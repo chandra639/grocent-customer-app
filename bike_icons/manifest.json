@@ -1,0 +1,399 @@
+{
+  "name": "Rapido-Style Top-Down Bike Icons",
+  "version": "1.0.0",
+  "description": "Top-down motorcycle/scooter icons for map tracking in 3 sizes with multiple variants and colors",
+  "sizes": [
+    {
+      "size": 48,
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0,
+      "description": "Standard size for most map displays"
+    },
+    {
+      "size": 72,
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5,
+      "description": "Medium size for better visibility"
+    },
+    {
+      "size": 96,
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0,
+      "description": "Large size for high-DPI displays"
+    }
+  ],
+  "variants": [
+    {
+      "name": "base",
+      "description": "Bike only (no rider/helmet/bag)"
+    },
+    {
+      "name": "helmet",
+      "description": "Bike with helmet on seat (indicates driver)"
+    },
+    {
+      "name": "bag",
+      "description": "Bike with delivery bag behind seat"
+    }
+  ],
+  "colors": [
+    {
+      "name": "green",
+      "hex": "#2ECC71",
+      "description": "Default Rapido-style green"
+    },
+    {
+      "name": "yellow",
+      "hex": "#FFD500",
+      "description": "Yellow variant"
+    },
+    {
+      "name": "orange",
+      "hex": "#FF9500",
+      "description": "Orange variant"
+    },
+    {
+      "name": "black",
+      "hex": "#000000",
+      "description": "Black silhouette for debug"
+    }
+  ],
+  "files": [
+    {
+      "filename": "ic_bike_topdown_48_base_green.png",
+      "size": 48,
+      "variant": "base",
+      "color": "green",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_base_yellow.png",
+      "size": 48,
+      "variant": "base",
+      "color": "yellow",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_base_orange.png",
+      "size": 48,
+      "variant": "base",
+      "color": "orange",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_base_black.png",
+      "size": 48,
+      "variant": "base",
+      "color": "black",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_helmet_green.png",
+      "size": 48,
+      "variant": "helmet",
+      "color": "green",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_helmet_yellow.png",
+      "size": 48,
+      "variant": "helmet",
+      "color": "yellow",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_helmet_orange.png",
+      "size": 48,
+      "variant": "helmet",
+      "color": "orange",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_helmet_black.png",
+      "size": 48,
+      "variant": "helmet",
+      "color": "black",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_bag_green.png",
+      "size": 48,
+      "variant": "bag",
+      "color": "green",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_bag_yellow.png",
+      "size": 48,
+      "variant": "bag",
+      "color": "yellow",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_bag_orange.png",
+      "size": 48,
+      "variant": "bag",
+      "color": "orange",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_48_bag_black.png",
+      "size": 48,
+      "variant": "bag",
+      "color": "black",
+      "width": 48,
+      "height": 48,
+      "iconSizeMultiplier": 1.0
+    },
+    {
+      "filename": "ic_bike_topdown_72_base_green.png",
+      "size": 72,
+      "variant": "base",
+      "color": "green",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_base_yellow.png",
+      "size": 72,
+      "variant": "base",
+      "color": "yellow",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_base_orange.png",
+      "size": 72,
+      "variant": "base",
+      "color": "orange",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_base_black.png",
+      "size": 72,
+      "variant": "base",
+      "color": "black",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_helmet_green.png",
+      "size": 72,
+      "variant": "helmet",
+      "color": "green",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_helmet_yellow.png",
+      "size": 72,
+      "variant": "helmet",
+      "color": "yellow",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_helmet_orange.png",
+      "size": 72,
+      "variant": "helmet",
+      "color": "orange",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_helmet_black.png",
+      "size": 72,
+      "variant": "helmet",
+      "color": "black",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_bag_green.png",
+      "size": 72,
+      "variant": "bag",
+      "color": "green",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_bag_yellow.png",
+      "size": 72,
+      "variant": "bag",
+      "color": "yellow",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_bag_orange.png",
+      "size": 72,
+      "variant": "bag",
+      "color": "orange",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_72_bag_black.png",
+      "size": 72,
+      "variant": "bag",
+      "color": "black",
+      "width": 72,
+      "height": 72,
+      "iconSizeMultiplier": 1.5
+    },
+    {
+      "filename": "ic_bike_topdown_96_base_green.png",
+      "size": 96,
+      "variant": "base",
+      "color": "green",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_base_yellow.png",
+      "size": 96,
+      "variant": "base",
+      "color": "yellow",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_base_orange.png",
+      "size": 96,
+      "variant": "base",
+      "color": "orange",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_base_black.png",
+      "size": 96,
+      "variant": "base",
+      "color": "black",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_helmet_green.png",
+      "size": 96,
+      "variant": "helmet",
+      "color": "green",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_helmet_yellow.png",
+      "size": 96,
+      "variant": "helmet",
+      "color": "yellow",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_helmet_orange.png",
+      "size": 96,
+      "variant": "helmet",
+      "color": "orange",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_helmet_black.png",
+      "size": 96,
+      "variant": "helmet",
+      "color": "black",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_bag_green.png",
+      "size": 96,
+      "variant": "bag",
+      "color": "green",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_bag_yellow.png",
+      "size": 96,
+      "variant": "bag",
+      "color": "yellow",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_bag_orange.png",
+      "size": 96,
+      "variant": "bag",
+      "color": "orange",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    },
+    {
+      "filename": "ic_bike_topdown_96_bag_black.png",
+      "size": 96,
+      "variant": "bag",
+      "color": "black",
+      "width": 96,
+      "height": 96,
+      "iconSizeMultiplier": 2.0
+    }
+  ],
+  "totalFiles": 36,
+  "format": "PNG with transparent background (RGBA)",
+  "design": {
+    "perspective": "Top-down view (bike front points north/up)",
+    "style": "Flat, minimalist, bold solid colors",
+    "anchor": "Bottom center (wheel aligns with map coordinate)",
+    "padding": "6-8% bottom padding for proper anchor alignment"
+  }
+}
+

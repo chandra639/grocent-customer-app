@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "818832342818",
+    "project_id": "grocent",
+    "storage_bucket": "grocent.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818832342818:android:4f12ce0ac161b4c7fc6f7b",
+        "android_client_info": {
+          "package_name": "com.codewithchandra.grocent"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEpXPisibrrI7eYu3_t0M4DDSUi4pSEYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818832342818:android:89cea22d057cabe7fc6f7b",
+        "android_client_info": {
+          "package_name": "com.codewithchandra.grocent.admin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEpXPisibrrI7eYu3_t0M4DDSUi4pSEYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:818832342818:android:701e6cf01a1a30c2fc6f7b",
+        "android_client_info": {
+          "package_name": "com.codewithchandra.grocent.driver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCEpXPisibrrI7eYu3_t0M4DDSUi4pSEYI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

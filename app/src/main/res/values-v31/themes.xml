@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Main Theme for Android 12+ (API 31+) -->
+    <style name="Theme.Grocent" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Splash screen background color (Android 12+) - Grocent brand green -->
+        <item name="android:windowSplashScreenBackground">#34C759</item>
+        <!-- Animation duration set to 0 to minimize icon animation time -->
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+        <!-- Icon background color - match splash background -->
+        <item name="android:windowSplashScreenIconBackgroundColor">#34C759</item>
+        <!-- Use "Grocent" text instead of logo -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_splash_grocent_text</item>
+        <!-- Post splash screen theme -->
+        <item name="postSplashScreenTheme">@style/Theme.Grocent</item>
+        <!-- Window background - splash.jpeg image -->
+        <item name="android:windowBackground">@drawable/launch_screen_background</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">#34C759</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+    
+    <!-- Splash Screen Theme for Android 12+ (API 31+) - kept for backward compatibility -->
+    <style name="Theme.Grocent.Splash" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- Splash screen background color (Android 12+) - Grocent brand green -->
+        <!-- This shows IMMEDIATELY when app icon is clicked -->
+        <item name="android:windowSplashScreenBackground">#34C759</item>
+        <!-- Animation duration set to 0 to minimize icon animation time -->
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+        <!-- Icon background color - match splash background -->
+        <item name="android:windowSplashScreenIconBackgroundColor">#34C759</item>
+        <!-- Use "Grocent" text instead of logo -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_splash_grocent_text</item>
+        <!-- Post splash screen theme -->
+        <item name="postSplashScreenTheme">@style/Theme.Grocent</item>
+        <!-- Window background - Grocent brand green -->
+        <item name="android:windowBackground">#34C759</item>
+        <!-- Standard window attributes -->
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">#34C759</item>
+        <item name="android:navigationBarColor">#34C759</item>
+    </style>
+</resources>
+
+
+
+
+
+
+
+
+

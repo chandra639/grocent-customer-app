@@ -1,0 +1,2913 @@
+package com.codewithchandra.grocent.ui.screens
+
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.LocationOff
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
+import androidx.compose.runtime.rememberCoroutineScope
+import com.codewithchandra.grocent.model.DeliveryAddress
+import com.codewithchandra.grocent.model.Order
+import com.codewithchandra.grocent.model.OrderStatus
+import com.codewithchandra.grocent.model.OrderTrackingStatus
+import com.codewithchandra.grocent.model.PaymentMethod
+import com.codewithchandra.grocent.ui.theme.*
+import com.codewithchandra.grocent.util.LocationHelper
+import com.codewithchandra.grocent.util.ServiceBoundaryHelper
+import com.codewithchandra.grocent.data.repository.FirestoreStoreRepository
+import com.codewithchandra.grocent.viewmodel.CartViewModel
+import com.codewithchandra.grocent.viewmodel.OrderViewModel
+import com.codewithchandra.grocent.viewmodel.LocationViewModel
+import com.codewithchandra.grocent.viewmodel.WalletViewModel
+import com.codewithchandra.grocent.viewmodel.PromoCodeViewModel
+import com.codewithchandra.grocent.viewmodel.PaymentViewModel
+import com.codewithchandra.grocent.integration.RazorpayPaymentHandler
+import com.codewithchandra.grocent.model.PaymentRequest
+import com.codewithchandra.grocent.model.CustomerInfo
+import com.codewithchandra.grocent.config.PaymentConfig
+import com.codewithchandra.grocent.ui.components.AddMoneyDialog
+import com.codewithchandra.grocent.ui.components.PromoCodeInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.activity.ComponentActivity
+import android.content.SharedPreferences
+import android.content.Context
+import android.media.MediaPlayer
+import android.media.AudioManager
+import android.media.RingtoneManager
+import android.os.Handler
+import android.os.Looper
+import com.codewithchandra.grocent.database.DatabaseProvider
+import com.codewithchandra.grocent.database.repository.FeeConfigurationRepository
+import com.codewithchandra.grocent.model.FeeConfiguration
+import com.codewithchandra.grocent.model.OfferType
+import com.codewithchandra.grocent.data.OfferConfigRepository
+import com.codewithchandra.grocent.data.CustomerRepository
+import com.codewithchandra.grocent.service.OfferService
+import com.codewithchandra.grocent.service.CheckoutValidationService
+import kotlinx.coroutines.flow.first
+import java.text.SimpleDateFormat
+import java.util.*
+
+// Data class for fee calculation results
+data class FeeCalculationResult(
+    val subtotal: Double,
+    val handlingFee: Double,
+    val deliveryFee: Double,
+    val rainFee: Double,
+    val taxAmount: Double,
+    val finalTotal: Double
+)
+
+/**
+ * Play order success sound
+ */
+fun playOrderSuccessSound(context: Context) {
+    try {
+        // Ensure we're on the main thread
+        Handler(Looper.getMainLooper()).post {
+            try {
+                val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val customSoundResId = context.resources.getIdentifier("order_success", "raw", context.packageName)
+                
+                if (customSoundResId != 0) {
+                    // Play custom sound from raw folder
+                    val mediaPlayer = MediaPlayer.create(context, customSoundResId)
+                    
+                    if (mediaPlayer != null) {
+                        // Use STREAM_MUSIC for better volume control
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+                        
+                        // Set volume to maximum
+                        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                        audioManager.setStreamVolume(
+                            AudioManager.STREAM_MUSIC,
+                            maxVolume,
+                            0
+                        )
+                        
+                        mediaPlayer.setOnCompletionListener { player ->
+                            player.release()
+                        }
+                        
+                        mediaPlayer.setOnErrorListener { player, what, extra ->
+                            android.util.Log.e("PaymentScreen", "MediaPlayer error: what=$what, extra=$extra")
+                            player.release()
+                            true
+                        }
+                        
+                        mediaPlayer.start()
+                    } else {
+                        android.util.Log.e("PaymentScreen", "MediaPlayer.create() returned null")
+                        // Fallback to default notification sound
+                        playFallbackSound(context, audioManager)
+                    }
+                } else {
+                    android.util.Log.e("PaymentScreen", "Sound resource not found: order_success")
+                    // Fallback to default notification sound
+                    playFallbackSound(context, audioManager)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("PaymentScreen", "Error playing order success sound: ${e.message}", e)
+                // Fallback to default notification sound
+                try {
+                    playFallbackSound(context, context.getSystemService(Context.AUDIO_SERVICE) as AudioManager)
+                } catch (fallbackException: Exception) {
+                    android.util.Log.e("PaymentScreen", "Fallback sound also failed: ${fallbackException.message}", fallbackException)
+                }
+            }
+        }
+    } catch (e: Exception) {
+        android.util.Log.e("PaymentScreen", "Error posting sound to main thread: ${e.message}", e)
+    }
+}
+
+/**
+ * Play fallback notification sound
+ */
+private fun playFallbackSound(context: Context, audioManager: AudioManager) {
+    try {
+        val notificationUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val ringtone = RingtoneManager.getRingtone(context, notificationUri)
+        
+        // Set volume to maximum
+        val maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION)
+        audioManager.setStreamVolume(
+            AudioManager.STREAM_NOTIFICATION,
+            maxVolume,
+            0
+        )
+        
+        ringtone?.play()
+        Handler(Looper.getMainLooper()).postDelayed({
+            ringtone?.stop()
+        }, 2000)
+    } catch (e: Exception) {
+        android.util.Log.e("PaymentScreen", "Error playing fallback sound: ${e.message}", e)
+    }
+}
+
+@Composable
+fun PaymentScreen(
+    cartViewModel: CartViewModel,
+    orderViewModel: OrderViewModel? = null,
+    locationViewModel: LocationViewModel? = null,
+    locationHelper: LocationHelper? = null,
+    walletViewModel: WalletViewModel? = null,
+    promoCodeViewModel: PromoCodeViewModel? = null,
+    paymentViewModel: PaymentViewModel? = null,
+    onOrderPlaced: (Order) -> Unit,
+    onBackClick: () -> Unit,
+    onAddMoneyClick: (() -> Unit)? = null
+) {
+    val context = LocalContext.current
+    val activity = context as? ComponentActivity
+    val scope = rememberCoroutineScope()
+    val locationHelperInstance = locationHelper ?: remember { LocationHelper(context) }
+    val localPaymentViewModel = paymentViewModel ?: remember { PaymentViewModel() }
+    val razorpayHandler = remember { RazorpayPaymentHandler(context) }
+    
+    // Fee Configuration Repository
+    val feeConfigRepository = remember {
+        val database = DatabaseProvider.getDatabase(context)
+        FeeConfigurationRepository(database.feeConfigurationDao())
+    }
+    
+    // Load fee configuration
+    var feeConfig by remember { mutableStateOf<FeeConfiguration?>(null) }
+    
+    LaunchedEffect(Unit) {
+        feeConfig = feeConfigRepository.getFeeConfiguration() ?: FeeConfiguration()
+    }
+    
+    // SharedPreferences for saving customer details
+    val prefs = remember { 
+        context.getSharedPreferences("customer_prefs", android.content.Context.MODE_PRIVATE) 
+    }
+    
+    var selectedPaymentMethod by remember { mutableStateOf<PaymentMethod?>(null) }
+    
+    // Customer details for payment (if not using COD or Wallet)
+    // Load from saved preferences or previous orders
+    var customerName by remember { 
+        mutableStateOf(
+            prefs.getString("saved_customer_name", "") ?: ""
+        )
+    }
+    var customerEmail by remember { 
+        mutableStateOf(
+            prefs.getString("saved_customer_email", "") ?: ""
+        )
+    }
+    var customerPhone by remember { 
+        mutableStateOf(
+            prefs.getString("saved_customer_phone", "") ?: ""
+        )
+    }
+    var showCustomerDetailsForm by remember { mutableStateOf(false) }
+    
+    // Load customer details from AuthViewModel (phone number)
+    val authViewModel = remember { com.codewithchandra.grocent.viewmodel.AuthViewModel(context) }
+    
+    // Load from previous orders if available
+    LaunchedEffect(Unit) {
+        // Try to get phone from AuthViewModel
+        val savedPhone = authViewModel.userPhoneNumber
+        if (savedPhone != null && customerPhone.isEmpty()) {
+            // Remove country code if present (+91)
+            val phone = savedPhone.replace("+91", "").replace(" ", "")
+            customerPhone = phone
+        }
+        
+        // Try to load from most recent order
+        val recentOrder = orderViewModel?.orders?.firstOrNull()
+        if (recentOrder != null) {
+            // Check if order has customer info (would need to be added to Order model)
+            // For now, just ensure we have phone from auth
+        }
+        
+        // Load from SharedPreferences (already done in remember, but refresh if needed)
+        if (customerName.isEmpty() && customerEmail.isEmpty() && customerPhone.isEmpty()) {
+            // Try to load from saved preferences
+            val savedName = prefs.getString("saved_customer_name", null)
+            val savedEmail = prefs.getString("saved_customer_email", null)
+            val savedPhone = prefs.getString("saved_customer_phone", null)
+            
+            if (savedName != null) customerName = savedName
+            if (savedEmail != null) customerEmail = savedEmail
+            if (savedPhone != null) customerPhone = savedPhone
+        }
+    }
+    var deliveryAddress by remember { mutableStateOf(
+        locationViewModel?.currentAddress?.address ?: "Home - Manneswarar Nagar, Mannivakkam, Tamil Nadu"
+    ) }
+    var showAddressDialog by remember { mutableStateOf(false) }
+    var showAddAddressDialog by remember { mutableStateOf(false) }
+    var newAddressTitle by remember { mutableStateOf("") }
+    var newAddressText by remember { mutableStateOf("") }
+    var showSuccessPopup by remember { mutableStateOf(false) }
+    var orderPlaced by remember { mutableStateOf(false) } // Track if order is placed
+    val totalPrice = cartViewModel.totalPrice
+    
+    // Wallet state
+    val walletBalance = walletViewModel?.walletBalance ?: 0.0
+    var showAddMoneyDialog by remember { mutableStateOf(false) }
+    var secondaryPaymentMethod by remember { mutableStateOf<PaymentMethod?>(null) }
+    
+    // UPI and Card selection state
+    var selectedUpiOption by remember { mutableStateOf<String?>(null) }
+    var selectedCardOption by remember { mutableStateOf<String?>(null) }
+    
+    // Promo code state
+    val localPromoCodeViewModel = promoCodeViewModel ?: remember { PromoCodeViewModel() }
+    LaunchedEffect(Unit) {
+        localPromoCodeViewModel.initializeSamplePromoCodes()
+    }
+    
+    // Offer selection state
+    var selectedOfferType by remember { mutableStateOf<OfferType?>(null) }
+    var walletAmountUsed by remember { mutableStateOf(0.0) }
+    var welcomeOfferDiscount by remember { mutableStateOf(0.0) }
+    
+    // Initialize offer services
+    val offerService = remember {
+        OfferService(
+            offerConfigRepository = OfferConfigRepository,
+            referralRepository = com.codewithchandra.grocent.data.ReferralRepository,
+            customerRepository = CustomerRepository,
+            walletViewModel = walletViewModel ?: com.codewithchandra.grocent.viewmodel.WalletViewModel()
+        )
+    }
+    
+    val checkoutValidationService = remember {
+        CheckoutValidationService(
+            offerService = offerService,
+            offerConfigRepository = OfferConfigRepository
+        )
+    }
+    
+    // Get current user ID (from auth) - reactive to auth state changes
+    val currentUserId = remember(authViewModel.userPhoneNumber, authViewModel.isLoggedIn) {
+        authViewModel.getCurrentUserId()
+    }
+    
+    // Load offer config
+    val offerConfig = remember { mutableStateOf<com.codewithchandra.grocent.model.OfferConfig?>(null) }
+    LaunchedEffect(Unit) {
+        offerConfig.value = OfferConfigRepository.getOfferConfigOnce()
+    }
+    
+    // Check welcome offer eligibility (will be set up after finalTotal is calculated)
+    var isWelcomeOfferEligible by remember { mutableStateOf(false) }
+    
+    // Check referral wallet eligibility (will be set up after finalTotal is calculated)
+    var isReferralWalletEligible by remember { mutableStateOf(false) }
+    var usableWalletAmount by remember { mutableStateOf(0.0) }
+    
+    // Calculate totals with promo code discount
+    val appliedPromoCode = cartViewModel.appliedPromoCode
+    val discountAmount = cartViewModel.discountAmount
+    val subtotal = totalPrice
+    
+    // Calculate fees based on configuration
+    val calculatedFees = remember(feeConfig, subtotal, appliedPromoCode) {
+        if (feeConfig == null) {
+            // Default values if config not loaded
+            FeeCalculationResult(
+                subtotal = subtotal,
+                handlingFee = 0.0,
+                deliveryFee = 0.0,
+                rainFee = 0.0,
+                taxAmount = 0.0,
+                finalTotal = subtotal
+            )
+        } else {
+            val config = feeConfig!!
+            
+            // Handling Fee
+            val handlingFee = if (config.handlingFeeEnabled && !config.handlingFeeFree) {
+                config.handlingFeeAmount
+            } else {
+                0.0
+            }
+            
+            // Delivery Fee (check if free delivery promo is applied OR order above minimum)
+            val deliveryFee = if (appliedPromoCode?.type == com.codewithchandra.grocent.model.PromoCodeType.FREE_DELIVERY) {
+                0.0
+            } else if (config.deliveryFeeEnabled && !config.deliveryFeeFree) {
+                if (subtotal >= config.minimumOrderForFreeDelivery) {
+                    0.0 // Free delivery above minimum order
+                } else {
+                    config.deliveryFeeAmount
+                }
+            } else {
+                0.0
+            }
+            
+            // Rain Fee
+            val rainFee = if (config.rainFeeEnabled && config.isRaining) {
+                config.rainFeeAmount
+            } else {
+                0.0
+            }
+            
+            // Tax (calculated on subtotal + handling + delivery + rain fee)
+            val taxBase = subtotal + handlingFee + deliveryFee + rainFee
+            val taxAmount = if (config.taxEnabled) {
+                taxBase * (config.taxPercentage / 100.0)
+            } else {
+                0.0
+            }
+            
+            // Final total
+            val finalTotal = subtotal + handlingFee + deliveryFee + rainFee + taxAmount
+            
+            FeeCalculationResult(
+                subtotal = subtotal,
+                handlingFee = handlingFee,
+                deliveryFee = deliveryFee,
+                rainFee = rainFee,
+                taxAmount = taxAmount,
+                finalTotal = finalTotal
+            )
+        }
+    }
+    
+    // Calculate final total with offer discounts
+    val baseFinalTotal = calculatedFees.finalTotal
+    val finalTotalWithOffers = remember(
+        baseFinalTotal,
+        welcomeOfferDiscount,
+        discountAmount,
+        walletAmountUsed,
+        selectedOfferType
+    ) {
+        var total = baseFinalTotal
+        
+        // Apply welcome offer discount
+        if (selectedOfferType == OfferType.WELCOME_OFFER) {
+            total = maxOf(0.0, total - welcomeOfferDiscount)
+        }
+        
+        // Apply promo code discount (if festival promo selected)
+        if (selectedOfferType == OfferType.FESTIVAL_PROMO && discountAmount > 0) {
+            total = maxOf(0.0, total - discountAmount)
+        }
+        
+        // Apply wallet discount (reduces final payment, not subtotal)
+        if (selectedOfferType == OfferType.REFERRAL_WALLET && walletAmountUsed > 0) {
+            total = maxOf(0.0, total - walletAmountUsed)
+        }
+        
+        total
+    }
+    
+    val finalTotal = finalTotalWithOffers
+    
+    // Check welcome offer eligibility (after finalTotal is calculated)
+    LaunchedEffect(currentUserId, finalTotal) {
+        scope.launch {
+            val validation = offerService.validateWelcomeOffer(currentUserId, finalTotal)
+            isWelcomeOfferEligible = validation.isValid
+            
+            // Auto-apply welcome offer for first order (if eligible and no other offer selected)
+            if (validation.isValid && selectedOfferType == null) {
+                selectedOfferType = OfferType.WELCOME_OFFER
+                localPromoCodeViewModel.setSelectedOfferType(OfferType.WELCOME_OFFER)
+                welcomeOfferDiscount = validation.discountAmount
+                android.util.Log.d("PaymentScreen", "Auto-applied welcome offer: ₹${welcomeOfferDiscount}")
+            } else if (validation.isValid && selectedOfferType == OfferType.WELCOME_OFFER) {
+                welcomeOfferDiscount = validation.discountAmount
+            }
+        }
+    }
+    
+    // Check referral wallet eligibility (after finalTotal is calculated)
+    LaunchedEffect(currentUserId, walletBalance, finalTotal, offerConfig.value) {
+        scope.launch {
+            if (walletBalance > 0 && offerConfig.value != null) {
+                val validation = offerService.validateReferralWallet(
+                    currentUserId,
+                    finalTotal,
+                    walletBalance
+                )
+                isReferralWalletEligible = validation.isValid
+                usableWalletAmount = validation.usableWalletAmount
+                if (validation.isValid && selectedOfferType == OfferType.REFERRAL_WALLET) {
+                    walletAmountUsed = validation.usableWalletAmount
+                }
+            } else {
+                isReferralWalletEligible = false
+                usableWalletAmount = 0.0
+            }
+        }
+    }
+    
+    // Calculate payment breakdown (wallet + promo code)
+    // Note: walletAmountUsed is already applied if REFERRAL_WALLET offer is selected
+    val walletPaymentAmount = if (selectedPaymentMethod == PaymentMethod.WALLET && selectedOfferType != OfferType.REFERRAL_WALLET) {
+        minOf(walletBalance, finalTotal)
+    } else if (selectedOfferType == OfferType.REFERRAL_WALLET) {
+        walletAmountUsed // Use the offer wallet amount
+    } else {
+        0.0
+    }
+    val remainingAmount = finalTotal - walletPaymentAmount
+    val isWalletSufficient = walletBalance >= finalTotal || (selectedOfferType == OfferType.REFERRAL_WALLET && walletAmountUsed > 0)
+    
+    // ============================================================================
+    // SERVICE AREA VALIDATION FLOW FOR MANUALLY ENTERED ADDRESSES
+    // ============================================================================
+    // Step 1: Geocode manually entered address to get coordinates
+    // Step 2: Load all active stores from Firestore
+    // Step 3: Calculate distance from customer location to each store (Haversine formula)
+    // Step 4: Find nearest store where distance <= serviceRadiusKm
+    // Step 5: If found → Location is within service area, else → Out of service area
+    // ============================================================================
+    
+    // Get customer location from address (geocoding) - converts address string to (lat, lng)
+    var customerLocation by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+    var isGeocodingInProgress by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(deliveryAddress) {
+        if (deliveryAddress.isNotEmpty()) {
+            isGeocodingInProgress = true
+            // Geocode: "123 MG Road, Bangalore" → (12.9716, 77.5946)
+            customerLocation = locationHelperInstance.getLocationFromAddress(deliveryAddress)
+            isGeocodingInProgress = false
+        } else {
+            customerLocation = null
+            isGeocodingInProgress = false
+        }
+    }
+    
+    // Load stores from Firestore
+    val firestoreStoreRepository = remember { FirestoreStoreRepository() }
+    var allStores by remember { mutableStateOf<List<com.codewithchandra.grocent.model.Store>>(emptyList()) }
+    
+    LaunchedEffect(Unit) {
+        firestoreStoreRepository.getActiveStores().collect { stores ->
+            allStores = stores
+            android.util.Log.d("PaymentScreen", "Loaded ${stores.size} stores from Firestore")
+        }
+    }
+    
+    // Find nearest store where customer location is WITHIN service area
+    // Returns null if no store serves this location
+    val nearestStore = remember(customerLocation, allStores) {
+        customerLocation?.let { location ->
+            ServiceBoundaryHelper.findNearestStoreInServiceArea(
+                customerLocation = location,
+                stores = allStores
+            )
+        }
+    }
+    
+    // Check if location is within service area
+    // Returns true only if a store is found AND location is within that store's radius
+    val isWithinServiceArea = remember(customerLocation, nearestStore) {
+        customerLocation?.let { location ->
+            nearestStore?.let { store ->
+                ServiceBoundaryHelper.isLocationWithinServiceArea(
+                    customerLocation = location,
+                    store = store
+                )
+            } ?: false // No store found = out of service area
+        } ?: false // No location = out of service area
+    }
+    
+    // Track if geocoding failed
+    var geocodingFailed by remember { mutableStateOf(false) }
+    
+    LaunchedEffect(customerLocation, deliveryAddress) {
+        // Check if geocoding is still in progress or failed
+        if (deliveryAddress.isNotEmpty()) {
+            // Small delay to allow geocoding to complete
+            kotlinx.coroutines.delay(2000)
+            if (customerLocation == null) {
+                geocodingFailed = true
+            } else {
+                geocodingFailed = false
+            }
+        }
+    }
+    
+    // Find nearest store regardless of service area (for error messages)
+    val nearestStoreAnyway = remember(customerLocation, allStores) {
+        customerLocation?.let { location ->
+            ServiceBoundaryHelper.findNearestStore(
+                customerLocation = location,
+                stores = allStores
+            )
+        }
+    }
+    
+    // Distance to nearest store (for error message - shows distance even if out of service area)
+    val distanceToStore = remember(customerLocation, nearestStoreAnyway) {
+        customerLocation?.let { location ->
+            nearestStoreAnyway?.let { store ->
+                ServiceBoundaryHelper.calculateDistanceToStore(
+                    customerLocation = location,
+                    storeLocation = Pair(store.latitude, store.longitude)
+                )
+            }
+        }
+    }
+    
+    // Use nearest store location
+    val storeLocation = nearestStore?.let { 
+        Pair(it.latitude, it.longitude) 
+    }
+    
+    // Service area validation dialog
+    var showServiceAreaError by remember { mutableStateOf(false) }
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BackgroundWhite)
+    ) {
+        // Top Bar
+        Surface(
+            color = Color.White,
+            modifier = Modifier.fillMaxWidth(),
+            shadowElevation = 2.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onBackClick) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = TextBlack
+                    )
+                }
+                Text(
+                    text = "Checkout",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextBlack,
+                    modifier = Modifier.weight(1f),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+                Spacer(modifier = Modifier.size(48.dp)) // Balance
+            }
+        }
+        
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .padding(bottom = 164.dp), // Extra padding for footer (100dp) + bottom navigation bar (64dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Delivery Address Section
+            val currentAddressObj = locationViewModel?.currentAddress
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = null,
+                            tint = Color(0xFF34C759),
+                            modifier = Modifier.size(24.dp)
+                        )
+                        
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = currentAddressObj?.title ?: "Home",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextBlack
+                                )
+                                if (currentAddressObj?.isDefault == true) {
+                                    Text(
+                                        text = "Default",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color(0xFF34C759)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = (currentAddressObj?.address ?: deliveryAddress).replace("|", ","),
+                                fontSize = 13.sp,
+                                color = TextGray,
+                                lineHeight = 18.sp
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Bill Summary
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Bill Summary",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextBlack
+                    )
+                    
+                    Divider()
+                    
+                    // Item Total
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Item Total",
+                            fontSize = 15.sp,
+                            color = TextBlack
+                        )
+                        Text(
+                            text = "₹${String.format("%.2f", subtotal)}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextBlack
+                        )
+                    }
+                    
+                    // Delivery Fee
+                    val isDeliveryFree = calculatedFees.deliveryFee == 0.0
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Delivery Fee",
+                            fontSize = 15.sp,
+                            color = TextBlack
+                        )
+                        Text(
+                            text = if (isDeliveryFree) "Free" else "₹${String.format("%.2f", calculatedFees.deliveryFee)}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = if (isDeliveryFree) Color(0xFF34C759) else TextBlack
+                        )
+                    }
+                    
+                    // Platform Fee
+                    val platformFee = calculatedFees.handlingFee
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Platform Fee",
+                            fontSize = 15.sp,
+                            color = TextBlack
+                        )
+                        Text(
+                            text = "₹${String.format("%.2f", platformFee)}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextBlack
+                        )
+                    }
+                    
+                    // Taxes & Charges
+                    val taxAmount = calculatedFees.taxAmount
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Taxes & Charges",
+                            fontSize = 15.sp,
+                            color = TextBlack
+                        )
+                        Text(
+                            text = "₹${String.format("%.2f", taxAmount)}",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = TextBlack
+                        )
+                    }
+                    
+                    // Welcome Offer Discount
+                    if (welcomeOfferDiscount > 0 && selectedOfferType == OfferType.WELCOME_OFFER) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Welcome Offer",
+                                fontSize = 15.sp,
+                                color = TextBlack
+                            )
+                            Text(
+                                text = "-₹${String.format("%.2f", welcomeOfferDiscount)}",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF34C759)
+                            )
+                        }
+                    }
+                    
+                    // Wallet Discount (Referral Reward)
+                    if (walletAmountUsed > 0 && selectedOfferType == OfferType.REFERRAL_WALLET) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Wallet Reward",
+                                fontSize = 15.sp,
+                                color = TextBlack
+                            )
+                            Text(
+                                text = "-₹${String.format("%.2f", walletAmountUsed)}",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF34C759)
+                            )
+                        }
+                    }
+                    
+                    // Coupon Discount (Festival Promo)
+                    if (discountAmount > 0 && selectedOfferType == OfferType.FESTIVAL_PROMO) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "Coupon Discount",
+                                fontSize = 15.sp,
+                                color = TextBlack
+                            )
+                            Text(
+                                text = "-₹${String.format("%.2f", discountAmount)}",
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF34C759)
+                            )
+                        }
+                    }
+                    
+                    Divider()
+                    
+                    // To Pay
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "To Pay",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextBlack
+                        )
+                        Text(
+                            text = "₹${String.format("%.2f", finalTotal)}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextBlack
+                        )
+                    }
+                }
+            }
+            
+            // Savings Banner
+            val isDeliveryFreeForSavings = calculatedFees.deliveryFee == 0.0
+            val totalSavings = discountAmount + (if (isDeliveryFreeForSavings) (feeConfig?.deliveryFeeAmount ?: 30.0) else 0.0)
+            if (totalSavings > 0) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFE8F5E9) // Light green background
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = Color(0xFF34C759),
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Text(
+                                text = "₹${String.format("%.0f", totalSavings)} Saved!",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF34C759)
+                            )
+                            if (discountAmount > 0) {
+                                Text(
+                                    text = "Includes coupon discount of ₹${String.format("%.0f", discountAmount)}",
+                                    fontSize = 13.sp,
+                                    color = Color(0xFF34C759).copy(alpha = 0.8f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Offer Selection Section
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Choose Your Offer",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextBlack,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Welcome Offer Card
+            if (isWelcomeOfferEligible) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedOfferType = OfferType.WELCOME_OFFER
+                            localPromoCodeViewModel.clearOfferSelection()
+                            localPromoCodeViewModel.setSelectedOfferType(OfferType.WELCOME_OFFER)
+                            cartViewModel.removePromoCode()
+                            walletAmountUsed = 0.0
+                            scope.launch {
+                                val config = offerConfig.value ?: com.codewithchandra.grocent.model.OfferConfig()
+                                welcomeOfferDiscount = offerService.applyWelcomeOffer(finalTotal, config)
+                            }
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (selectedOfferType == OfferType.WELCOME_OFFER) 
+                            Color(0xFFE8F5E9) 
+                        else 
+                            Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (selectedOfferType == OfferType.WELCOME_OFFER) 2.dp else 1.dp
+                    ),
+                    border = if (selectedOfferType == OfferType.WELCOME_OFFER) 
+                        BorderStroke(2.dp, PrimaryGreen) 
+                    else 
+                        null
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (selectedOfferType == OfferType.WELCOME_OFFER)
+                                    Icons.Default.RadioButtonChecked
+                                else
+                                    Icons.Default.RadioButtonUnchecked,
+                                contentDescription = null,
+                                tint = if (selectedOfferType == OfferType.WELCOME_OFFER) 
+                                    PrimaryGreen 
+                                else 
+                                    TextGray.copy(alpha = 0.5f),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = "Welcome Offer",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextBlack
+                                )
+                                Text(
+                                    text = "₹${offerConfig.value?.welcomeOfferAmount?.toInt() ?: 50} OFF on first order",
+                                    fontSize = 14.sp,
+                                    color = TextGray
+                                )
+                            }
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (selectedOfferType == OfferType.WELCOME_OFFER) {
+                                Text(
+                                    text = "₹${welcomeOfferDiscount.toInt()} OFF",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PrimaryGreen
+                                )
+                                // Remove button (X icon)
+                                IconButton(
+                                    onClick = {
+                                        selectedOfferType = null
+                                        localPromoCodeViewModel.clearOfferSelection()
+                                        welcomeOfferDiscount = 0.0
+                                    },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Remove offer",
+                                        tint = TextGray,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            
+            // Referral Wallet Card
+            if (isReferralWalletEligible && usableWalletAmount > 0) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedOfferType = OfferType.REFERRAL_WALLET
+                            localPromoCodeViewModel.clearOfferSelection()
+                            localPromoCodeViewModel.setSelectedOfferType(OfferType.REFERRAL_WALLET)
+                            cartViewModel.removePromoCode()
+                            walletAmountUsed = usableWalletAmount
+                            welcomeOfferDiscount = 0.0
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (selectedOfferType == OfferType.REFERRAL_WALLET) 
+                            Color(0xFFE8F5E9) 
+                        else 
+                            Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(
+                        defaultElevation = if (selectedOfferType == OfferType.REFERRAL_WALLET) 2.dp else 1.dp
+                    ),
+                    border = if (selectedOfferType == OfferType.REFERRAL_WALLET) 
+                        BorderStroke(2.dp, PrimaryGreen) 
+                    else 
+                        null
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (selectedOfferType == OfferType.REFERRAL_WALLET)
+                                    Icons.Default.RadioButtonChecked
+                                else
+                                    Icons.Default.RadioButtonUnchecked,
+                                contentDescription = null,
+                                tint = if (selectedOfferType == OfferType.REFERRAL_WALLET) 
+                                    PrimaryGreen 
+                                else 
+                                    TextGray.copy(alpha = 0.5f),
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = "Use Wallet Reward",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextBlack
+                                )
+                                Text(
+                                    text = "Usable wallet amount: ₹${usableWalletAmount.toInt()}",
+                                    fontSize = 14.sp,
+                                    color = TextGray
+                                )
+                            }
+                        }
+                        if (selectedOfferType == OfferType.REFERRAL_WALLET) {
+                            Text(
+                                text = "₹${walletAmountUsed.toInt()}",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = PrimaryGreen
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            
+            // Festival Promo Input (PromoCodeInput component)
+            PromoCodeInput(
+                promoCodeViewModel = localPromoCodeViewModel,
+                cartViewModel = cartViewModel,
+                cartTotal = finalTotal,
+                modifier = Modifier.fillMaxWidth()
+            )
+            
+            // Handle promo code selection
+            LaunchedEffect(appliedPromoCode) {
+                if (appliedPromoCode != null) {
+                    selectedOfferType = OfferType.FESTIVAL_PROMO
+                    localPromoCodeViewModel.setSelectedOfferType(OfferType.FESTIVAL_PROMO)
+                    walletAmountUsed = 0.0
+                    welcomeOfferDiscount = 0.0
+                } else if (selectedOfferType == OfferType.FESTIVAL_PROMO) {
+                    selectedOfferType = null
+                    localPromoCodeViewModel.clearOfferSelection()
+                }
+            }
+            
+            // Mutual exclusivity message
+            if (selectedOfferType != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = PrimaryGreen.copy(alpha = 0.1f)
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                ) {
+                    Text(
+                        text = "Only one offer can be applied per order. Please choose the best deal.",
+                        fontSize = 13.sp,
+                        color = PrimaryGreen,
+                        modifier = Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            
+            // Payment Methods Section
+            Text(
+                text = "Select Payment Method",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextBlack,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Grocent Wallet
+            if (walletViewModel != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(
+                            enabled = walletBalance >= finalTotal,
+                            onClick = { 
+                                selectedPaymentMethod = PaymentMethod.WALLET
+                                selectedUpiOption = null
+                                selectedCardOption = null
+                                secondaryPaymentMethod = null
+                            }
+                        ),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White
+                    ),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        // Left side: Radio button, Icon, and Details
+                        Row(
+                            modifier = Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // Radio Button
+                            Icon(
+                                imageVector = if (selectedPaymentMethod == PaymentMethod.WALLET) 
+                                    Icons.Default.RadioButtonChecked 
+                                else 
+                                    Icons.Default.RadioButtonUnchecked,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .padding(top = 2.dp), // Align with first line of text
+                                tint = if (selectedPaymentMethod == PaymentMethod.WALLET) 
+                                    Color(0xFF34C759) 
+                                else 
+                                    TextGray.copy(alpha = 0.5f)
+                            )
+                            
+                            // Wallet Icon
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(Color(0xFF34C759), RoundedCornerShape(8.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "G",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                            }
+                            
+                            // Details
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Grocent Wallet",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextBlack,
+                                    lineHeight = 20.sp
+                                )
+                                Text(
+                                    text = "Available balance: ₹${String.format("%.2f", walletBalance)}",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = TextBlack,
+                                    lineHeight = 18.sp
+                                )
+                                if (walletBalance < finalTotal) {
+                                    Text(
+                                        text = "Add ₹${String.format("%.2f", finalTotal - walletBalance)} to proceed",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Normal,
+                                        color = TextBlack,
+                                        lineHeight = 18.sp
+                                    )
+                                }
+                            }
+                        }
+                        
+                        // Right side: Add Now Button (only show if insufficient balance)
+                        if (walletBalance < finalTotal) {
+                            OutlinedButton(
+                                onClick = { 
+                                    // Stop event propagation to prevent card selection
+                                    onAddMoneyClick?.invoke() ?: run {
+                                        showAddMoneyDialog = true
+                                    }
+                                },
+                                modifier = Modifier.padding(start = 8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = Color.White,
+                                    contentColor = TextBlack
+                                ),
+                                border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = "Add Now",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    color = TextBlack
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Default.ArrowForward,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp),
+                                    tint = TextGray
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                // Show UPI options to add money if wallet is selected and insufficient
+                if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFF5F5F5)
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "Add Money via UPI to complete payment",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = TextBlack
+                            )
+                            
+                            // PhonePe option
+                            PaymentMethodCardWithIcon(
+                                icon = {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .background(Color(0xFF5F259F), RoundedCornerShape(8.dp)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "P",
+                                            fontSize = 18.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color.White
+                                        )
+                                    }
+                                },
+                                title = "PhonePe",
+                                subtitle = "Add ₹${String.format("%.2f", finalTotal - walletBalance)}",
+                                isSelected = secondaryPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "phonepe",
+                                onClick = { 
+                                    secondaryPaymentMethod = PaymentMethod.UPI
+                                    selectedUpiOption = "phonepe"
+                                    val hasAllDetails = customerName.isNotBlank() && 
+                                        customerEmail.isNotBlank() && 
+                                        customerEmail.contains("@") &&
+                                        customerPhone.length == 10
+                                    showCustomerDetailsForm = !hasAllDetails
+                                }
+                            )
+                            
+                            // Google Pay option
+                            PaymentMethodCardWithIcon(
+                                icon = {
+                                    Box(
+                                        modifier = Modifier.size(36.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                        ) {
+                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFF4285F4), RoundedCornerShape(2.dp)))
+                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFFEA4335), RoundedCornerShape(2.dp)))
+                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFFFBBC04), RoundedCornerShape(2.dp)))
+                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFF34A853), RoundedCornerShape(2.dp)))
+                                        }
+                                    }
+                                },
+                                title = "Google Pay",
+                                subtitle = "Add ₹${String.format("%.2f", finalTotal - walletBalance)}",
+                                isSelected = secondaryPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "googlepay",
+                                onClick = { 
+                                    secondaryPaymentMethod = PaymentMethod.UPI
+                                    selectedUpiOption = "googlepay"
+                                    val hasAllDetails = customerName.isNotBlank() && 
+                                        customerEmail.isNotBlank() && 
+                                        customerEmail.contains("@") &&
+                                        customerPhone.length == 10
+                                    showCustomerDetailsForm = !hasAllDetails
+                                }
+                            )
+                            
+                            // Add Money button alternative
+                            TextButton(
+                                onClick = { 
+                                    onAddMoneyClick?.invoke() ?: run {
+                                        showAddMoneyDialog = true
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(
+                                    text = "Or Add Money to Wallet",
+                                    fontSize = 14.sp,
+                                    color = Color(0xFF34C759),
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            
+            // Cash on Delivery
+            PaymentMethodCardWithIcon(
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.AttachMoney,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = TextGray
+                    )
+                },
+                title = "Cash on Delivery (COD)",
+                subtitle = "Pay cash at your doorstep",
+                isSelected = selectedPaymentMethod == PaymentMethod.CASH_ON_DELIVERY,
+                onClick = { 
+                    selectedPaymentMethod = PaymentMethod.CASH_ON_DELIVERY
+                    selectedUpiOption = null
+                    selectedCardOption = null
+                    secondaryPaymentMethod = null
+                }
+            )
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // UPI Section
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "UPI",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextBlack
+                )
+                
+                // PhonePe
+                PaymentMethodCardWithIcon(
+                    icon = {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(Color(0xFF5F259F), RoundedCornerShape(8.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "P",
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    },
+                    title = "PhonePe",
+                    subtitle = "user@ybl",
+                    isSelected = selectedPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "phonepe",
+                    onClick = { 
+                        selectedPaymentMethod = PaymentMethod.UPI
+                        selectedUpiOption = "phonepe"
+                        selectedCardOption = null
+                        secondaryPaymentMethod = null
+                        val hasAllDetails = customerName.isNotBlank() && 
+                            customerEmail.isNotBlank() && 
+                            customerEmail.contains("@") &&
+                            customerPhone.length == 10
+                        showCustomerDetailsForm = !hasAllDetails
+                    }
+                )
+                
+                // Google Pay
+                PaymentMethodCardWithIcon(
+                    icon = {
+                        Box(
+                            modifier = Modifier.size(40.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Google Pay icon - simplified as colored squares
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Box(modifier = Modifier.size(16.dp).background(Color(0xFF4285F4), RoundedCornerShape(2.dp)))
+                                Box(modifier = Modifier.size(16.dp).background(Color(0xFFEA4335), RoundedCornerShape(2.dp)))
+                                Box(modifier = Modifier.size(16.dp).background(Color(0xFFFBBC04), RoundedCornerShape(2.dp)))
+                                Box(modifier = Modifier.size(16.dp).background(Color(0xFF34A853), RoundedCornerShape(2.dp)))
+                            }
+                        }
+                    },
+                    title = "Google Pay",
+                    subtitle = "Add new UPI ID",
+                    isSelected = selectedPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "googlepay",
+                    onClick = { 
+                        selectedPaymentMethod = PaymentMethod.UPI
+                        selectedUpiOption = "googlepay"
+                        selectedCardOption = null
+                        secondaryPaymentMethod = null
+                        val hasAllDetails = customerName.isNotBlank() && 
+                            customerEmail.isNotBlank() && 
+                            customerEmail.contains("@") &&
+                            customerPhone.length == 10
+                        showCustomerDetailsForm = !hasAllDetails
+                    }
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Cards Section
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Cards",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextBlack
+                )
+                
+                // HDFC Bank Credit Card
+                PaymentMethodCardWithIcon(
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.CreditCard,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = TextGray
+                        )
+                    },
+                    title = "HDFC Bank Credit Card",
+                    subtitle = "**** 4242",
+                    isSelected = (selectedPaymentMethod == PaymentMethod.CREDIT_CARD || selectedPaymentMethod == PaymentMethod.DEBIT_CARD) && selectedCardOption == "hdfc",
+                    onClick = { 
+                        selectedPaymentMethod = PaymentMethod.CREDIT_CARD
+                        selectedCardOption = "hdfc"
+                        selectedUpiOption = null
+                        secondaryPaymentMethod = null
+                        val hasAllDetails = customerName.isNotBlank() && 
+                            customerEmail.isNotBlank() && 
+                            customerEmail.contains("@") &&
+                            customerPhone.length == 10
+                        showCustomerDetailsForm = !hasAllDetails
+                    }
+                )
+                
+                // Add New Card
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedPaymentMethod = PaymentMethod.CREDIT_CARD
+                            selectedCardOption = "new"
+                            selectedUpiOption = null
+                            secondaryPaymentMethod = null
+                            val hasAllDetails = customerName.isNotBlank() && 
+                                customerEmail.isNotBlank() && 
+                                customerEmail.contains("@") &&
+                                customerPhone.length == 10
+                            showCustomerDetailsForm = !hasAllDetails
+                        },
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    border = BorderStroke(1.dp, TextGray.copy(alpha = 0.3f))
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddCircle,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = TextGray
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Add New Card",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = TextBlack
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = TextGray
+                        )
+                    }
+                }
+            }
+            
+            // Security Message
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = TextGray
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "100% SAFE & SECURE PAYMENT",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextGray
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(164.dp)) // Space for footer (100dp) + bottom navigation bar (64dp)
+        }
+        
+        // Customer Details Form (for online payments)
+        // Only show if customer details are missing
+        val needsCustomerDetails = (selectedPaymentMethod == PaymentMethod.UPI || 
+            selectedPaymentMethod == PaymentMethod.CREDIT_CARD || 
+            selectedPaymentMethod == PaymentMethod.DEBIT_CARD ||
+            (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient && 
+             (secondaryPaymentMethod == PaymentMethod.UPI || secondaryPaymentMethod == PaymentMethod.CREDIT_CARD)))
+        
+        val hasAllCustomerDetails = customerName.isNotBlank() && 
+            customerEmail.isNotBlank() && 
+            customerEmail.contains("@") &&
+            customerPhone.length == 10
+        
+        // Only show form if details are missing AND form was triggered
+        if (needsCustomerDetails && !hasAllCustomerDetails && showCustomerDetailsForm) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = CardBackground
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Customer Details",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = TextBlack
+                    )
+                    
+                    OutlinedTextField(
+                        value = customerName,
+                        onValueChange = { customerName = it },
+                        label = { Text("Full Name *") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = TextGray.copy(alpha = 0.3f)
+                        )
+                    )
+                    
+                    OutlinedTextField(
+                        value = customerEmail,
+                        onValueChange = { customerEmail = it },
+                        label = { Text("Email *") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Email
+                        ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = TextGray.copy(alpha = 0.3f)
+                        )
+                    )
+                    
+                    OutlinedTextField(
+                        value = customerPhone,
+                        onValueChange = { 
+                            // Only allow digits and limit to 10 digits
+                            if (it.all { char -> char.isDigit() } && it.length <= 10) {
+                                customerPhone = it
+                            }
+                        },
+                        label = { Text("Phone Number *") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = androidx.compose.ui.text.input.KeyboardType.Phone
+                        ),
+                        leadingIcon = { Text("+91 ", modifier = Modifier.padding(start = 16.dp), color = TextGray) },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = PrimaryGreen,
+                            unfocusedBorderColor = TextGray.copy(alpha = 0.3f)
+                        )
+                    )
+                }
+            }
+        }
+        
+        // Payment Error Message
+        if (localPaymentViewModel.paymentError != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFFD32F2F).copy(alpha = 0.1f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = localPaymentViewModel.paymentError ?: "Payment error",
+                        color = Color(0xFFD32F2F),
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = { localPaymentViewModel.clearError() }) {
+                        Icon(Icons.Default.Close, "Close", tint = Color(0xFFD32F2F))
+                    }
+                }
+            }
+        }
+        
+        // Place Order Button - Hide if order is placed
+        if (!orderPlaced) {
+            // Validate customer details for online payments
+            val needsCustomerDetails = (selectedPaymentMethod == PaymentMethod.UPI || 
+                selectedPaymentMethod == PaymentMethod.CREDIT_CARD || 
+                selectedPaymentMethod == PaymentMethod.DEBIT_CARD ||
+                (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient && 
+                 (secondaryPaymentMethod == PaymentMethod.UPI || secondaryPaymentMethod == PaymentMethod.CREDIT_CARD)))
+            
+            val hasValidCustomerDetails = if (needsCustomerDetails) {
+                customerName.isNotBlank() && 
+                customerEmail.isNotBlank() && 
+                customerEmail.contains("@") &&
+                customerPhone.length == 10
+            } else {
+                true // Not needed for COD or full wallet payment
+            }
+            
+            val canPlaceOrder = when {
+                selectedPaymentMethod == null -> false
+                selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient -> {
+                    secondaryPaymentMethod != null && hasValidCustomerDetails
+                }
+                needsCustomerDetails -> {
+                    hasValidCustomerDetails && cartViewModel.cartItems.isNotEmpty() && finalTotal > 0
+                }
+                else -> cartViewModel.cartItems.isNotEmpty() && finalTotal > 0
+            }
+            
+            // Footer with Total and Place Order Button
+            Surface(
+                color = Color.White,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(bottom = 72.dp), // Bottom padding for bottom navigation bar
+                shadowElevation = 8.dp,
+                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "Total Pay:",
+                            fontSize = 14.sp,
+                            color = TextBlack
+                        )
+                        Text(
+                            text = "₹${String.format("%.0f", finalTotal)}",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextBlack
+                        )
+                    }
+                    
+                    Button(
+                        onClick = {
+                    if (canPlaceOrder) {
+                        // Validate service area before placing order
+                        // Only validate if we successfully geocoded the address
+                        if (customerLocation != null && !isWithinServiceArea) {
+                            showServiceAreaError = true
+                            return@Button
+                        }
+                        // If geocoding failed, allow order to proceed (don't block)
+                        
+                        // Handle different payment methods
+                        val finalPaymentMethod = if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
+                            secondaryPaymentMethod ?: PaymentMethod.WALLET
+                        } else {
+                            selectedPaymentMethod!!
+                        }
+                        
+                        // For COD or Wallet (full payment), place order directly
+                        if (finalPaymentMethod == PaymentMethod.CASH_ON_DELIVERY || 
+                            (selectedPaymentMethod == PaymentMethod.WALLET && isWalletSufficient)) {
+                            scope.launch {
+                                placeOrderDirectly(
+                                    context = context,
+                                    scope = scope,
+                                    currentTime = System.currentTimeMillis(),
+                                    cartViewModel = cartViewModel,
+                                    orderViewModel = orderViewModel,
+                                    locationHelperInstance = locationHelperInstance,
+                                    deliveryAddress = deliveryAddress,
+                                    walletViewModel = walletViewModel,
+                                    localPromoCodeViewModel = localPromoCodeViewModel,
+                                    authViewModel = authViewModel,
+                                    discountAmount = discountAmount,
+                                    subtotal = subtotal,
+                                    finalTotal = finalTotal,
+                                    calculatedFees = calculatedFees,
+                                    feeConfig = feeConfig,
+                                    finalPaymentMethod = finalPaymentMethod,
+                                    walletPaymentAmount = walletPaymentAmount,
+                                    locationViewModel = locationViewModel,
+                                    customerName = customerName,
+                                    customerEmail = customerEmail,
+                                    customerPhone = customerPhone,
+                                    prefs = prefs,
+                                    onOrderPlaced = onOrderPlaced,
+                                    orderPlaced = { orderPlaced = true },
+                                    selectedOfferType = selectedOfferType,
+                                    welcomeOfferDiscount = welcomeOfferDiscount,
+                                    walletAmountUsed = walletAmountUsed,
+                                    offerService = offerService,
+                                    currentUserId = currentUserId
+                                )
+                            }
+                        } else {
+                            // For online payments (UPI, Cards), initiate Razorpay
+                            // Validate service area before payment
+                            // Only validate if we successfully geocoded the address
+                            if (customerLocation != null && !isWithinServiceArea) {
+                                showServiceAreaError = true
+                                return@Button
+                            }
+                            // If geocoding failed, allow payment to proceed (don't block)
+                            
+                            if (activity != null && hasValidCustomerDetails) {
+                                initiateRazorpayPayment(
+                                    context = context,
+                                    activity = activity,
+                                    razorpayHandler = razorpayHandler,
+                                    localPaymentViewModel = localPaymentViewModel,
+                                    scope = scope,
+                                    orderId = "order_${System.currentTimeMillis()}",
+                                    amount = if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
+                                        remainingAmount
+                                    } else {
+                                        finalTotal
+                                    },
+                                    customerName = customerName,
+                                    customerEmail = customerEmail,
+                                    customerPhone = customerPhone,
+                                    paymentMethod = finalPaymentMethod,
+                                    cartViewModel = cartViewModel,
+                                    orderViewModel = orderViewModel,
+                                    locationHelperInstance = locationHelperInstance,
+                                    deliveryAddress = deliveryAddress,
+                                    walletViewModel = walletViewModel,
+                                    localPromoCodeViewModel = localPromoCodeViewModel,
+                                    authViewModel = authViewModel,
+                                    discountAmount = discountAmount,
+                                    subtotal = subtotal,
+                                    finalTotal = finalTotal,
+                                    calculatedFees = calculatedFees,
+                                    feeConfig = feeConfig,
+                                    walletPaymentAmount = walletPaymentAmount,
+                                    selectedPaymentMethod = selectedPaymentMethod,
+                                    locationViewModel = locationViewModel,
+                                    prefs = prefs,
+                                    onOrderPlaced = onOrderPlaced,
+                                    orderPlaced = { orderPlaced = true },
+                                    selectedOfferType = selectedOfferType,
+                                    welcomeOfferDiscount = welcomeOfferDiscount,
+                                    walletAmountUsed = walletAmountUsed,
+                                    offerService = offerService,
+                                    currentUserId = currentUserId
+                                )
+                            }
+                        }
+                    }
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(48.dp),
+                        enabled = canPlaceOrder,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF34C759),
+                            disabledContainerColor = TextGray.copy(alpha = 0.3f)
+                        ),
+                        shape = RoundedCornerShape(24.dp)
+                    ) {
+                        Text(
+                            text = "Place Order",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            imageVector = Icons.Default.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
+        } else {
+            // Hide footer when order is placed
+            Spacer(modifier = Modifier.height(164.dp)) // Space for bottom navigation bar (64dp) + extra padding (100dp)
+        }
+        
+        // Address Selection Dialog
+        if (showAddressDialog) {
+            AlertDialog(
+                onDismissRequest = { showAddressDialog = false },
+                title = {
+                    Text(
+                        text = "Select Delivery Address",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 400.dp)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Show saved addresses
+                        locationViewModel?.savedAddresses?.forEach { address ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        deliveryAddress = address.address
+                                        locationViewModel.selectAddress(address)
+                                        showAddressDialog = false
+                                    },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (deliveryAddress == address.address) 
+                                        PrimaryGreen.copy(alpha = 0.1f) 
+                                    else CardBackground
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text(
+                                        text = address.title,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        color = TextBlack
+                                    )
+                                    Text(
+                                        text = address.address.replace("|", ","),
+                                        fontSize = 12.sp,
+                                        color = TextGray
+                                    )
+                                }
+                            }
+                        }
+                        
+                        // Add New Address Button
+                        Button(
+                            onClick = {
+                                showAddressDialog = false
+                                showAddAddressDialog = true
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = PrimaryGreen
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Add New Address")
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showAddressDialog = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+        
+        // Service Area Error Dialog
+        if (showServiceAreaError) {
+            AlertDialog(
+                onDismissRequest = { showServiceAreaError = false },
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.LocationOff,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                },
+                title = {
+                    Text(
+                        text = "Service Not Available",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                },
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "We currently don't deliver to your location.",
+                            fontSize = 14.sp
+                        )
+                        nearestStoreAnyway?.let { store ->
+                            if (store.serviceAreaEnabled) {
+                                Text(
+                                    text = "We deliver within ${String.format("%.1f", store.serviceRadiusKm)} km of ${store.name}.",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        distanceToStore?.let { distance ->
+                            nearestStoreAnyway?.let { store ->
+                                Text(
+                                    text = "Your location is ${String.format("%.1f", distance)} km away from ${store.name}.",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        // Service area information
+                        nearestStoreAnyway?.let { store ->
+                            if (store.serviceAreaEnabled) {
+                                Text(
+                                    text = "\nService area: Within ${String.format("%.1f", store.serviceRadiusKm)} km${store.pincode?.let { " of PINCODE $it" } ?: " of our store"}",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        Text(
+                            text = "\nPlease try a different delivery address within our service area.",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = { showServiceAreaError = false },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error
+                        )
+                    ) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+        
+        // Add New Address Dialog
+        if (showAddAddressDialog) {
+            AlertDialog(
+                onDismissRequest = { 
+                    showAddAddressDialog = false
+                    newAddressTitle = ""
+                    newAddressText = ""
+                },
+                title = {
+                    Text(
+                        text = "Add New Address",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = newAddressTitle,
+                            onValueChange = { newAddressTitle = it },
+                            label = { Text("Address Title (e.g., Home, Office)") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        OutlinedTextField(
+                            value = newAddressText,
+                            onValueChange = { newAddressText = it },
+                            label = { Text("Full Address") },
+                            modifier = Modifier.fillMaxWidth(),
+                            minLines = 3
+                        )
+                    }
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            if (newAddressTitle.isNotBlank() && newAddressText.isNotBlank()) {
+                                val newAddress = DeliveryAddress(
+                                    id = "addr_${System.currentTimeMillis()}",
+                                    title = newAddressTitle,
+                                    address = newAddressText,
+                                    isDefault = locationViewModel?.savedAddresses?.isEmpty() == true
+                                )
+                                locationViewModel?.addAddress(newAddress)
+                                locationViewModel?.selectAddress(newAddress)
+                                deliveryAddress = newAddressText
+                                newAddressTitle = ""
+                                newAddressText = ""
+                                showAddAddressDialog = false
+                            }
+                        },
+                        enabled = newAddressTitle.isNotBlank() && newAddressText.isNotBlank(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PrimaryGreen
+                        )
+                    ) {
+                        Text("Add")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { 
+                        showAddAddressDialog = false
+                        newAddressTitle = ""
+                        newAddressText = ""
+                    }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
+        
+        // Success Popup (Amazon-style tick mark popup)
+        if (showSuccessPopup) {
+            OrderSuccessPopup(
+                onDismiss = {
+                    showSuccessPopup = false
+                    // Place order after popup is dismissed
+                    scope.launch {
+                        // Get delivery preferences from LocationViewModel
+                        val deliveryType = locationViewModel?.selectedDeliveryType ?: "SAME_DAY"
+                        val deliveryTimeSlot = locationViewModel?.selectedDeliveryTimeSlot
+                        
+                        val currentTime = System.currentTimeMillis()
+                        
+                        // Calculate estimated delivery time based on delivery type
+                        val estimatedDeliveryTime = when (deliveryType) {
+                            "SAME_DAY" -> currentTime + (15 * 60 * 1000) // 15 minutes
+                            "SCHEDULE" -> {
+                                val calendar = Calendar.getInstance().apply {
+                                    add(Calendar.DAY_OF_MONTH, 1)
+                                    deliveryTimeSlot?.let { slot ->
+                                        val isPM = slot.contains("PM", ignoreCase = true)
+                                        val timePart = slot.replace(" AM", "").replace(" PM", "").replace("am", "").replace("pm", "")
+                                        val hour = timePart.split(":")[0].toIntOrNull() ?: 9
+                                        val minute = if (timePart.contains(":")) {
+                                            timePart.split(":")[1].toIntOrNull() ?: 0
+                                        } else {
+                                            0
+                                        }
+                                        set(Calendar.HOUR_OF_DAY, if (isPM && hour != 12) hour + 12 else if (!isPM && hour == 12) 0 else hour)
+                                        set(Calendar.MINUTE, minute)
+                                        set(Calendar.SECOND, 0)
+                                        set(Calendar.MILLISECOND, 0)
+                                    } ?: run {
+                                        set(Calendar.HOUR_OF_DAY, 9)
+                                        set(Calendar.MINUTE, 0)
+                                        set(Calendar.SECOND, 0)
+                                        set(Calendar.MILLISECOND, 0)
+                                    }
+                                }
+                                calendar.timeInMillis
+                            }
+                            else -> currentTime + (15 * 60 * 1000)
+                        }
+                        
+                        val estimatedDelivery = when (deliveryType) {
+                            "SAME_DAY" -> "15 Min"
+                            "SCHEDULE" -> {
+                                val calendar = Calendar.getInstance().apply {
+                                    timeInMillis = estimatedDeliveryTime
+                                }
+                                val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
+                                val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+                                "${dateFormat.format(calendar.time)}, ${timeFormat.format(calendar.time)}"
+                            }
+                            else -> "15 Min"
+                        }
+                        
+                        val estimatedMinutesRemaining = when (deliveryType) {
+                            "SAME_DAY" -> 15
+                            "SCHEDULE" -> ((estimatedDeliveryTime - currentTime) / (60 * 1000)).toInt()
+                            else -> 15
+                        }
+                        
+                        // Initialize tracking status
+                        val trackingStatus = OrderTrackingStatus(
+                            status = OrderStatus.PLACED,
+                            timestamp = currentTime,
+                            message = "Order placed successfully",
+                            estimatedMinutesRemaining = estimatedMinutesRemaining
+                        )
+                        
+                        // Get customer location (already calculated above)
+                        val finalCustomerLocation = customerLocation ?: locationHelperInstance.getLocationFromAddress(deliveryAddress)
+                        
+                        val scheduledDeliveryDate = if (deliveryType == "SCHEDULE") {
+                            val calendar = Calendar.getInstance().apply {
+                                timeInMillis = estimatedDeliveryTime
+                            }
+                            SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault()).format(calendar.time)
+                        } else null
+                        
+                        val scheduledDeliveryTime = if (deliveryType == "SCHEDULE") deliveryTimeSlot else null
+                        
+                        val order = Order(
+                            userId = "user_${System.currentTimeMillis()}",
+                            storeId = nearestStore?.id,
+                            items = cartViewModel.cartItems,
+                            totalPrice = calculatedFees.finalTotal,
+                            paymentMethod = selectedPaymentMethod!!,
+                            deliveryAddress = deliveryAddress,
+                            orderDate = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date()),
+                            createdAt = currentTime,
+                            updatedAt = currentTime,
+                            orderStatus = OrderStatus.PLACED,
+                            estimatedDelivery = estimatedDelivery,
+                            estimatedDeliveryTime = estimatedDeliveryTime,
+                            deliveryType = deliveryType,
+                            scheduledDeliveryDate = scheduledDeliveryDate,
+                            scheduledDeliveryTime = scheduledDeliveryTime,
+                            trackingStatuses = listOf(trackingStatus),
+                            storeLocation = storeLocation,
+                            customerLocation = finalCustomerLocation,
+                            subtotal = calculatedFees.subtotal,
+                            handlingFee = calculatedFees.handlingFee,
+                            deliveryFee = calculatedFees.deliveryFee,
+                            taxAmount = calculatedFees.taxAmount,
+                            rainFee = calculatedFees.rainFee,
+                            feeConfigurationId = feeConfig?.id,
+                            promoCodeId = appliedPromoCode?.id,
+                            promoCode = appliedPromoCode?.code,
+                            discountAmount = discountAmount,
+                            originalTotal = subtotal,
+                            finalTotal = calculatedFees.finalTotal
+                        )
+                        onOrderPlaced(order)
+                        // Play order success sound
+                        playOrderSuccessSound(context)
+                    }
+                }
+            )
+        }
+        
+        // Add Money Dialog
+        if (showAddMoneyDialog && walletViewModel != null) {
+            AddMoneyDialog(
+                walletViewModel = walletViewModel,
+                paymentViewModel = localPaymentViewModel,
+                razorpayHandler = razorpayHandler,
+                onDismiss = { 
+                    showAddMoneyDialog = false
+                    walletViewModel.clearError()
+                },
+                onSuccess = {
+                    // Money added successfully - dialog will close
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun OrderSuccessPopup(
+    onDismiss: () -> Unit
+) {
+    // Auto-dismiss after 2 seconds and navigate to home
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(2000)
+        onDismiss()
+    }
+    
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.5f))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth(0.8f)
+                .padding(24.dp),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = BackgroundWhite
+            )
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Tick Mark Icon (Green Circle with White Tick)
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(PrimaryGreen),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = "Success",
+                        tint = BackgroundWhite,
+                        modifier = Modifier.size(50.dp)
+                    )
+                }
+                
+                Text(
+                    text = "Order Placed!",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextBlack
+                )
+                
+                Text(
+                    text = "Your order has been placed successfully",
+                    fontSize = 14.sp,
+                    color = TextGray,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Place order directly (for COD or full wallet payment)
+ */
+private suspend fun placeOrderDirectly(
+    context: Context,
+    scope: kotlinx.coroutines.CoroutineScope,
+    currentTime: Long,
+    cartViewModel: CartViewModel,
+    orderViewModel: OrderViewModel?,
+    locationHelperInstance: LocationHelper,
+    deliveryAddress: String,
+    walletViewModel: WalletViewModel?,
+    localPromoCodeViewModel: PromoCodeViewModel,
+    authViewModel: com.codewithchandra.grocent.viewmodel.AuthViewModel,
+    discountAmount: Double,
+    subtotal: Double,
+    finalTotal: Double,
+    calculatedFees: FeeCalculationResult,
+    feeConfig: com.codewithchandra.grocent.model.FeeConfiguration?,
+    finalPaymentMethod: PaymentMethod,
+    walletPaymentAmount: Double,
+    locationViewModel: LocationViewModel?,
+    customerName: String = "",
+    customerEmail: String = "",
+    customerPhone: String = "",
+    prefs: SharedPreferences? = null,
+    onOrderPlaced: (Order) -> Unit,
+    orderPlaced: () -> Unit,
+    // Offer-related parameters
+    selectedOfferType: OfferType? = null,
+    welcomeOfferDiscount: Double = 0.0,
+    walletAmountUsed: Double = 0.0,
+    offerService: OfferService? = null,
+    currentUserId: String = "user_001"
+) {
+    // Get delivery preferences from LocationViewModel
+    val deliveryType = locationViewModel?.selectedDeliveryType ?: "SAME_DAY"
+    val deliveryDate = locationViewModel?.selectedDeliveryDate ?: "TODAY"
+    val deliveryTimeSlot = locationViewModel?.selectedDeliveryTimeSlot
+    
+    // Calculate estimated delivery time based on delivery type
+    val estimatedDeliveryTime = when (deliveryType) {
+        "SAME_DAY" -> currentTime + (15 * 60 * 1000) // 15 minutes for same-day
+        "SCHEDULE" -> {
+            // Calculate tomorrow + selected time slot
+            val calendar = Calendar.getInstance().apply {
+                add(Calendar.DAY_OF_MONTH, 1) // Tomorrow
+                deliveryTimeSlot?.let { slot ->
+                    // Parse time slot (e.g., "9:00 AM" or "4:00 PM")
+                    val isPM = slot.contains("PM", ignoreCase = true)
+                    val timePart = slot.replace(" AM", "").replace(" PM", "").replace("am", "").replace("pm", "")
+                    val hour = timePart.split(":")[0].toIntOrNull() ?: 9
+                    val minute = if (timePart.contains(":")) {
+                        timePart.split(":")[1].toIntOrNull() ?: 0
+                    } else {
+                        0
+                    }
+                    set(Calendar.HOUR_OF_DAY, if (isPM && hour != 12) hour + 12 else if (!isPM && hour == 12) 0 else hour)
+                    set(Calendar.MINUTE, minute)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                } ?: run {
+                    // Default to 9 AM if no slot selected
+                    set(Calendar.HOUR_OF_DAY, 9)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+            }
+            calendar.timeInMillis
+        }
+        else -> currentTime + (15 * 60 * 1000) // Default to 15 minutes
+    }
+    
+    // Format estimated delivery string
+    val estimatedDelivery = when (deliveryType) {
+        "SAME_DAY" -> "15 Min"
+        "SCHEDULE" -> {
+            val calendar = Calendar.getInstance().apply {
+                timeInMillis = estimatedDeliveryTime
+            }
+            val dateFormat = SimpleDateFormat("EEE, d MMM", Locale.getDefault())
+            val timeFormat = SimpleDateFormat("h:mm a", Locale.getDefault())
+            "${dateFormat.format(calendar.time)}, ${timeFormat.format(calendar.time)}"
+        }
+        else -> "15 Min"
+    }
+    
+    // Save customer details for future use (if provided)
+    if (customerName.isNotBlank() && customerEmail.isNotBlank() && customerPhone.length == 10) {
+        prefs?.edit()?.apply {
+            putString("saved_customer_name", customerName)
+            putString("saved_customer_email", customerEmail)
+            putString("saved_customer_phone", customerPhone)
+            apply()
+        }
+    }
+    
+    // Handle wallet deduction (only for regular wallet payment, not referral wallet)
+    // Referral wallet is deducted separately after order creation
+    if (finalPaymentMethod == PaymentMethod.WALLET && walletViewModel != null && selectedOfferType != OfferType.REFERRAL_WALLET) {
+        if (walletPaymentAmount > 0) {
+            walletViewModel.deductMoney(
+                amount = walletPaymentAmount,
+                orderId = "order_${currentTime}",
+                description = "Order payment"
+            )
+        }
+    }
+    
+    // Record promo code usage if applied
+    val appliedPromo = cartViewModel.appliedPromoCode
+    if (appliedPromo != null) {
+        val userId = authViewModel.getCurrentUserId()
+        localPromoCodeViewModel.recordUsage(
+            userId = userId,
+            promoCodeId = appliedPromo.id,
+            orderId = "order_${currentTime}",
+            discountAmount = discountAmount
+        )
+    }
+    
+    // Get store and customer locations
+    // Try to get customer location first, then find nearest store
+    val finalCustomerLocation = locationHelperInstance.getLocationFromAddress(deliveryAddress)
+    
+    // Load stores from Firestore for order creation (synchronously in suspend function)
+    val firestoreStoreRepositoryForOrder = com.codewithchandra.grocent.data.repository.FirestoreStoreRepository()
+    
+    // Load stores from Firestore - get first value
+    val allStoresForOrder = firestoreStoreRepositoryForOrder.getActiveStores().first()
+    
+    // Find nearest store using customer location
+    val nearestStoreForOrder = finalCustomerLocation?.let { location ->
+        ServiceBoundaryHelper.findNearestStoreInServiceArea(
+            customerLocation = location,
+            stores = allStoresForOrder
+        )
+    }
+    
+    val storeLocation = nearestStoreForOrder?.let { 
+        Pair(it.latitude, it.longitude) 
+    }
+    
+    // Use customer location for order (no fallback - must have valid location)
+    val finalCustomerLocationForOrder = finalCustomerLocation
+    
+    // Initialize tracking status
+    val estimatedMinutesRemaining = when (deliveryType) {
+        "SAME_DAY" -> 15
+        "SCHEDULE" -> {
+            val minutesUntilDelivery = ((estimatedDeliveryTime - currentTime) / (60 * 1000)).toInt()
+            minutesUntilDelivery
+        }
+        else -> 15
+    }
+    
+    val trackingStatus = OrderTrackingStatus(
+        status = OrderStatus.PLACED,
+        timestamp = currentTime,
+        message = "Order placed successfully",
+        estimatedMinutesRemaining = estimatedMinutesRemaining
+    )
+    
+    // Format scheduled delivery date and time for storage
+    val scheduledDeliveryDate = if (deliveryType == "SCHEDULE") {
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = estimatedDeliveryTime
+        }
+        SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault()).format(calendar.time)
+    } else null
+    
+    val scheduledDeliveryTime = if (deliveryType == "SCHEDULE") deliveryTimeSlot else null
+    
+    // Determine offer fields based on selected offer type
+    val welcomeOfferApplied = selectedOfferType == OfferType.WELCOME_OFFER && welcomeOfferDiscount > 0
+    val referralRewardUsed = selectedOfferType == OfferType.REFERRAL_WALLET && walletAmountUsed > 0
+    val festivalPromoApplied = selectedOfferType == OfferType.FESTIVAL_PROMO && appliedPromo != null
+    
+    // Calculate total discount (welcome offer + promo code)
+    val totalDiscountAmount = welcomeOfferDiscount + (if (festivalPromoApplied) discountAmount else 0.0)
+    
+    val order = Order(
+        userId = currentUserId,
+        storeId = nearestStoreForOrder?.id,
+        items = cartViewModel.cartItems,
+        totalPrice = finalTotal,
+        paymentMethod = finalPaymentMethod,
+        deliveryAddress = deliveryAddress,
+        orderDate = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date()),
+        createdAt = currentTime,
+        updatedAt = currentTime,
+        orderStatus = OrderStatus.PLACED,
+        estimatedDelivery = estimatedDelivery,
+        estimatedDeliveryTime = estimatedDeliveryTime,
+        deliveryType = deliveryType,
+        scheduledDeliveryDate = scheduledDeliveryDate,
+        scheduledDeliveryTime = scheduledDeliveryTime,
+        trackingStatuses = listOf(trackingStatus),
+        storeLocation = storeLocation,
+        customerLocation = finalCustomerLocationForOrder,
+        promoCodeId = appliedPromo?.id,
+        promoCode = appliedPromo?.code,
+        discountAmount = totalDiscountAmount, // Total discount from all offers
+        originalTotal = subtotal + calculatedFees.handlingFee + calculatedFees.deliveryFee + calculatedFees.rainFee + calculatedFees.taxAmount,
+        finalTotal = finalTotal,
+        subtotal = calculatedFees.subtotal,
+        handlingFee = calculatedFees.handlingFee,
+        deliveryFee = calculatedFees.deliveryFee,
+        taxAmount = calculatedFees.taxAmount,
+        rainFee = calculatedFees.rainFee,
+        feeConfigurationId = feeConfig?.id,
+        // Offer and Wallet Usage Fields
+        walletAmountUsed = if (referralRewardUsed) walletAmountUsed else walletPaymentAmount,
+        welcomeOfferApplied = welcomeOfferApplied,
+        referralRewardUsed = referralRewardUsed,
+        festivalPromoApplied = festivalPromoApplied,
+        offerType = selectedOfferType
+    )
+    
+    // Mark welcome offer as used if applied
+    if (welcomeOfferApplied && offerService != null) {
+        scope.launch {
+            CustomerRepository.markWelcomeOfferUsed(currentUserId)
+        }
+    }
+    
+    // Deduct wallet if referral wallet was used
+    if (referralRewardUsed && walletViewModel != null && walletAmountUsed > 0) {
+        walletViewModel.deductMoney(
+            amount = walletAmountUsed,
+            orderId = order.id,
+            description = "Referral wallet reward used"
+        )
+    }
+    
+    // Create referral record if this is a referred user's first order
+    scope.launch {
+        try {
+            val referral = com.codewithchandra.grocent.data.ReferralRepository.getReferralByReferredUser(currentUserId)
+            if (referral != null && referral.status == com.codewithchandra.grocent.model.ReferralStatus.PENDING) {
+                // Update referral with order ID
+                com.codewithchandra.grocent.data.ReferralRepository.updateReferralOrderId(referral.id, order.id)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("PaymentScreen", "Error creating referral record: ${e.message}", e)
+        }
+    }
+    
+    onOrderPlaced(order)
+    orderPlaced()
+    
+    // Play order success sound
+    playOrderSuccessSound(context)
+}
+
+/**
+ * Initiate Razorpay payment
+ */
+private fun initiateRazorpayPayment(
+    context: Context,
+    activity: ComponentActivity,
+    razorpayHandler: RazorpayPaymentHandler,
+    localPaymentViewModel: PaymentViewModel,
+    scope: kotlinx.coroutines.CoroutineScope,
+    orderId: String,
+    amount: Double,
+    customerName: String,
+    customerEmail: String,
+    customerPhone: String,
+    paymentMethod: PaymentMethod,
+    cartViewModel: CartViewModel,
+    orderViewModel: OrderViewModel?,
+    locationHelperInstance: LocationHelper,
+    deliveryAddress: String,
+    walletViewModel: WalletViewModel?,
+    localPromoCodeViewModel: PromoCodeViewModel,
+    authViewModel: com.codewithchandra.grocent.viewmodel.AuthViewModel,
+    discountAmount: Double,
+    subtotal: Double,
+    finalTotal: Double,
+    calculatedFees: FeeCalculationResult,
+    feeConfig: com.codewithchandra.grocent.model.FeeConfiguration?,
+    walletPaymentAmount: Double,
+    selectedPaymentMethod: PaymentMethod?,
+    locationViewModel: LocationViewModel?,
+    prefs: SharedPreferences,
+    onOrderPlaced: (Order) -> Unit,
+    orderPlaced: () -> Unit,
+    // Offer-related parameters
+    selectedOfferType: OfferType? = null,
+    welcomeOfferDiscount: Double = 0.0,
+    walletAmountUsed: Double = 0.0,
+    offerService: OfferService? = null,
+    currentUserId: String = "user_001"
+) {
+    val paymentRequest = PaymentRequest(
+        orderId = orderId,
+        amount = amount,
+        currency = PaymentConfig.CURRENCY,
+        customerName = customerName,
+        customerEmail = customerEmail,
+        customerPhone = "+91$customerPhone",
+        paymentMethod = paymentMethod,
+        description = PaymentConfig.getPaymentDescription(orderId),
+        notes = mapOf(
+            "order_id" to orderId,
+            "app" to "Grocent"
+        )
+    )
+    
+    // Initiate Razorpay checkout
+    razorpayHandler.initiatePayment(
+        activity = activity,
+        paymentRequest = paymentRequest,
+        onSuccess = { paymentId, signature ->
+            // Payment successful - verify and place order
+            scope.launch {
+                val isVerified = if (PaymentConfig.isMockMode()) {
+                    true // In mock mode, skip verification
+                } else {
+                    localPaymentViewModel.verifyPayment(paymentId, signature, orderId, amount)
+                }
+                
+                if (isVerified) {
+                    // Place order after successful payment
+                    placeOrderDirectly(
+                        context = context,
+                        scope = scope,
+                        currentTime = System.currentTimeMillis(),
+                        cartViewModel = cartViewModel,
+                        orderViewModel = orderViewModel,
+                        locationHelperInstance = locationHelperInstance,
+                        deliveryAddress = deliveryAddress,
+                        walletViewModel = walletViewModel,
+                        localPromoCodeViewModel = localPromoCodeViewModel,
+                        authViewModel = authViewModel,
+                        discountAmount = discountAmount,
+                        subtotal = subtotal,
+                        finalTotal = finalTotal,
+                        calculatedFees = calculatedFees,
+                        feeConfig = feeConfig,
+                        finalPaymentMethod = paymentMethod,
+                        walletPaymentAmount = walletPaymentAmount,
+                        locationViewModel = locationViewModel,
+                        customerName = customerName,
+                        customerEmail = customerEmail,
+                        customerPhone = customerPhone,
+                        prefs = prefs,
+                        onOrderPlaced = onOrderPlaced,
+                        orderPlaced = orderPlaced,
+                        selectedOfferType = selectedOfferType,
+                        welcomeOfferDiscount = welcomeOfferDiscount,
+                        walletAmountUsed = walletAmountUsed,
+                        offerService = offerService,
+                        currentUserId = currentUserId
+                    )
+                } else {
+                    // Payment verification failed
+                    localPaymentViewModel.paymentError = "Payment verification failed"
+                }
+            }
+        },
+        onFailure = { errorMessage ->
+            // Payment failed
+            localPaymentViewModel.paymentError = errorMessage
+            localPaymentViewModel.paymentStatus = com.codewithchandra.grocent.model.PaymentStatus.FAILED
+        }
+    )
+}
+
+@Composable
+fun PaymentMethodCardWithIcon(
+    icon: @Composable () -> Unit,
+    title: String,
+    subtitle: String? = null,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon()
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextBlack
+                )
+                subtitle?.let {
+                    Text(
+                        text = it,
+                        fontSize = 13.sp,
+                        color = TextGray
+                    )
+                }
+            }
+            Icon(
+                imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = if (isSelected) Color(0xFF34C759) else TextGray.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+@Composable
+fun PaymentMethodCard(
+    title: String,
+    description: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) PrimaryGreen.copy(alpha = 0.1f) else CardBackground
+        ),
+        border = if (isSelected) {
+            androidx.compose.foundation.BorderStroke(2.dp, PrimaryGreen)
+        } else null
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                contentDescription = null,
+                tint = if (isSelected) PrimaryGreen else TextGray
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = TextBlack
+                )
+                Text(
+                    text = description,
+                    fontSize = 12.sp,
+                    color = TextGray
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BillSummaryRow(
+    label: String,
+    originalPrice: Double,
+    currentPrice: Double,
+    isFree: Boolean = false
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            color = TextGray
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (originalPrice > currentPrice) {
+                Text(
+                    text = "₹${String.format("%.0f", originalPrice)}",
+                    fontSize = 12.sp,
+                    color = TextGray,
+                    style = androidx.compose.ui.text.TextStyle(
+                        textDecoration = TextDecoration.LineThrough
+                    )
+                )
+            }
+            Text(
+                text = if (isFree) "FREE" else "₹${String.format("%.0f", currentPrice)}",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (isFree) PrimaryGreen else TextBlack
+            )
+        }
+    }
+}
+
+@Composable
+fun BillSavingsRow(
+    label: String,
+    amount: Double
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                tint = PrimaryGreen,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = label,
+                fontSize = 14.sp,
+                color = TextGray
+            )
+        }
+        Text(
+            text = "₹${String.format("%.0f", amount)}",
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = PrimaryGreen
+        )
+    }
+}
+
