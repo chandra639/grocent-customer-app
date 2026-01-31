@@ -58,7 +58,8 @@ fun AccountScreen(
     onSettingsClick: () -> Unit = {},
     onLogoutClick: () -> Unit = {},
     onEditProfileClick: () -> Unit = {},
-    onReferAndEarnClick: () -> Unit = {}
+    onReferAndEarnClick: () -> Unit = {},
+    onPaymentMethodsClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val localUserProfileViewModel = userProfileViewModel ?: remember { com.codewithchandra.grocent.viewmodel.UserProfileViewModel(context) }
@@ -75,9 +76,10 @@ fun AccountScreen(
         uri?.let { selectedImageUri = it }
     }
     
-    // Check for updates when screen is first displayed
+    // Check for updates and refresh profile from prefs when screen is displayed (so name is cleared after logout)
     LaunchedEffect(Unit) {
         appUpdateViewModel.checkForUpdates()
+        localUserProfileViewModel.refreshFromPrefs()
         editedName = localUserProfileViewModel.userName
     }
     
@@ -223,9 +225,9 @@ fun AccountScreen(
                     }
                 }
                 
-                // Name - show empty string or placeholder if name is empty
+                // Name - only show when logged in; after logout show empty
                 Text(
-                    text = localUserProfileViewModel.userName.ifBlank { "" },
+                    text = if (authViewModel?.isLoggedIn == true) localUserProfileViewModel.userName.ifBlank { "" } else "",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
@@ -515,6 +517,13 @@ fun AccountScreen(
                             title = "Refer and Earn",
                             iconColor = BrandPrimary,
                             onClick = onReferAndEarnClick
+                        )
+                        Divider(color = Color(0xFFE0E0E0), thickness = 1.dp)
+                        ProfileMenuItem(
+                            icon = Icons.Default.Payment,
+                            title = "Payment methods",
+                            iconColor = BrandPrimary,
+                            onClick = onPaymentMethodsClick
                         )
                     }
                 }

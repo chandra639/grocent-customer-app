@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder for GPay; replace with official logo asset if needed -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="40dp"
+    android:height="40dp"
+    android:viewportWidth="40"
+    android:viewportHeight="40">
+    <path
+        android:fillColor="#4285F4"
+        android:pathData="M6,4L34,4Q38,4 38,8L38,32Q38,36 34,36L6,36Q2,36 2,32L2,8Q2,4 6,4Z"/>
+</vector>

@@ -108,6 +108,9 @@ dependencies {
     // Firebase Analytics (optional but recommended)
     implementation("com.google.firebase:firebase-analytics-ktx")
     
+    // Firebase Cloud Messaging (push notifications)
+    implementation("com.google.firebase:firebase-messaging-ktx")
+    
     // Browser support for Firebase reCAPTCHA (required for phone OTP)
     implementation("androidx.browser:browser:1.3.0")
     

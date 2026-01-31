@@ -11,6 +11,9 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.PhoneAuthCredential
 import com.google.firebase.auth.PhoneAuthOptions
 import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -22,7 +25,17 @@ import com.codewithchandra.grocent.util.DebugLogger
 
 class AuthViewModel(private val context: Context? = null) {
     // Constructor completes immediately - no blocking operations here
-    
+
+    init {
+        // Restore login state when ViewModel is first created (e.g. when starting at Shop/Account without LoginScreen).
+        // Ensures profile phone number and isLoggedIn are set even when LoginScreen never runs.
+        try {
+            if (context != null) checkLoginStatus()
+        } catch (e: Exception) {
+            android.util.Log.e("AuthViewModel", "init checkLoginStatus failed: ${e.message}", e)
+        }
+    }
+
     // Make SharedPreferences access lazy - only accessed when needed to avoid blocking startup
     // This defers disk I/O until checkLoginStatus() is called (after UI renders)
     private val prefs: SharedPreferences? by lazy {
@@ -211,8 +224,14 @@ class AuthViewModel(private val context: Context? = null) {
                     apply()
                 }
                 
+                // Save phone to customer doc so admin panel can show readable customer labels
+                savePhoneToCustomerDoc(userId, phoneNumber)
+                
                 // Apply pending referral code after successful login
                 applyPendingReferralCode(userId, phoneNumber)
+                
+                // Store FCM token for push notifications
+                saveFcmTokenToFirestore(userId)
                 
                 isLoading = false
                 errorMessage = null
@@ -301,6 +320,56 @@ class AuthViewModel(private val context: Context? = null) {
     }
     
     /**
+     * Save phone to customer doc so admin panel can show readable labels (name/phone) instead of document ID.
+     */
+    private suspend fun savePhoneToCustomerDoc(userId: String, phoneNumber: String) = withContext(Dispatchers.IO) {
+        if (phoneNumber.isEmpty()) return@withContext
+        try {
+            FirebaseFirestore.getInstance()
+                .collection("customers")
+                .document(userId)
+                .set(mapOf("phone" to phoneNumber), com.google.firebase.firestore.SetOptions.merge())
+                .await()
+            android.util.Log.d("AuthViewModel", "Phone saved for customer $userId")
+        } catch (e: Exception) {
+            android.util.Log.e("AuthViewModel", "Failed to save phone to customer doc: ${e.message}", e)
+        }
+    }
+    
+    /**
+     * Save FCM token to Firestore (customers/{userId}) for push notifications from admin/backend.
+     */
+    private suspend fun saveFcmTokenToFirestore(userId: String) = withContext(Dispatchers.IO) {
+        try {
+            val token = FirebaseMessaging.getInstance().token.await()
+            FirebaseFirestore.getInstance()
+                .collection("customers")
+                .document(userId)
+                .set(mapOf("fcmToken" to token), com.google.firebase.firestore.SetOptions.merge())
+                .await()
+            android.util.Log.d("AuthViewModel", "FCM token saved for user $userId")
+        } catch (e: Exception) {
+            android.util.Log.e("AuthViewModel", "Failed to save FCM token: ${e.message}", e)
+        }
+    }
+    
+    /**
+     * Clear FCM token from Firestore on logout so push is not sent to this device.
+     */
+    private suspend fun clearFcmTokenFromFirestore(userId: String) = withContext(Dispatchers.IO) {
+        try {
+            FirebaseFirestore.getInstance()
+                .collection("customers")
+                .document(userId)
+                .update("fcmToken", FieldValue.delete())
+                .await()
+            android.util.Log.d("AuthViewModel", "FCM token cleared for user $userId")
+        } catch (e: Exception) {
+            android.util.Log.e("AuthViewModel", "Failed to clear FCM token: ${e.message}", e)
+        }
+    }
+    
+    /**
      * Resend OTP to the same phone number
      */
     fun resendOTP(phoneNumber: String) {
@@ -308,6 +377,7 @@ class AuthViewModel(private val context: Context? = null) {
     }
     
     fun logout() {
+        val uid = firebaseAuth.currentUser?.uid
         firebaseAuth.signOut()
         userPhoneNumber = null
         isLoggedIn = false
@@ -320,6 +390,13 @@ class AuthViewModel(private val context: Context? = null) {
             putBoolean(KEY_IS_LOGGED_IN, false)
             remove(KEY_PHONE_NUMBER)
             apply()
+        }
+        
+        // Clear FCM token from Firestore so push is not sent to this device
+        if (uid != null) {
+            viewModelScope.launch(Dispatchers.IO) {
+                clearFcmTokenFromFirestore(uid)
+            }
         }
     }
     

@@ -69,6 +69,7 @@ sealed class Screen(val route: String, val title: String, val icon: androidx.com
     object AddMoney : Screen("add_money", "Add Money", Icons.Default.Add)
     object ReturnRequest : Screen("return_request/{orderId}", "Return Request", Icons.Default.Undo)
     object ReferAndEarn : Screen("refer_and_earn", "Refer & Earn", Icons.Default.CardGiftcard)
+    object PaymentMethods : Screen("payment_methods/{toPay}", "Payment methods", Icons.Default.Payment)
     object MyReturns : Screen("my_returns", "My Returns", Icons.Default.ShoppingBag)
     object CategoryDetail : Screen("category_detail/{categoryId}", "Category Detail", Icons.Default.Category)
     @Suppress("DEPRECATION")
@@ -89,43 +90,14 @@ fun GroceryNavigation(
     onThemeChange: (Boolean) -> Unit = {},
     onSplashImageReady: (Boolean) -> Unit = {}
 ) {
-    // #region agent log
-    val navStart = System.currentTimeMillis()
-    try {
-        java.io.File(".cursor/debug.log").appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"H4","location":"Navigation.kt:76","message":"GroceryNavigation entry","data":{"navStart":$navStart},"timestamp":$navStart}""" + "\n")
-    } catch (e: Exception) {}
-    // #endregion
-    
     val context = LocalContext.current
-    
-    // #region agent log
-    val beforeNavController = System.currentTimeMillis()
-    try {
-        java.io.File(".cursor/debug.log").appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"H4","location":"Navigation.kt:84","message":"Before rememberNavController","data":{"beforeNavController":$beforeNavController,"timeSinceStart":${beforeNavController - navStart}},"timestamp":$beforeNavController}""" + "\n")
-    } catch (e: Exception) {}
-    // #endregion
-    
     val navController = rememberNavController()
-    
-    // #region agent log
-    val afterNavController = System.currentTimeMillis()
-    try {
-        java.io.File(".cursor/debug.log").appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"H4","location":"Navigation.kt:88","message":"After rememberNavController","data":{"afterNavController":$afterNavController,"navControllerTimeMs":${afterNavController - beforeNavController},"timeSinceStart":${afterNavController - navStart}},"timestamp":$afterNavController}""" + "\n")
-    } catch (e: Exception) {}
-    // #endregion
     
     // Create AuthViewModel lazily (only when LoginScreen is composed)
     // This prevents Firebase access during Navigation composition
     val authViewModel = remember { lazy { 
         com.codewithchandra.grocent.viewmodel.AuthViewModel(context)
     } }
-    
-    // #region agent log
-    val afterLazyViewModels = System.currentTimeMillis()
-    try {
-        java.io.File(".cursor/debug.log").appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"H4","location":"Navigation.kt:99","message":"After lazy ViewModels","data":{"afterLazyViewModels":$afterLazyViewModels,"lazyViewModelsTimeMs":${afterLazyViewModels - afterNavController},"timeSinceStart":${afterLazyViewModels - navStart}},"timestamp":$afterLazyViewModels}""" + "\n")
-    } catch (e: Exception) {}
-    // #endregion
     
     // Other ViewModels are lazy - only created when needed
     val cartViewModel = remember { lazy { CartViewModel() } }
@@ -210,22 +182,6 @@ fun GroceryNavigation(
         }
     }.value
     
-    // #region agent log - Track shouldShowBottomBar changes (Hypothesis F)
-    var lastShouldShowBottomBar by remember { mutableStateOf(shouldShowBottomBar) }
-    LaunchedEffect(shouldShowBottomBar, currentRoute) {
-        if (shouldShowBottomBar != lastShouldShowBottomBar) {
-            try {
-                val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                logFile.appendText("""{"sessionId":"debug-session","runId":"run8","hypothesisId":"F","location":"Navigation.kt:191","message":"shouldShowBottomBar changed","data":{"currentRoute":"$currentRoute","oldValue":$lastShouldShowBottomBar,"newValue":$shouldShowBottomBar,"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                android.util.Log.w("NavigationDebug", "shouldShowBottomBar changed: route=$currentRoute, old=$lastShouldShowBottomBar, new=$shouldShowBottomBar")
-            } catch (e: Exception) {
-                android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-            }
-            lastShouldShowBottomBar = shouldShowBottomBar
-        }
-    }
-    // #endregion
-    
     // OPTIMIZATION: Stabilize cart item count calculation
     val cartItemCount = remember(shouldShowBottomBar) {
         if (shouldShowBottomBar) {
@@ -247,22 +203,6 @@ fun GroceryNavigation(
             derivedStateOf { 0 }
         }
     }.value
-    
-    // #region agent log - Track cartItemCount changes (Hypothesis G)
-    var lastCartItemCount by remember { mutableStateOf(cartItemCount) }
-    LaunchedEffect(cartItemCount, currentRoute) {
-        if (cartItemCount != lastCartItemCount) {
-            try {
-                val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                logFile.appendText("""{"sessionId":"debug-session","runId":"run8","hypothesisId":"G","location":"Navigation.kt:203","message":"cartItemCount changed","data":{"currentRoute":"$currentRoute","oldValue":$lastCartItemCount,"newValue":$cartItemCount,"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                android.util.Log.w("NavigationDebug", "cartItemCount changed: route=$currentRoute, old=$lastCartItemCount, new=$cartItemCount")
-            } catch (e: Exception) {
-                android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-            }
-            lastCartItemCount = cartItemCount
-        }
-    }
-    // #endregion
     
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -303,18 +243,6 @@ fun GroceryNavigation(
             }
         }
     ) { innerPadding ->
-        // #region agent log - Track Scaffold content lambda recomposition (Hypothesis H)
-        LaunchedEffect(Unit) {
-            try {
-                val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                logFile.appendText("""{"sessionId":"debug-session","runId":"run8","hypothesisId":"H","location":"Navigation.kt:263","message":"Scaffold content lambda recomposition","data":{"currentRoute":"$currentRoute","shouldShowBottomBar":$shouldShowBottomBar,"cartItemCount":$cartItemCount,"innerPaddingHash":${innerPadding.hashCode()},"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                android.util.Log.d("NavigationDebug", "Scaffold content lambda recomposition: route=$currentRoute, shouldShowBottomBar=$shouldShowBottomBar, cartItemCount=$cartItemCount, innerPaddingHash=${innerPadding.hashCode()}")
-            } catch (e: Exception) {
-                android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-            }
-        }
-        // #endregion
-        
         // CRITICAL FIX: Stabilize content padding calculation to prevent flickering during navigation
         val layoutDirection = LocalLayoutDirection.current
         
@@ -342,61 +270,6 @@ fun GroceryNavigation(
         val endPaddingValueFloat = endPaddingValue.value
         val stableSystemBottomPaddingFloat = stableSystemBottomPadding.value
         
-        // #region agent log - Track innerPadding object reference changes (Hypothesis A)
-        var lastInnerPaddingHash by remember { mutableStateOf(innerPadding.hashCode()) }
-        var lastTopPaddingValue by remember { mutableStateOf(topPaddingValue.value) }
-        var lastStartPaddingValue by remember { mutableStateOf(startPaddingValue.value) }
-        var lastEndPaddingValue by remember { mutableStateOf(endPaddingValue.value) }
-        var lastBottomPaddingValue by remember { mutableStateOf(rawSystemBottomPadding.value) }
-        LaunchedEffect(innerPadding) {
-            val currentHash = innerPadding.hashCode()
-            val topChanged = kotlin.math.abs(topPaddingValue.value - lastTopPaddingValue) > 0.1
-            val startChanged = kotlin.math.abs(startPaddingValue.value - lastStartPaddingValue) > 0.1
-            val endChanged = kotlin.math.abs(endPaddingValue.value - lastEndPaddingValue) > 0.1
-            val bottomChanged = kotlin.math.abs(rawSystemBottomPadding.value - lastBottomPaddingValue) > 0.1
-            if (currentHash != lastInnerPaddingHash) {
-                try {
-                    val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                    logFile.appendText("""{"sessionId":"debug-session","runId":"run9","hypothesisId":"A","location":"Navigation.kt:280","message":"innerPadding object reference changed","data":{"currentRoute":"$currentRoute","oldHash":$lastInnerPaddingHash,"newHash":$currentHash,"topPadding":${topPaddingValue.value},"startPadding":${startPaddingValue.value},"endPadding":${endPaddingValue.value},"bottomPadding":${rawSystemBottomPadding.value},"topChanged":$topChanged,"startChanged":$startChanged,"endChanged":$endChanged,"bottomChanged":$bottomChanged,"shouldShowBottomBar":$shouldShowBottomBar,"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                    android.util.Log.w("NavigationDebug", "innerPadding object reference changed: route=$currentRoute, oldHash=$lastInnerPaddingHash, newHash=$currentHash, topChanged=$topChanged, startChanged=$startChanged, endChanged=$endChanged, bottomChanged=$bottomChanged, shouldShowBottomBar=$shouldShowBottomBar")
-                } catch (e: Exception) {
-                    android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                }
-                lastInnerPaddingHash = currentHash
-                lastTopPaddingValue = topPaddingValue.value
-                lastStartPaddingValue = startPaddingValue.value
-                lastEndPaddingValue = endPaddingValue.value
-                lastBottomPaddingValue = rawSystemBottomPadding.value
-            }
-        }
-        // #endregion
-        
-        // Track padding value changes
-        var lastTopPadding by remember { mutableStateOf(topPaddingValue.value) }
-        var lastStartPadding by remember { mutableStateOf(startPaddingValue.value) }
-        var lastEndPadding by remember { mutableStateOf(endPaddingValue.value) }
-        
-        LaunchedEffect(topPaddingValue, startPaddingValue, endPaddingValue, currentRoute) {
-            val topChanged = kotlin.math.abs(topPaddingValue.value - lastTopPadding) > 0.1
-            val startChanged = kotlin.math.abs(startPaddingValue.value - lastStartPadding) > 0.1
-            val endChanged = kotlin.math.abs(endPaddingValue.value - lastEndPadding) > 0.1
-            
-            if (topChanged || startChanged || endChanged) {
-                // #region agent log - Track actual padding value changes (Hypothesis E)
-                try {
-                    val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                    logFile.appendText("""{"sessionId":"debug-session","runId":"run7","hypothesisId":"E","location":"Navigation.kt:305","message":"Padding values changed","data":{"currentRoute":"$currentRoute","topChanged":$topChanged,"startChanged":$startChanged,"endChanged":$endChanged,"topPadding":${topPaddingValue.value},"startPadding":${startPaddingValue.value},"endPadding":${endPaddingValue.value},"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                    android.util.Log.w("NavigationDebug", "Padding values changed: route=$currentRoute, top=$topChanged, start=$startChanged, end=$endChanged")
-                } catch (e: Exception) {
-                    android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                }
-                // #endregion
-                lastTopPadding = topPaddingValue.value
-                lastStartPadding = startPaddingValue.value
-                lastEndPadding = endPaddingValue.value
-            }
-        }
-        
         // CRITICAL FIX: Stabilize contentPadding using Float values to prevent unnecessary recalculations
         // Note: Float values are already extracted above (lines 330-333) to stabilize the key() wrapper
         // This ensures remember() only recalculates when actual padding values change, not when Dp objects change
@@ -419,18 +292,6 @@ fun GroceryNavigation(
         // This ensures NavHost only recomposes when route or actual padding values change,
         // NOT when Scaffold creates a new innerPadding object with the same values
         key(topPaddingValueFloat, startPaddingValueFloat, endPaddingValueFloat, stableSystemBottomPaddingFloat, currentRoute) {
-            // #region agent log - Track key() wrapper recomposition (Hypothesis I)
-            LaunchedEffect(Unit) {
-                try {
-                    val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                    logFile.appendText("""{"sessionId":"debug-session","runId":"run10","hypothesisId":"I","location":"Navigation.kt:405","message":"key() block recomposition","data":{"currentRoute":"$currentRoute","topPadding":$topPaddingValueFloat,"startPadding":$startPaddingValueFloat,"endPadding":$endPaddingValueFloat,"bottomPadding":$stableSystemBottomPaddingFloat,"innerPaddingHash":${innerPadding.hashCode()},"shouldShowBottomBar":$shouldShowBottomBar,"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                    android.util.Log.d("NavigationDebug", "key() block recomposition: route=$currentRoute, top=$topPaddingValueFloat, start=$startPaddingValueFloat, end=$endPaddingValueFloat, bottom=$stableSystemBottomPaddingFloat, innerPaddingHash=${innerPadding.hashCode()}, shouldShowBottomBar=$shouldShowBottomBar")
-                } catch (e: Exception) {
-                    android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                }
-            }
-            // #endregion
-            
             // Check if user is already logged in (fast check from SharedPreferences + Firebase)
             // This prevents showing login screen if user is already authenticated
             val isLoggedIn = remember {
@@ -495,20 +356,6 @@ fun GroceryNavigation(
                 }
             ) {
                 composable(Screen.Login.route) {
-                    // #region agent log
-                    val loginScreenStart = System.currentTimeMillis()
-                    try {
-                        java.io.File(context.getExternalFilesDir(null), "debug.log").appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"H5","location":"Navigation.kt:290","message":"LoginScreen composable entry","data":{"loginScreenStart":$loginScreenStart},"timestamp":$loginScreenStart}""" + "\n")
-                    } catch (e: Exception) {}
-                    // #endregion
-                    
-                    // #region agent log
-                    val beforeGetAuthViewModel = System.currentTimeMillis()
-                    try {
-                        java.io.File(context.getExternalFilesDir(null), "debug.log").appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"H5","location":"Navigation.kt:296","message":"Before getAuthViewModel","data":{"beforeGetAuthViewModel":$beforeGetAuthViewModel,"timeSinceStart":${beforeGetAuthViewModel - loginScreenStart}},"timestamp":$beforeGetAuthViewModel}""" + "\n")
-                    } catch (e: Exception) {}
-                    // #endregion
-                    
                     com.codewithchandra.grocent.ui.screens.LoginScreen(
                         authViewModel = getAuthViewModel(), // Created lazily only when LoginScreen composes
                         onLoginSuccess = {
@@ -752,29 +599,6 @@ fun GroceryNavigation(
             }
             
             composable(Screen.Shop.route) {
-                // #region agent log - Shop screen entry
-                val shopScreenStartTime = System.currentTimeMillis()
-                android.util.Log.d("ShopScreenDebug", "Shop screen composable entry at ${shopScreenStartTime}")
-                try {
-                    val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                    logFile.parentFile?.mkdirs()
-                    val logData = org.json.JSONObject().apply {
-                        put("sessionId", "debug-session")
-                        put("runId", "run1")
-                        put("hypothesisId", "A,B,C,D,E")
-                        put("location", "Navigation.kt:740")
-                        put("message", "Shop screen composable entry")
-                        put("data", org.json.JSONObject().apply {
-                            put("shopScreenStartTime", shopScreenStartTime)
-                        })
-                        put("timestamp", shopScreenStartTime)
-                    }
-                    logFile.appendText(logData.toString() + "\n")
-                } catch (e: Exception) {
-                    android.util.Log.e("ShopScreenDebug", "Log write error: ${e.message}", e)
-                }
-                // #endregion
-                
                 val scope = rememberCoroutineScope()
                 val context = LocalContext.current
                 val lifecycleOwner = LocalLifecycleOwner.current
@@ -1042,214 +866,35 @@ fun GroceryNavigation(
                 }
                 
                 // ViewModels are created lazily when SearchScreen needs them (deferred until composition)
-                // #region agent log - Before ViewModel access
-                val beforeViewModelAccess = System.currentTimeMillis()
-                try {
-                    val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                    logFile.parentFile?.mkdirs()
-                    val logData = org.json.JSONObject().apply {
-                        put("sessionId", "debug-session")
-                        put("runId", "run1")
-                        put("hypothesisId", "A,C")
-                        put("location", "Navigation.kt:1008")
-                        put("message", "Before accessing ViewModels for SearchScreen")
-                        put("data", org.json.JSONObject().apply {
-                            put("beforeViewModelAccess", beforeViewModelAccess)
-                            put("timeSinceShopStart", beforeViewModelAccess - shopScreenStartTime)
-                        })
-                        put("timestamp", beforeViewModelAccess)
-                    }
-                    logFile.appendText(logData.toString() + "\n")
-                } catch (e: Exception) {
-                    android.util.Log.e("ShopScreenDebug", "Log write error: ${e.message}", e)
-                }
-                // #endregion
-                
                 val cartVm = remember { getCartViewModel() }
                 val favoriteVm = remember { getFavoriteViewModel() }
-                // #region agent log - LocationViewModel access
-                val beforeLocationVm = System.currentTimeMillis()
-                try {
-                    val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                    logFile.parentFile?.mkdirs()
-                    val logData = org.json.JSONObject().apply {
-                        put("sessionId", "debug-session")
-                        put("runId", "run1")
-                        put("hypothesisId", "A,B")
-                        put("location", "Navigation.kt:1013")
-                        put("message", "Before getLocationViewModel() call")
-                        put("data", org.json.JSONObject().apply {
-                            put("beforeLocationVm", beforeLocationVm)
-                        })
-                        put("timestamp", beforeLocationVm)
-                    }
-                    logFile.appendText(logData.toString() + "\n")
-                } catch (e: Exception) {}
-                // #endregion
-                
-                android.util.Log.d("ShopScreenDebug", "Before locationVm remember block")
                 val locationVm = remember { 
-                    android.util.Log.d("ShopScreenDebug", "Inside locationVm remember block")
-                    // #region agent log - Before getLocationViewModel in remember
-                    val beforeRemember = System.currentTimeMillis()
-                    android.util.Log.d("ShopScreenDebug", "Before getLocationViewModel call, time: $beforeRemember")
                     try {
-                        val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                        logFile.parentFile?.mkdirs()
-                        val logData = org.json.JSONObject().apply {
-                            put("sessionId", "debug-session")
-                            put("runId", "run1")
-                            put("hypothesisId", "A")
-                            put("location", "Navigation.kt:1075")
-                            put("message", "Before getLocationViewModel in remember block")
-                            put("data", org.json.JSONObject().apply {
-                                put("beforeRemember", beforeRemember)
-                            })
-                            put("timestamp", beforeRemember)
-                        }
-                        logFile.appendText(logData.toString() + "\n")
+                        getLocationViewModel()
                     } catch (e: Exception) {
-                        android.util.Log.e("ShopScreenDebug", "Log write error in remember: ${e.message}", e)
-                    }
-                    // #endregion
-                    
-                    try {
-                        android.util.Log.d("ShopScreenDebug", "Calling getLocationViewModel()")
-                        val vm = getLocationViewModel()
-                        android.util.Log.d("ShopScreenDebug", "getLocationViewModel() succeeded")
-                        // #region agent log - getLocationViewModel succeeded
-                        val afterRemember = System.currentTimeMillis()
-                        try {
-                            val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                            logFile.parentFile?.mkdirs()
-                            val logData = org.json.JSONObject().apply {
-                                put("sessionId", "debug-session")
-                                put("runId", "run1")
-                                put("hypothesisId", "A")
-                                put("location", "Navigation.kt:1075")
-                                put("message", "getLocationViewModel succeeded in remember")
-                                put("data", org.json.JSONObject().apply {
-                                    put("afterRemember", afterRemember)
-                                    put("rememberDuration", afterRemember - beforeRemember)
-                                })
-                                put("timestamp", afterRemember)
-                            }
-                            logFile.appendText(logData.toString() + "\n")
-                        } catch (e: Exception) {
-                            android.util.Log.e("ShopScreenDebug", "Log write error after success: ${e.message}", e)
-                        }
-                        // #endregion
-                        vm
-                    } catch (e: Exception) {
-                        android.util.Log.e("ShopScreenDebug", "Exception in getLocationViewModel: ${e.message}", e)
-                        e.printStackTrace()
-                        // #region agent log - LocationViewModel access error
-                        try {
-                            val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                            logFile.parentFile?.mkdirs()
-                            val logData = org.json.JSONObject().apply {
-                                put("sessionId", "debug-session")
-                                put("runId", "run1")
-                                put("hypothesisId", "A")
-                                put("location", "Navigation.kt:1075")
-                                put("message", "ERROR accessing LocationViewModel in remember")
-                                put("data", org.json.JSONObject().apply {
-                                    put("error", e.message ?: "Unknown")
-                                    put("errorType", e.javaClass.simpleName)
-                                    put("stackTrace", e.stackTraceToString().take(500))
-                                })
-                                put("timestamp", System.currentTimeMillis())
-                            }
-                            logFile.appendText(logData.toString() + "\n")
-                        } catch (e2: Exception) {
-                            android.util.Log.e("ShopScreenDebug", "Log write error in catch: ${e2.message}", e2)
-                        }
-                        // #endregion
                         android.util.Log.e("ShopScreenDebug", "Error accessing LocationViewModel: ${e.message}", e)
-                        // Return a default LocationViewModel instance instead of throwing
-                        android.util.Log.d("ShopScreenDebug", "Creating fallback LocationViewModel")
                         com.codewithchandra.grocent.viewmodel.LocationViewModel()
                     }
                 }
-                android.util.Log.d("ShopScreenDebug", "After locationVm remember block, locationVm is ${if (locationVm != null) "not null" else "null"}")
                 
-                // #region agent log - LocationViewModel accessed (after remember)
-                val afterLocationVm = System.currentTimeMillis()
-                try {
-                    val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                    logFile.parentFile?.mkdirs()
-                    val logData = org.json.JSONObject().apply {
-                        put("sessionId", "debug-session")
-                        put("runId", "run1")
-                        put("hypothesisId", "A,B")
-                        put("location", "Navigation.kt:1105")
-                        put("message", "LocationViewModel accessed successfully")
-                        put("data", org.json.JSONObject().apply {
-                            put("afterLocationVm", afterLocationVm)
-                            put("accessDuration", afterLocationVm - beforeLocationVm)
-                            // Removed property access to avoid potential crashes - these are new schedule feature properties
-                            // that might not be fully initialized when accessed during composition
-                        })
-                        put("timestamp", afterLocationVm)
-                    }
-                    logFile.appendText(logData.toString() + "\n")
-                } catch (e: Exception) {}
-                // #endregion
                 val orderVm = remember { getOrderViewModel() }
-                
-                // #region agent log - After ViewModel access
-                val afterViewModelAccess = System.currentTimeMillis()
-                try {
-                    val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                    logFile.parentFile?.mkdirs()
-                    val logData = org.json.JSONObject().apply {
-                        put("sessionId", "debug-session")
-                        put("runId", "run1")
-                        put("hypothesisId", "A,C")
-                        put("location", "Navigation.kt:1014")
-                        put("message", "All ViewModels accessed successfully")
-                        put("data", org.json.JSONObject().apply {
-                            put("afterViewModelAccess", afterViewModelAccess)
-                            put("viewModelAccessDuration", afterViewModelAccess - beforeViewModelAccess)
-                        })
-                        put("timestamp", afterViewModelAccess)
+
+                // Load saved addresses from Firestore when user is logged in (so they persist after app restart)
+                LaunchedEffect(Unit) {
+                    try {
+                        val userId = getAuthViewModel().getCurrentUserId()
+                        if (userId != "guest") locationVm.loadAddresses(userId)
+                    } catch (e: Exception) {
+                        android.util.Log.e("Navigation", "loadAddresses failed: ${e.message}", e)
                     }
-                    logFile.appendText(logData.toString() + "\n")
-                } catch (e: Exception) {}
-                // #endregion
-                
-                // #region agent log - Before SearchScreen call
-                val beforeSearchScreen = System.currentTimeMillis()
-                try {
-                    val logFile = java.io.File("c:\\chandra\\App_Design\\.cursor\\debug.log")
-                    logFile.parentFile?.mkdirs()
-                    val logData = org.json.JSONObject().apply {
-                        put("sessionId", "debug-session")
-                        put("runId", "run1")
-                        put("hypothesisId", "A,B,C,D,E")
-                        put("location", "Navigation.kt:1156")
-                        put("message", "Before SearchScreen call")
-                        put("data", org.json.JSONObject().apply {
-                            put("beforeSearchScreen", beforeSearchScreen)
-                            put("locationVmNotNull", locationVm != null)
-                            put("cartVmNotNull", cartVm != null)
-                            put("favoriteVmNotNull", favoriteVm != null)
-                            put("orderVmNotNull", orderVm != null)
-                        })
-                        put("timestamp", beforeSearchScreen)
-                    }
-                    logFile.appendText(logData.toString() + "\n")
-                } catch (e: Exception) {
-                    android.util.Log.e("ShopScreenDebug", "Log write error before SearchScreen: ${e.message}", e)
                 }
-                // #endregion
-                
+
                 SearchScreen(
                     products = products,
                     categories = categories, // Pass categories loaded in background
                     cartViewModel = cartVm,
                     favoriteViewModel = favoriteVm,
-                    locationViewModel = locationVm ?: com.codewithchandra.grocent.viewmodel.LocationViewModel(),
+                    locationViewModel = locationVm,
                     orderViewModel = orderVm,
                     onProductClick = { product ->
                         // Add comprehensive safety check before navigation
@@ -1642,6 +1287,7 @@ fun GroceryNavigation(
                     promoCodeViewModel = getPromoCodeViewModel(),
                     paymentViewModel = getPaymentViewModel(),
                     onAddMoneyClick = { navController.navigate(Screen.AddMoney.route) },
+                    onPaymentMethodsClick = { amount -> navController.navigate("payment_methods/${amount.toInt()}") },
                     onOrderPlaced = { order ->
                         orderVm.addOrder(order) // Add order to order list
                         getCartViewModel().clearCart()
@@ -1759,6 +1405,12 @@ fun GroceryNavigation(
                         // Clear cart and logout
                         getCartViewModel().clearCart()
                         getAuthViewModel().logout()
+                        // Clear profile name/photo so next user doesn't see previous user's data
+                        try {
+                            context.getSharedPreferences("user_profile_prefs", android.content.Context.MODE_PRIVATE).edit().clear().apply()
+                        } catch (_: Exception) {}
+                        // Clear addresses/selection so next user doesn't see previous user's addresses
+                        getLocationViewModel().clearOnLogout()
                         // Navigate to login screen and clear back stack
                         navController.navigate(Screen.Login.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -1767,7 +1419,24 @@ fun GroceryNavigation(
                             launchSingleTop = true
                         }
                     },
-                    onEditProfileClick = { /* Navigate to edit profile */ }
+                    onEditProfileClick = { /* Navigate to edit profile */ },
+                    onPaymentMethodsClick = { navController.navigate("payment_methods/0") }
+                )
+            }
+            
+            composable(
+                route = Screen.PaymentMethods.route,
+                arguments = listOf(
+                    androidx.navigation.navArgument("toPay") {
+                        type = androidx.navigation.NavType.StringType
+                        defaultValue = "0"
+                    }
+                )
+            ) { backStackEntry ->
+                val toPay = backStackEntry.arguments?.getString("toPay")?.toDoubleOrNull() ?: 0.0
+                DefaultPaymentMethodScreen(
+                    amountToPay = if (toPay > 0) toPay else null,
+                    onBackClick = { navController.popBackStack() }
                 )
             }
             
@@ -1937,15 +1606,6 @@ fun GroceryNavigation(
                     // CRITICAL: Ensure products list is never empty
                     // OPTIMIZATION: Include productId in remember key to ensure fresh lookup
                     val safeProducts = remember(products, productId) {
-                        // #region agent log
-                        try {
-                            val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                            logFile.appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"A,D","location":"Navigation.kt:1405","message":"safeProducts remember computation","data":{"productId":$productId,"productsCount":${products.size},"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                            android.util.Log.d("NavigationDebug", "safeProducts computation: productId=$productId, productsCount=${products.size}")
-                        } catch (e: Exception) {
-                            android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                        }
-                        // #endregion
                         try {
                             if (products.isEmpty()) {
                                 val sampleProducts = try {
@@ -1983,19 +1643,6 @@ fun GroceryNavigation(
                             )
                         }
                     }
-                    
-                    // #region agent log
-                    LaunchedEffect(safeProducts.size, productId) {
-                        try {
-                            val productIds = safeProducts.map { it.id }.take(10)
-                            val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                            logFile.appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"A,D","location":"Navigation.kt:1442","message":"safeProducts computed","data":{"productId":$productId,"safeProductsCount":${safeProducts.size},"first10ProductIds":$productIds,"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                            android.util.Log.d("NavigationDebug", "safeProducts computed: productId=$productId, count=${safeProducts.size}, first10=$productIds")
-                        } catch (e: Exception) {
-                            android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                        }
-                    }
-                    // #endregion
                 
                     // CRITICAL: Check if products list is empty first
                     if (safeProducts.isEmpty()) {
@@ -2013,17 +1660,6 @@ fun GroceryNavigation(
                         // CRITICAL FIX: Key product lookup to productId to ensure correct product
                         // IMPORTANT: Only return product if it matches the requested productId to prevent flickering
                         val product = remember(productId, safeProducts) {
-                            // #region agent log
-                            try {
-                                val foundProduct = safeProducts.find { it.id == productId }
-                                val fallbackProduct = safeProducts.firstOrNull()
-                                val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                                logFile.appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"A,E","location":"Navigation.kt:1458","message":"Product lookup","data":{"productId":$productId,"foundProductId":${foundProduct?.id},"foundProductName":"${foundProduct?.name ?: ""}","fallbackProductId":${fallbackProduct?.id},"fallbackProductName":"${fallbackProduct?.name ?: ""}","timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                                android.util.Log.d("NavigationDebug", "Product lookup: productId=$productId, found=${foundProduct?.id}, fallback=${fallbackProduct?.id}")
-                            } catch (e: Exception) {
-                                android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                            }
-                            // #endregion
                             try {
                                 // CRITICAL FIX: Only return product if it matches the requested productId
                                 // This prevents showing a fallback product (like product 1) when the requested product isn't found yet
@@ -2032,18 +1668,6 @@ fun GroceryNavigation(
                                 null
                             }
                         }
-                        
-                        // #region agent log
-                        LaunchedEffect(product?.id, product?.name) {
-                            try {
-                                val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                                logFile.appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"A,E","location":"Navigation.kt:1464","message":"Product resolved","data":{"expectedProductId":$productId,"actualProductId":${product?.id},"actualProductName":"${product?.name ?: ""}","productImageUrl":"${product?.imageUrl ?: ""}","timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                                android.util.Log.d("NavigationDebug", "Product resolved: expected=$productId, actual=${product?.id}, name=${product?.name}, imageUrl=${product?.imageUrl}")
-                            } catch (e: Exception) {
-                                android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                            }
-                        }
-                        // #endregion
                     
                         // CRITICAL FIX: Show loading state if product doesn't match requested productId
                         // This prevents flickering by not showing a fallback product
@@ -2057,17 +1681,6 @@ fun GroceryNavigation(
                             }
                         } else if (product.id != productId) {
                             // Product found but doesn't match requested ID - wait for correct product
-                            // #region agent log
-                            LaunchedEffect(product.id, productId) {
-                                try {
-                                    val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                                    logFile.appendText("""{"sessionId":"debug-session","runId":"run1","hypothesisId":"A,E","location":"Navigation.kt:1523","message":"Product ID mismatch - waiting","data":{"requestedProductId":$productId,"actualProductId":${product.id},"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                                    android.util.Log.w("NavigationDebug", "Product ID mismatch: requested=$productId, actual=${product.id} - showing loading")
-                                } catch (e: Exception) {
-                                    android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                                }
-                            }
-                            // #endregion
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center
@@ -2099,18 +1712,6 @@ fun GroceryNavigation(
                                     emptyList() // Return empty list on error
                                 }
                             }
-                            
-                            // #region agent log
-                            LaunchedEffect(product.id, product.name) {
-                                try {
-                                    val logFile = java.io.File(context.getExternalFilesDir(null), "debug.log")
-                                    logFile.appendText("""{"sessionId":"debug-session","runId":"run2","hypothesisId":"F,G,H","location":"Navigation.kt:1549","message":"About to call ProductDetailScreen","data":{"productId":${product.id},"productName":"${product.name}","productImageUrl":"${product.imageUrl}","requestedProductId":$productId,"timestamp":${System.currentTimeMillis()}},"timestamp":${System.currentTimeMillis()}}""" + "\n")
-                                    android.util.Log.d("NavigationDebug", "=== About to call ProductDetailScreen: productId=${product.id}, requested=$productId, name=${product.name}, imageUrl=${product.imageUrl} ===")
-                                } catch (e: Exception) {
-                                    android.util.Log.e("NavigationDebug", "Log write failed: ${e.message}")
-                                }
-                            }
-                            // #endregion
                             
                             // ProductDetailScreen - all safety checks done above, safe to call
                             ProductDetailScreen(

@@ -167,26 +167,33 @@ fun ReferAndEarnScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Code Display Field
+                                // Code Display Field (fixed height ~20% smaller)
                                 Surface(
                                     modifier = Modifier
                                         .weight(1f)
+                                        .height(36.dp)
                                         .clip(RoundedCornerShape(8.dp))
                                         .border(1.dp, Color(0xFFE0E0E0), RoundedCornerShape(8.dp))
-                                        .background(Color.White)
-                                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                                        .background(Color.White),
                                     color = Color.White
                                 ) {
-                                    Text(
-                                        text = referralCode,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = TextGray,
-                                        letterSpacing = 1.sp
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 12.dp),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Text(
+                                            text = referralCode,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = TextGray,
+                                            letterSpacing = 1.sp
+                                        )
+                                    }
                                 }
                                 
-                                // Share Button
+                                // Share Button (height matches referral code box)
                                 Button(
                                     onClick = {
                                         val shareText = referralViewModel.getShareableReferralText()
@@ -201,15 +208,16 @@ fun ReferAndEarnScreen(
                                         containerColor = BrandPrimary
                                     ),
                                     shape = RoundedCornerShape(8.dp),
-                                    modifier = Modifier.height(48.dp)
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                                    modifier = Modifier.fillMaxHeight()
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Share,
                                         contentDescription = "Share",
-                                        modifier = Modifier.size(18.dp)
+                                        modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Share", fontSize = 14.sp)
+                                    Text("Share", fontSize = 13.sp)
                                 }
                             }
                             

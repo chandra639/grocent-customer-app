@@ -193,6 +193,16 @@ fun LocationScreen(
         }
     }
     
+    // Only prepend Current Location (not Home/Work) to avoid duplicate; saved sorted by priority: Home, Work, Other
+    val addressesToShow = remember(locationViewModel.currentAddress, savedAddresses) {
+        val current = locationViewModel.currentAddress
+        val saved = savedAddresses
+            .filter { it.title != "Current Location" }
+            .sortedBy { locationViewModel.addressPriority(it.title) }
+        val onlyCurrentLocation = current != null && current.title == "Current Location"
+        if (onlyCurrentLocation) listOf(current) + saved else saved
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -255,9 +265,9 @@ fun LocationScreen(
                     )
                 }
             }
-            
+
             // Select Address Header - Only show if addresses exist
-            if (savedAddresses.isNotEmpty()) {
+            if (addressesToShow.isNotEmpty()) {
                 item {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -279,9 +289,9 @@ fun LocationScreen(
                     }
                 }
             }
-            
-            // Saved Addresses (only user-added addresses)
-            items(savedAddresses) { address ->
+
+            // Current Location (once) + Saved Addresses
+            items(addressesToShow) { address ->
                 AddressCard(
                     address = address,
                     onClick = {

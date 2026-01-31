@@ -47,49 +47,20 @@ fun CheckoutScreen(
     android.util.Log.d("CheckoutScreenDebug", "CheckoutScreen composable ENTRY")
     val context = LocalContext.current
     
-    // Combine current address and saved addresses (current first, then saved)
-    // Fix: Prevent duplicate addresses by checking both ID and normalized address string
+    // Priority: Home (1), Work (2), Other (3). When no saved addresses, only current location.
     val allAddresses = remember(locationViewModel.currentAddress, locationViewModel.savedAddresses) {
-        val addresses = mutableListOf<DeliveryAddress>()
-        val addedAddressIds = mutableSetOf<String?>()
-        val addedAddressStrings = mutableSetOf<String>()
-        
-        // Helper to normalize address string for comparison
-        fun normalizeAddress(addr: String?): String {
-            return (addr ?: "").trim().lowercase()
+        val saved = locationViewModel.savedAddresses
+            .filter { it.title != "Current Location" }
+            .sortedBy { locationViewModel.addressPriority(it.title) }
+        val current = locationViewModel.currentAddress
+        val list = if (saved.isEmpty()) {
+            listOfNotNull(current)
+        } else {
+            val withCurrent = if (current != null && current.title == "Current Location" && saved.none { it.address == current.address }) saved + current else saved
+            withCurrent
         }
-        
-        // Add current address first if available
-        locationViewModel.currentAddress?.let { current ->
-            addresses.add(current)
-            addedAddressIds.add(current.id)
-            addedAddressStrings.add(normalizeAddress(current.address))
-            android.util.Log.d("CheckoutScreenDebug", "Added current address: ${current.title} - ${current.address}, id=${current.id}")
-        }
-        
-        // Add saved addresses (excluding duplicates by ID or normalized address string)
-        locationViewModel.savedAddresses.forEach { saved ->
-            val normalizedAddress = normalizeAddress(saved.address)
-            val currentNormalized = locationViewModel.currentAddress?.address?.let { normalizeAddress(it) } ?: ""
-            
-            // Skip if it's the same as current address (by ID or normalized address)
-            val isDuplicate = saved.id == locationViewModel.currentAddress?.id || 
-                             (normalizedAddress.isNotEmpty() && normalizedAddress == currentNormalized) ||
-                             addedAddressIds.contains(saved.id) ||
-                             (normalizedAddress.isNotEmpty() && addedAddressStrings.contains(normalizedAddress))
-            
-            if (!isDuplicate) {
-                addresses.add(saved)
-                addedAddressIds.add(saved.id)
-                addedAddressStrings.add(normalizedAddress)
-                android.util.Log.d("CheckoutScreenDebug", "Added saved address: ${saved.title} - ${saved.address}, id=${saved.id}")
-            } else {
-                android.util.Log.d("CheckoutScreenDebug", "Skipped duplicate saved address: ${saved.title} - ${saved.address}, id=${saved.id}")
-            }
-        }
-        
-        android.util.Log.d("CheckoutScreenDebug", "allAddresses final size: ${addresses.size}, currentAddress exists: ${locationViewModel.currentAddress != null}, savedAddresses size: ${locationViewModel.savedAddresses.size}")
-        addresses
+        android.util.Log.d("CheckoutScreenDebug", "allAddresses size=${list.size}, saved=${saved.size}, priority order")
+        list
     }
     
     // Selected address - explicitly null if no addresses exist
@@ -598,6 +569,14 @@ fun CheckoutScreen(
                     }
                 }
             }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Bill Summary - show item total, delivery, fees, discount, To Pay
+            BillSummarySection(
+                calculatedFees = calculatedFees,
+                discountAmount = discountAmount
+            )
         }
         
         // Bottom Bar
@@ -621,12 +600,12 @@ fun CheckoutScreen(
                 ) {
                     Column {
                         Text(
-                            text = "Total Amount",
+                            text = "To Pay",
                             fontSize = 14.sp,
                             color = TextGray
                         )
                         Text(
-                            text = "₹${String.format("%.2f", calculatedFees.finalTotal)}",
+                            text = "\u20B9${String.format("%.0f", calculatedFees.finalTotal)}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
@@ -635,7 +614,7 @@ fun CheckoutScreen(
                     
                     if (savings > 0) {
                         Text(
-                            text = "You save ₹${String.format("%.0f", savings)}",
+                            text = "You save \u20B9${String.format("%.0f", savings)}",
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF34C759)
@@ -689,7 +668,7 @@ fun CheckoutScreen(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = "Continue to Payment",
+                        text = "Pay \u20B9${String.format("%.0f", calculatedFees.finalTotal)}",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         color = if (selectedAddress != null && (deliveryType == "SAME_DAY" || selectedTimeSlot != null)) Color.White else TextGray
@@ -819,7 +798,7 @@ fun BillSummarySection(
                     color = TextBlack
                 )
                 Text(
-                    text = "₹${String.format("%.2f", calculatedFees.subtotal)}",
+                    text = "\u20B9${String.format("%.2f", calculatedFees.subtotal)}",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
@@ -838,7 +817,7 @@ fun BillSummarySection(
                     color = TextBlack
                 )
                 Text(
-                    text = if (isDeliveryFree) "Free" else "₹${String.format("%.2f", calculatedFees.deliveryFee)}",
+                    text = if (isDeliveryFree) "Free" else "\u20B9${String.format("%.2f", calculatedFees.deliveryFee)}",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     color = if (isDeliveryFree) Color(0xFF34C759) else TextBlack
@@ -857,7 +836,7 @@ fun BillSummarySection(
                     color = TextBlack
                 )
                 Text(
-                    text = "₹${String.format("%.2f", platformFee)}",
+                    text = "\u20B9${String.format("%.2f", platformFee)}",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
@@ -876,7 +855,7 @@ fun BillSummarySection(
                     color = TextBlack
                 )
                 Text(
-                    text = "₹${String.format("%.2f", taxAmount)}",
+                    text = "\u20B9${String.format("%.2f", taxAmount)}",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
@@ -895,7 +874,7 @@ fun BillSummarySection(
                         color = TextBlack
                     )
                     Text(
-                        text = "-₹${String.format("%.2f", discountAmount)}",
+                        text = "-\u20B9${String.format("%.2f", discountAmount)}",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF34C759)
@@ -918,10 +897,10 @@ fun BillSummarySection(
                     color = TextBlack
                 )
                 Text(
-                    text = "₹${String.format("%.2f", calculatedFees.finalTotal)}",
+                    text = "\u20B9${String.format("%.0f", calculatedFees.finalTotal)}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextBlack
+                    color = Color(0xFF34C759)
                 )
             }
         }

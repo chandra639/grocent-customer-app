@@ -44,6 +44,12 @@ class UserProfileViewModel(private val context: Context? = null) {
             apply()
         }
     }
+
+    /** Re-read name and photo from prefs (e.g. after logout cleared prefs). Call when Account screen is shown. */
+    fun refreshFromPrefs() {
+        userName = getSavedUserName() ?: ""
+        userPhotoUri = getSavedUserPhotoUri()
+    }
 }
 
 

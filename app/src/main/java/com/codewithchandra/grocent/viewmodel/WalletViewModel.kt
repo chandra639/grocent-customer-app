@@ -172,45 +172,32 @@ class WalletViewModel {
         }
     }
     
-    // Deduct money from wallet (for orders)
+    // Deduct money from wallet (for orders). Uses atomic read-deduct-write in repository to avoid race when multiple orders place quickly.
     fun deductMoney(amount: Double, orderId: String, description: String = "Order payment") {
-        if (amount <= 0 || amount > walletBalance) {
+        if (amount <= 0) {
+            android.util.Log.w("WalletViewModel", "deductMoney skipped: amount <= 0")
             return
         }
-        
         viewModelScope.launch {
-            try {
-        val balanceBefore = walletBalance
-        val balanceAfter = balanceBefore - amount
-        
-        val transaction = WalletTransaction(
-            userId = currentUserId,
-            type = WalletTransactionType.DEBIT,
-            amount = amount,
-            balanceBefore = balanceBefore,
-            balanceAfter = balanceAfter,
-            description = description,
-            orderId = orderId,
-            status = WalletTransactionStatus.COMPLETED
-        )
-        
-                // Save to Firestore
-                val balanceResult = WalletRepository.updateWalletBalance(currentUserId, balanceAfter)
-                balanceResult.getOrElse { error ->
-                    android.util.Log.e("WalletViewModel", "Failed to save balance to Firestore: ${error.message}")
+            WalletRepository.deductBalance(currentUserId, amount, orderId, description)
+                .onSuccess { newBalance ->
+                    walletBalance = newBalance
+                    val balanceBefore = newBalance + amount
+                    val transaction = WalletTransaction(
+                        userId = currentUserId,
+                        type = WalletTransactionType.DEBIT,
+                        amount = amount,
+                        balanceBefore = balanceBefore,
+                        balanceAfter = newBalance,
+                        description = description,
+                        orderId = orderId,
+                        status = WalletTransactionStatus.COMPLETED
+                    )
+                    transactions = listOf(transaction) + transactions
                 }
-                
-                val transactionResult = WalletRepository.saveTransaction(currentUserId, transaction.toMap())
-                transactionResult.getOrElse { error ->
-                    android.util.Log.e("WalletViewModel", "Failed to save transaction to Firestore: ${error.message}")
+                .onFailure { e ->
+                    android.util.Log.e("WalletViewModel", "Deduct failed: ${e.message}", e)
                 }
-                
-                // Update local state
-        walletBalance = balanceAfter
-        transactions = listOf(transaction) + transactions
-            } catch (e: Exception) {
-                android.util.Log.e("WalletViewModel", "Error deducting money: ${e.message}", e)
-            }
         }
     }
     

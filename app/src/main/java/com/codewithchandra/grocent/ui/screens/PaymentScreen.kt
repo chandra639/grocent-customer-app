@@ -1,6 +1,7 @@
 package com.codewithchandra.grocent.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,17 +25,24 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.codewithchandra.grocent.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
@@ -62,6 +70,8 @@ import com.codewithchandra.grocent.ui.components.AddMoneyDialog
 import com.codewithchandra.grocent.ui.components.PromoCodeInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.activity.ComponentActivity
 import android.content.SharedPreferences
@@ -192,7 +202,8 @@ fun PaymentScreen(
     paymentViewModel: PaymentViewModel? = null,
     onOrderPlaced: (Order) -> Unit,
     onBackClick: () -> Unit,
-    onAddMoneyClick: (() -> Unit)? = null
+    onAddMoneyClick: (() -> Unit)? = null,
+    onPaymentMethodsClick: (Double) -> Unit = {}
 ) {
     val context = LocalContext.current
     val activity = context as? ComponentActivity
@@ -219,7 +230,35 @@ fun PaymentScreen(
         context.getSharedPreferences("customer_prefs", android.content.Context.MODE_PRIVATE) 
     }
     
-    var selectedPaymentMethod by remember { mutableStateOf<PaymentMethod?>(null) }
+    // Default checkout payment: last used (PhonePe, GPay, UPI, COD, Wallet, Card), or UPI if none saved so "Paying via" is never "Select method"
+    val initialPaymentFromPrefs = remember(prefs) {
+        val savedMethod = prefs.getString("last_payment_method", null)
+        val method = if (savedMethod != null) {
+            try { PaymentMethod.valueOf(savedMethod) } catch (_: IllegalArgumentException) { null }
+        } else null
+        val savedUpi = prefs.getString("last_upi_option", null)?.takeIf { it.isNotEmpty() }
+        val effectiveMethod = method ?: PaymentMethod.UPI
+        val effectiveUpi = if (effectiveMethod == PaymentMethod.UPI) (savedUpi ?: "any") else null
+        Pair(effectiveMethod, effectiveUpi)
+    }
+    var selectedPaymentMethod by remember { mutableStateOf(initialPaymentFromPrefs.first) }
+    var selectedUpiOption by remember { mutableStateOf(initialPaymentFromPrefs.second) }
+    var selectedCardOption by remember { mutableStateOf<String?>(null) }
+    
+    // Re-apply last used payment when prefs may have changed (e.g. returning from Payment Options)
+    LaunchedEffect(Unit) {
+        val savedMethod = prefs.getString("last_payment_method", null)
+        val savedUpi = prefs.getString("last_upi_option", null)
+        if (savedMethod != null) {
+            try {
+                selectedPaymentMethod = PaymentMethod.valueOf(savedMethod)
+                selectedUpiOption = if (selectedPaymentMethod == PaymentMethod.UPI) savedUpi?.takeIf { it.isNotEmpty() } else null
+            } catch (_: IllegalArgumentException) { /* ignore */ }
+        } else {
+            selectedPaymentMethod = PaymentMethod.UPI
+            selectedUpiOption = savedUpi?.takeIf { it.isNotEmpty() } ?: "any"
+        }
+    }
     
     // Customer details for payment (if not using COD or Wallet)
     // Load from saved preferences or previous orders
@@ -243,33 +282,23 @@ fun PaymentScreen(
     // Load customer details from AuthViewModel (phone number)
     val authViewModel = remember { com.codewithchandra.grocent.viewmodel.AuthViewModel(context) }
     
-    // Load from previous orders if available
-    LaunchedEffect(Unit) {
-        // Try to get phone from AuthViewModel
-        val savedPhone = authViewModel.userPhoneNumber
-        if (savedPhone != null && customerPhone.isEmpty()) {
-            // Remove country code if present (+91)
-            val phone = savedPhone.replace("+91", "").replace(" ", "")
-            customerPhone = phone
-        }
-        
-        // Try to load from most recent order
-        val recentOrder = orderViewModel?.orders?.firstOrNull()
-        if (recentOrder != null) {
-            // Check if order has customer info (would need to be added to Order model)
-            // For now, just ensure we have phone from auth
-        }
-        
-        // Load from SharedPreferences (already done in remember, but refresh if needed)
-        if (customerName.isEmpty() && customerEmail.isEmpty() && customerPhone.isEmpty()) {
-            // Try to load from saved preferences
-            val savedName = prefs.getString("saved_customer_name", null)
-            val savedEmail = prefs.getString("saved_customer_email", null)
-            val savedPhone = prefs.getString("saved_customer_phone", null)
-            
-            if (savedName != null) customerName = savedName
-            if (savedEmail != null) customerEmail = savedEmail
-            if (savedPhone != null) customerPhone = savedPhone
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            // Load customer details and payment method from prefs (runs on first show and when returning from Default Payment Method screen)
+            val savedPhone = authViewModel.userPhoneNumber
+            if (savedPhone != null && customerPhone.isEmpty()) {
+                val phone = savedPhone.replace("+91", "").replace(" ", "")
+                customerPhone = phone
+            }
+            if (customerName.isEmpty() && customerEmail.isEmpty() && customerPhone.isEmpty()) {
+                val savedName = prefs.getString("saved_customer_name", null)
+                val savedEmail = prefs.getString("saved_customer_email", null)
+                val savedPhone = prefs.getString("saved_customer_phone", null)
+                if (savedName != null) customerName = savedName
+                if (savedEmail != null) customerEmail = savedEmail
+                if (savedPhone != null) customerPhone = savedPhone
+            }
         }
     }
     var deliveryAddress by remember { mutableStateOf(
@@ -288,9 +317,8 @@ fun PaymentScreen(
     var showAddMoneyDialog by remember { mutableStateOf(false) }
     var secondaryPaymentMethod by remember { mutableStateOf<PaymentMethod?>(null) }
     
-    // UPI and Card selection state
-    var selectedUpiOption by remember { mutableStateOf<String?>(null) }
-    var selectedCardOption by remember { mutableStateOf<String?>(null) }
+    val scrollState = rememberScrollState()
+    var scrollableContentTop by remember { mutableStateOf(0f) }
     
     // Promo code state
     val localPromoCodeViewModel = promoCodeViewModel ?: remember { PromoCodeViewModel() }
@@ -449,7 +477,7 @@ fun PaymentScreen(
                 selectedOfferType = OfferType.WELCOME_OFFER
                 localPromoCodeViewModel.setSelectedOfferType(OfferType.WELCOME_OFFER)
                 welcomeOfferDiscount = validation.discountAmount
-                android.util.Log.d("PaymentScreen", "Auto-applied welcome offer: ₹${welcomeOfferDiscount}")
+                android.util.Log.d("PaymentScreen", "Auto-applied welcome offer: \u20B9${welcomeOfferDiscount}")
             } else if (validation.isValid && selectedOfferType == OfferType.WELCOME_OFFER) {
                 welcomeOfferDiscount = validation.discountAmount
             }
@@ -489,6 +517,56 @@ fun PaymentScreen(
     val remainingAmount = finalTotal - walletPaymentAmount
     val isWalletSufficient = walletBalance >= finalTotal || (selectedOfferType == OfferType.REFERRAL_WALLET && walletAmountUsed > 0)
     
+    // Load payment method from prefs on resume (e.g. when returning from Payment Options). Uses walletBalance/finalTotal for partial-wallet logic.
+    LaunchedEffect(lifecycleOwner, walletBalance, finalTotal) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            val savedMethod = prefs.getString("last_payment_method", null)
+            val savedUpiOption = prefs.getString("last_upi_option", null)
+            if (savedMethod != null) {
+                try {
+                    val method = PaymentMethod.valueOf(savedMethod)
+                    val forRemaining = prefs.getBoolean("paying_via_for_remaining", false)
+                    val isSecondaryMethod = method == PaymentMethod.UPI || method == PaymentMethod.CREDIT_CARD || method == PaymentMethod.DEBIT_CARD
+                    if (forRemaining && isSecondaryMethod) {
+                        prefs.edit().remove("paying_via_for_remaining").apply()
+                        selectedPaymentMethod = PaymentMethod.WALLET
+                        secondaryPaymentMethod = method
+                        if (method == PaymentMethod.UPI && !savedUpiOption.isNullOrEmpty()) {
+                            selectedUpiOption = savedUpiOption
+                        } else if (method != PaymentMethod.UPI) {
+                            selectedUpiOption = null
+                        }
+                    } else {
+                        val walletInsufficient = walletBalance < finalTotal
+                        if (selectedPaymentMethod == PaymentMethod.WALLET && walletInsufficient && isSecondaryMethod) {
+                            secondaryPaymentMethod = method
+                            if (method == PaymentMethod.UPI && !savedUpiOption.isNullOrEmpty()) {
+                                selectedUpiOption = savedUpiOption
+                            } else if (method != PaymentMethod.UPI) {
+                                selectedUpiOption = null
+                            }
+                        } else {
+                            prefs.edit().remove("paying_via_for_remaining").apply()
+                            // Apply last used method (PhonePe, GPay, UPI, COD, Wallet, Card) so checkout shows it
+                            selectedPaymentMethod = method
+                            selectedUpiOption = if (method == PaymentMethod.UPI) savedUpiOption?.takeIf { it.isNotEmpty() } else null
+                            secondaryPaymentMethod = null
+                        }
+                    }
+                } catch (_: IllegalArgumentException) { /* ignore invalid enum */ }
+            }
+        }
+    }
+    
+    // When Wallet is selected and insufficient and no secondary yet, default PAYING VIA (remaining) to UPI (PhonePe/GPay/UPI).
+    LaunchedEffect(selectedPaymentMethod, isWalletSufficient, secondaryPaymentMethod) {
+        if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient && secondaryPaymentMethod == null) {
+            val savedUpiOption = prefs.getString("last_upi_option", null)?.takeIf { it.isNotEmpty() }
+            secondaryPaymentMethod = PaymentMethod.UPI
+            selectedUpiOption = savedUpiOption ?: "any"
+        }
+    }
+    
     // ============================================================================
     // SERVICE AREA VALIDATION FLOW FOR MANUALLY ENTERED ADDRESSES
     // ============================================================================
@@ -496,7 +574,7 @@ fun PaymentScreen(
     // Step 2: Load all active stores from Firestore
     // Step 3: Calculate distance from customer location to each store (Haversine formula)
     // Step 4: Find nearest store where distance <= serviceRadiusKm
-    // Step 5: If found → Location is within service area, else → Out of service area
+    // Step 5: If found â†’ Location is within service area, else â†’ Out of service area
     // ============================================================================
     
     // Get customer location from address (geocoding) - converts address string to (lat, lng)
@@ -506,7 +584,7 @@ fun PaymentScreen(
     LaunchedEffect(deliveryAddress) {
         if (deliveryAddress.isNotEmpty()) {
             isGeocodingInProgress = true
-            // Geocode: "123 MG Road, Bangalore" → (12.9716, 77.5946)
+            // Geocode: "123 MG Road, Bangalore" â†’ (12.9716, 77.5946)
             customerLocation = locationHelperInstance.getLocationFromAddress(deliveryAddress)
             isGeocodingInProgress = false
         } else {
@@ -637,7 +715,8 @@ fun PaymentScreen(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
+                .onGloballyPositioned { scrollableContentTop = it.positionInRoot().y }
                 .padding(horizontal = 16.dp, vertical = 16.dp)
                 .padding(bottom = 164.dp), // Extra padding for footer (100dp) + bottom navigation bar (64dp)
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -731,7 +810,7 @@ fun PaymentScreen(
                             color = TextBlack
                         )
                         Text(
-                            text = "₹${String.format("%.2f", subtotal)}",
+                            text = "\u20B9${String.format("%.2f", subtotal)}",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
@@ -750,7 +829,7 @@ fun PaymentScreen(
                             color = TextBlack
                         )
                         Text(
-                            text = if (isDeliveryFree) "Free" else "₹${String.format("%.2f", calculatedFees.deliveryFee)}",
+                            text = if (isDeliveryFree) "Free" else "\u20B9${String.format("%.2f", calculatedFees.deliveryFee)}",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
                             color = if (isDeliveryFree) Color(0xFF34C759) else TextBlack
@@ -769,7 +848,7 @@ fun PaymentScreen(
                             color = TextBlack
                         )
                         Text(
-                            text = "₹${String.format("%.2f", platformFee)}",
+                            text = "\u20B9${String.format("%.2f", platformFee)}",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
@@ -788,7 +867,7 @@ fun PaymentScreen(
                             color = TextBlack
                         )
                         Text(
-                            text = "₹${String.format("%.2f", taxAmount)}",
+                            text = "\u20B9${String.format("%.2f", taxAmount)}",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
@@ -807,7 +886,7 @@ fun PaymentScreen(
                                 color = TextBlack
                             )
                             Text(
-                                text = "-₹${String.format("%.2f", welcomeOfferDiscount)}",
+                                text = "-\u20B9${String.format("%.2f", welcomeOfferDiscount)}",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFF34C759)
@@ -827,7 +906,7 @@ fun PaymentScreen(
                                 color = TextBlack
                             )
                             Text(
-                                text = "-₹${String.format("%.2f", walletAmountUsed)}",
+                                text = "-\u20B9${String.format("%.2f", walletAmountUsed)}",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFF34C759)
@@ -847,7 +926,7 @@ fun PaymentScreen(
                                 color = TextBlack
                             )
                             Text(
-                                text = "-₹${String.format("%.2f", discountAmount)}",
+                                text = "-\u20B9${String.format("%.2f", discountAmount)}",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFF34C759)
@@ -870,7 +949,7 @@ fun PaymentScreen(
                             color = TextBlack
                         )
                         Text(
-                            text = "₹${String.format("%.2f", finalTotal)}",
+                            text = "\u20B9${String.format("%.2f", finalTotal)}",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
@@ -908,14 +987,14 @@ fun PaymentScreen(
                             verticalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
                             Text(
-                                text = "₹${String.format("%.0f", totalSavings)} Saved!",
+                                text = "\u20B9${String.format("%.0f", totalSavings)} Saved!",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF34C759)
                             )
                             if (discountAmount > 0) {
                                 Text(
-                                    text = "Includes coupon discount of ₹${String.format("%.0f", discountAmount)}",
+                                    text = "Includes coupon discount of \u20B9${String.format("%.0f", discountAmount)}",
                                     fontSize = 13.sp,
                                     color = Color(0xFF34C759).copy(alpha = 0.8f)
                                 )
@@ -998,7 +1077,7 @@ fun PaymentScreen(
                                     color = TextBlack
                                 )
                                 Text(
-                                    text = "₹${offerConfig.value?.welcomeOfferAmount?.toInt() ?: 50} OFF on first order",
+                                    text = "\u20B9${offerConfig.value?.welcomeOfferAmount?.toInt() ?: 50} OFF on first order",
                                     fontSize = 14.sp,
                                     color = TextGray
                                 )
@@ -1010,7 +1089,7 @@ fun PaymentScreen(
                         ) {
                             if (selectedOfferType == OfferType.WELCOME_OFFER) {
                                 Text(
-                                    text = "₹${welcomeOfferDiscount.toInt()} OFF",
+                                    text = "\u20B9${welcomeOfferDiscount.toInt()} OFF",
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = PrimaryGreen
@@ -1096,7 +1175,7 @@ fun PaymentScreen(
                                     color = TextBlack
                                 )
                                 Text(
-                                    text = "Usable wallet amount: ₹${usableWalletAmount.toInt()}",
+                                    text = "Usable wallet amount: \u20B9${usableWalletAmount.toInt()}",
                                     fontSize = 14.sp,
                                     color = TextGray
                                 )
@@ -1104,7 +1183,7 @@ fun PaymentScreen(
                         }
                         if (selectedOfferType == OfferType.REFERRAL_WALLET) {
                             Text(
-                                text = "₹${walletAmountUsed.toInt()}",
+                                text = "\u20B9${walletAmountUsed.toInt()}",
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = PrimaryGreen
@@ -1156,463 +1235,6 @@ fun PaymentScreen(
                 Spacer(modifier = Modifier.height(8.dp))
             }
             
-            // Payment Methods Section
-            Text(
-                text = "Select Payment Method",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = TextBlack,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Grocent Wallet
-            if (walletViewModel != null) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            enabled = walletBalance >= finalTotal,
-                            onClick = { 
-                                selectedPaymentMethod = PaymentMethod.WALLET
-                                selectedUpiOption = null
-                                selectedCardOption = null
-                                secondaryPaymentMethod = null
-                            }
-                        ),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color.White
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        // Left side: Radio button, Icon, and Details
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalAlignment = Alignment.Top
-                        ) {
-                            // Radio Button
-                            Icon(
-                                imageVector = if (selectedPaymentMethod == PaymentMethod.WALLET) 
-                                    Icons.Default.RadioButtonChecked 
-                                else 
-                                    Icons.Default.RadioButtonUnchecked,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .padding(top = 2.dp), // Align with first line of text
-                                tint = if (selectedPaymentMethod == PaymentMethod.WALLET) 
-                                    Color(0xFF34C759) 
-                                else 
-                                    TextGray.copy(alpha = 0.5f)
-                            )
-                            
-                            // Wallet Icon
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(Color(0xFF34C759), RoundedCornerShape(8.dp)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "G",
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White
-                                )
-                            }
-                            
-                            // Details
-                            Column(
-                                modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = "Grocent Wallet",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextBlack,
-                                    lineHeight = 20.sp
-                                )
-                                Text(
-                                    text = "Available balance: ₹${String.format("%.2f", walletBalance)}",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = TextBlack,
-                                    lineHeight = 18.sp
-                                )
-                                if (walletBalance < finalTotal) {
-                                    Text(
-                                        text = "Add ₹${String.format("%.2f", finalTotal - walletBalance)} to proceed",
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Normal,
-                                        color = TextBlack,
-                                        lineHeight = 18.sp
-                                    )
-                                }
-                            }
-                        }
-                        
-                        // Right side: Add Now Button (only show if insufficient balance)
-                        if (walletBalance < finalTotal) {
-                            OutlinedButton(
-                                onClick = { 
-                                    // Stop event propagation to prevent card selection
-                                    onAddMoneyClick?.invoke() ?: run {
-                                        showAddMoneyDialog = true
-                                    }
-                                },
-                                modifier = Modifier.padding(start = 8.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    containerColor = Color.White,
-                                    contentColor = TextBlack
-                                ),
-                                border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
-                                shape = RoundedCornerShape(8.dp),
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = "Add Now",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Normal,
-                                    color = TextBlack
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(
-                                    imageVector = Icons.Default.ArrowForward,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp),
-                                    tint = TextGray
-                                )
-                            }
-                        }
-                    }
-                }
-                
-                // Show UPI options to add money if wallet is selected and insufficient
-                if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFF5F5F5)
-                        ),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Text(
-                                text = "Add Money via UPI to complete payment",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = TextBlack
-                            )
-                            
-                            // PhonePe option
-                            PaymentMethodCardWithIcon(
-                                icon = {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .background(Color(0xFF5F259F), RoundedCornerShape(8.dp)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "P",
-                                            fontSize = 18.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = Color.White
-                                        )
-                                    }
-                                },
-                                title = "PhonePe",
-                                subtitle = "Add ₹${String.format("%.2f", finalTotal - walletBalance)}",
-                                isSelected = secondaryPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "phonepe",
-                                onClick = { 
-                                    secondaryPaymentMethod = PaymentMethod.UPI
-                                    selectedUpiOption = "phonepe"
-                                    val hasAllDetails = customerName.isNotBlank() && 
-                                        customerEmail.isNotBlank() && 
-                                        customerEmail.contains("@") &&
-                                        customerPhone.length == 10
-                                    showCustomerDetailsForm = !hasAllDetails
-                                }
-                            )
-                            
-                            // Google Pay option
-                            PaymentMethodCardWithIcon(
-                                icon = {
-                                    Box(
-                                        modifier = Modifier.size(36.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                        ) {
-                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFF4285F4), RoundedCornerShape(2.dp)))
-                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFFEA4335), RoundedCornerShape(2.dp)))
-                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFFFBBC04), RoundedCornerShape(2.dp)))
-                                            Box(modifier = Modifier.size(14.dp).background(Color(0xFF34A853), RoundedCornerShape(2.dp)))
-                                        }
-                                    }
-                                },
-                                title = "Google Pay",
-                                subtitle = "Add ₹${String.format("%.2f", finalTotal - walletBalance)}",
-                                isSelected = secondaryPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "googlepay",
-                                onClick = { 
-                                    secondaryPaymentMethod = PaymentMethod.UPI
-                                    selectedUpiOption = "googlepay"
-                                    val hasAllDetails = customerName.isNotBlank() && 
-                                        customerEmail.isNotBlank() && 
-                                        customerEmail.contains("@") &&
-                                        customerPhone.length == 10
-                                    showCustomerDetailsForm = !hasAllDetails
-                                }
-                            )
-                            
-                            // Add Money button alternative
-                            TextButton(
-                                onClick = { 
-                                    onAddMoneyClick?.invoke() ?: run {
-                                        showAddMoneyDialog = true
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    text = "Or Add Money to Wallet",
-                                    fontSize = 14.sp,
-                                    color = Color(0xFF34C759),
-                                    fontWeight = FontWeight.Medium
-                                )
-                            }
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-            
-            // Cash on Delivery
-            PaymentMethodCardWithIcon(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.AttachMoney,
-                        contentDescription = null,
-                        modifier = Modifier.size(40.dp),
-                        tint = TextGray
-                    )
-                },
-                title = "Cash on Delivery (COD)",
-                subtitle = "Pay cash at your doorstep",
-                isSelected = selectedPaymentMethod == PaymentMethod.CASH_ON_DELIVERY,
-                onClick = { 
-                    selectedPaymentMethod = PaymentMethod.CASH_ON_DELIVERY
-                    selectedUpiOption = null
-                    selectedCardOption = null
-                    secondaryPaymentMethod = null
-                }
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // UPI Section
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "UPI",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextBlack
-                )
-                
-                // PhonePe
-                PaymentMethodCardWithIcon(
-                    icon = {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(Color(0xFF5F259F), RoundedCornerShape(8.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "P",
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        }
-                    },
-                    title = "PhonePe",
-                    subtitle = "user@ybl",
-                    isSelected = selectedPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "phonepe",
-                    onClick = { 
-                        selectedPaymentMethod = PaymentMethod.UPI
-                        selectedUpiOption = "phonepe"
-                        selectedCardOption = null
-                        secondaryPaymentMethod = null
-                        val hasAllDetails = customerName.isNotBlank() && 
-                            customerEmail.isNotBlank() && 
-                            customerEmail.contains("@") &&
-                            customerPhone.length == 10
-                        showCustomerDetailsForm = !hasAllDetails
-                    }
-                )
-                
-                // Google Pay
-                PaymentMethodCardWithIcon(
-                    icon = {
-                        Box(
-                            modifier = Modifier.size(40.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            // Google Pay icon - simplified as colored squares
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(2.dp)
-                            ) {
-                                Box(modifier = Modifier.size(16.dp).background(Color(0xFF4285F4), RoundedCornerShape(2.dp)))
-                                Box(modifier = Modifier.size(16.dp).background(Color(0xFFEA4335), RoundedCornerShape(2.dp)))
-                                Box(modifier = Modifier.size(16.dp).background(Color(0xFFFBBC04), RoundedCornerShape(2.dp)))
-                                Box(modifier = Modifier.size(16.dp).background(Color(0xFF34A853), RoundedCornerShape(2.dp)))
-                            }
-                        }
-                    },
-                    title = "Google Pay",
-                    subtitle = "Add new UPI ID",
-                    isSelected = selectedPaymentMethod == PaymentMethod.UPI && selectedUpiOption == "googlepay",
-                    onClick = { 
-                        selectedPaymentMethod = PaymentMethod.UPI
-                        selectedUpiOption = "googlepay"
-                        selectedCardOption = null
-                        secondaryPaymentMethod = null
-                        val hasAllDetails = customerName.isNotBlank() && 
-                            customerEmail.isNotBlank() && 
-                            customerEmail.contains("@") &&
-                            customerPhone.length == 10
-                        showCustomerDetailsForm = !hasAllDetails
-                    }
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Cards Section
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "Cards",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextBlack
-                )
-                
-                // HDFC Bank Credit Card
-                PaymentMethodCardWithIcon(
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.CreditCard,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = TextGray
-                        )
-                    },
-                    title = "HDFC Bank Credit Card",
-                    subtitle = "**** 4242",
-                    isSelected = (selectedPaymentMethod == PaymentMethod.CREDIT_CARD || selectedPaymentMethod == PaymentMethod.DEBIT_CARD) && selectedCardOption == "hdfc",
-                    onClick = { 
-                        selectedPaymentMethod = PaymentMethod.CREDIT_CARD
-                        selectedCardOption = "hdfc"
-                        selectedUpiOption = null
-                        secondaryPaymentMethod = null
-                        val hasAllDetails = customerName.isNotBlank() && 
-                            customerEmail.isNotBlank() && 
-                            customerEmail.contains("@") &&
-                            customerPhone.length == 10
-                        showCustomerDetailsForm = !hasAllDetails
-                    }
-                )
-                
-                // Add New Card
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            selectedPaymentMethod = PaymentMethod.CREDIT_CARD
-                            selectedCardOption = "new"
-                            selectedUpiOption = null
-                            secondaryPaymentMethod = null
-                            val hasAllDetails = customerName.isNotBlank() && 
-                                customerEmail.isNotBlank() && 
-                                customerEmail.contains("@") &&
-                                customerPhone.length == 10
-                            showCustomerDetailsForm = !hasAllDetails
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-                    border = BorderStroke(1.dp, TextGray.copy(alpha = 0.3f))
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AddCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(40.dp),
-                            tint = TextGray
-                        )
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Add New Card",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = TextBlack
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.Default.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp),
-                            tint = TextGray
-                        )
-                    }
-                }
-            }
-            
-            // Security Message
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = TextGray
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "100% SAFE & SECURE PAYMENT",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextGray
-                )
-            }
-            
             Spacer(modifier = Modifier.height(164.dp)) // Space for footer (100dp) + bottom navigation bar (64dp)
         }
         
@@ -1647,7 +1269,6 @@ fun PaymentScreen(
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
-                    
                     OutlinedTextField(
                         value = customerName,
                         onValueChange = { customerName = it },
@@ -1678,7 +1299,6 @@ fun PaymentScreen(
                     OutlinedTextField(
                         value = customerPhone,
                         onValueChange = { 
-                            // Only allow digits and limit to 10 digits
                             if (it.all { char -> char.isDigit() } && it.length <= 10) {
                                 customerPhone = it
                             }
@@ -1728,29 +1348,12 @@ fun PaymentScreen(
         
         // Place Order Button - Hide if order is placed
         if (!orderPlaced) {
-            // Validate customer details for online payments
-            val needsCustomerDetails = (selectedPaymentMethod == PaymentMethod.UPI || 
-                selectedPaymentMethod == PaymentMethod.CREDIT_CARD || 
-                selectedPaymentMethod == PaymentMethod.DEBIT_CARD ||
-                (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient && 
-                 (secondaryPaymentMethod == PaymentMethod.UPI || secondaryPaymentMethod == PaymentMethod.CREDIT_CARD)))
-            
-            val hasValidCustomerDetails = if (needsCustomerDetails) {
-                customerName.isNotBlank() && 
-                customerEmail.isNotBlank() && 
-                customerEmail.contains("@") &&
-                customerPhone.length == 10
-            } else {
-                true // Not needed for COD or full wallet payment
-            }
-            
+            // Pay button enabled when any payment method is selected and cart has items; customer details validated on Pay click for UPI/Card
             val canPlaceOrder = when {
                 selectedPaymentMethod == null -> false
                 selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient -> {
-                    secondaryPaymentMethod != null && hasValidCustomerDetails
-                }
-                needsCustomerDetails -> {
-                    hasValidCustomerDetails && cartViewModel.cartItems.isNotEmpty() && finalTotal > 0
+                    // Enable when remaining amount method is selected; customer details validated on Pay click for UPI/Card
+                    secondaryPaymentMethod != null && cartViewModel.cartItems.isNotEmpty() && finalTotal > 0
                 }
                 else -> cartViewModel.cartItems.isNotEmpty() && finalTotal > 0
             }
@@ -1765,29 +1368,213 @@ fun PaymentScreen(
                 shadowElevation = 8.dp,
                 shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
             ) {
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Total Pay:",
-                            fontSize = 14.sp,
-                            color = TextBlack
-                        )
-                        Text(
-                            text = "₹${String.format("%.0f", finalTotal)}",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = TextBlack
-                        )
+                    if (walletViewModel != null) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clickable(onClick = {
+                                        if (selectedPaymentMethod == PaymentMethod.WALLET) {
+                                            secondaryPaymentMethod = null
+                                            val saved = prefs.getString("last_payment_method", null)
+                                            val savedUpi = prefs.getString("last_upi_option", null)
+                                            if (saved != null) {
+                                                try {
+                                                    selectedPaymentMethod = PaymentMethod.valueOf(saved)
+                                                    selectedUpiOption = if (selectedPaymentMethod == PaymentMethod.UPI) savedUpi?.takeIf { it.isNotEmpty() } else null
+                                                } catch (_: IllegalArgumentException) {
+                                                    selectedPaymentMethod = PaymentMethod.UPI
+                                                    selectedUpiOption = savedUpi?.takeIf { it.isNotEmpty() } ?: "any"
+                                                }
+                                            } else {
+                                                selectedPaymentMethod = PaymentMethod.UPI
+                                                selectedUpiOption = savedUpi?.takeIf { it.isNotEmpty() } ?: "any"
+                                            }
+                                        } else {
+                                            // Keep same payment method for remaining amount: use current selection as secondary
+                                            val currentPrimary = selectedPaymentMethod
+                                            selectedPaymentMethod = PaymentMethod.WALLET
+                                            if (currentPrimary != null && currentPrimary != PaymentMethod.WALLET) {
+                                                secondaryPaymentMethod = currentPrimary
+                                            }
+                                        }
+                                    })
+                            ) {
+                                Checkbox(
+                                    checked = selectedPaymentMethod == PaymentMethod.WALLET,
+                                    onCheckedChange = { checked ->
+                                        if (checked) {
+                                            // Keep same payment method for remaining amount: use current selection as secondary
+                                            val currentPrimary = selectedPaymentMethod
+                                            selectedPaymentMethod = PaymentMethod.WALLET
+                                            if (currentPrimary != null && currentPrimary != PaymentMethod.WALLET) {
+                                                secondaryPaymentMethod = currentPrimary
+                                            }
+                                        } else {
+                                            secondaryPaymentMethod = null
+                                            val saved = prefs.getString("last_payment_method", null)
+                                            val savedUpi = prefs.getString("last_upi_option", null)
+                                            if (saved != null) {
+                                                try {
+                                                    selectedPaymentMethod = PaymentMethod.valueOf(saved)
+                                                    selectedUpiOption = if (selectedPaymentMethod == PaymentMethod.UPI) savedUpi?.takeIf { it.isNotEmpty() } else null
+                                                } catch (_: IllegalArgumentException) {
+                                                    selectedPaymentMethod = PaymentMethod.UPI
+                                                    selectedUpiOption = savedUpi?.takeIf { it.isNotEmpty() } ?: "any"
+                                                }
+                                            } else {
+                                                selectedPaymentMethod = PaymentMethod.UPI
+                                                selectedUpiOption = savedUpi?.takeIf { it.isNotEmpty() } ?: "any"
+                                            }
+                                        }
+                                    },
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = PrimaryGreen,
+                                        uncheckedColor = TextGray.copy(alpha = 0.7f)
+                                    )
+                                )
+                                Text(
+                                    text = "Grocent Wallet: \u20B9${String.format("%.0f", walletBalance)}",
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = TextBlack
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                modifier = Modifier.clickable(onClick = {
+                                    onAddMoneyClick?.invoke() ?: run { showAddMoneyDialog = true }
+                                })
+                            ) {
+                                Text(
+                                    text = "Add money",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = PrimaryGreen
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ArrowForward,
+                                    contentDescription = "Add money",
+                                    modifier = Modifier.size(20.dp),
+                                    tint = TextGray
+                                )
+                            }
+                        }
                     }
-                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable(onClick = {
+                            if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
+                                prefs.edit().putBoolean("paying_via_for_remaining", true).apply()
+                            }
+                            onPaymentMethodsClick(finalTotal)
+                        }),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        val effectiveMethodForIcon = if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
+                            secondaryPaymentMethod ?: selectedPaymentMethod
+                        } else {
+                            selectedPaymentMethod
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            when (effectiveMethodForIcon) {
+                                PaymentMethod.CASH_ON_DELIVERY -> Icon(
+                                    imageVector = Icons.Default.LocalShipping,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = TextGray
+                                )
+                                PaymentMethod.WALLET -> Icon(
+                                    imageVector = Icons.Default.AccountBalanceWallet,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = TextGray
+                                )
+                                PaymentMethod.UPI -> when (selectedUpiOption?.lowercase()) {
+                                    "googlepay" -> Image(
+                                        painter = painterResource(R.drawable.ic_payment_gpay),
+                                        contentDescription = "GPay",
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    "phonepe" -> Image(
+                                        painter = painterResource(R.drawable.ic_payment_phonepe),
+                                        contentDescription = "PhonePe",
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    else -> Icon(
+                                        imageVector = Icons.Default.CreditCard,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                        tint = TextGray
+                                    )
+                                }
+                                PaymentMethod.CREDIT_CARD, PaymentMethod.DEBIT_CARD -> Icon(
+                                    imageVector = Icons.Default.CreditCard,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = TextGray
+                                )
+                                null -> Icon(
+                                    imageVector = Icons.Default.CreditCard,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                    tint = TextGray
+                                )
+                            }
+                        }
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(2.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "PAYING VIA",
+                                    fontSize = 12.sp,
+                                    color = TextGray
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.ExpandMore,
+                                    contentDescription = "Change payment method",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = TextGray
+                                )
+                            }
+                            Text(
+                                text = getPayingViaShortLabel(selectedPaymentMethod, selectedUpiOption, secondaryPaymentMethod, isWalletSufficient),
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = TextBlack
+                            )
+                        }
+                    }
                     Button(
                         onClick = {
                     if (canPlaceOrder) {
@@ -1833,6 +1620,7 @@ fun PaymentScreen(
                                     customerEmail = customerEmail,
                                     customerPhone = customerPhone,
                                     prefs = prefs,
+                                    lastUpiOption = selectedUpiOption,
                                     onOrderPlaced = onOrderPlaced,
                                     orderPlaced = { orderPlaced = true },
                                     selectedOfferType = selectedOfferType,
@@ -1852,7 +1640,7 @@ fun PaymentScreen(
                             }
                             // If geocoding failed, allow payment to proceed (don't block)
                             
-                            if (activity != null && hasValidCustomerDetails) {
+                            if (activity != null && hasAllCustomerDetails) {
                                 initiateRazorpayPayment(
                                     context = context,
                                     activity = activity,
@@ -1883,6 +1671,7 @@ fun PaymentScreen(
                                     feeConfig = feeConfig,
                                     walletPaymentAmount = walletPaymentAmount,
                                     selectedPaymentMethod = selectedPaymentMethod,
+                                    selectedUpiOption = selectedUpiOption,
                                     locationViewModel = locationViewModel,
                                     prefs = prefs,
                                     onOrderPlaced = onOrderPlaced,
@@ -1893,6 +1682,8 @@ fun PaymentScreen(
                                     offerService = offerService,
                                     currentUserId = currentUserId
                                 )
+                            } else if (!hasAllCustomerDetails) {
+                                showCustomerDetailsForm = true
                             }
                         }
                     }
@@ -1908,7 +1699,7 @@ fun PaymentScreen(
                         shape = RoundedCornerShape(24.dp)
                     ) {
                         Text(
-                            text = "Place Order",
+                            text = "Pay \u20B9${String.format("%.0f", if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) remainingAmount else finalTotal)}",
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
@@ -1921,6 +1712,7 @@ fun PaymentScreen(
                             tint = Color.White
                         )
                     }
+                }
                 }
             }
         } else {
@@ -2365,6 +2157,61 @@ fun OrderSuccessPopup(
 }
 
 /**
+ * Returns the "Paying via" label for the footer based on selected payment method.
+ * When wallet is selected but insufficient, uses secondary method (e.g. UPI) for display.
+ */
+private fun getPayingViaLabel(
+    selectedPaymentMethod: PaymentMethod?,
+    selectedUpiOption: String?,
+    secondaryPaymentMethod: PaymentMethod?,
+    isWalletSufficient: Boolean
+): String {
+    val effectiveMethod = if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
+        secondaryPaymentMethod ?: selectedPaymentMethod
+    } else {
+        selectedPaymentMethod
+    }
+    return when (effectiveMethod) {
+        PaymentMethod.CASH_ON_DELIVERY -> "Pay on Delivery"
+        PaymentMethod.WALLET -> "Paying via Wallet"
+        PaymentMethod.UPI -> when (selectedUpiOption?.lowercase()) {
+            "googlepay" -> "Paying via GPay"
+            "phonepe" -> "Paying via PhonePe"
+            else -> "Paying via UPI"
+        }
+        PaymentMethod.CREDIT_CARD, PaymentMethod.DEBIT_CARD -> "Paying via Card"
+        null -> "Paying via"
+    }
+}
+
+/**
+ * Returns short payment method label for footer (e.g. "GPay UPI", "Pay on Delivery").
+ */
+private fun getPayingViaShortLabel(
+    selectedPaymentMethod: PaymentMethod?,
+    selectedUpiOption: String?,
+    secondaryPaymentMethod: PaymentMethod?,
+    isWalletSufficient: Boolean
+): String {
+    val effectiveMethod = if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) {
+        secondaryPaymentMethod ?: selectedPaymentMethod
+    } else {
+        selectedPaymentMethod
+    }
+    return when (effectiveMethod) {
+        PaymentMethod.CASH_ON_DELIVERY -> "COD"
+        PaymentMethod.WALLET -> "Wallet"
+        PaymentMethod.UPI -> when (selectedUpiOption?.lowercase()) {
+            "googlepay" -> "GPay UPI"
+            "phonepe" -> "PhonePe UPI"
+            else -> "UPI"
+        }
+        PaymentMethod.CREDIT_CARD, PaymentMethod.DEBIT_CARD -> "Card"
+        null -> "Select method"
+    }
+}
+
+/**
  * Place order directly (for COD or full wallet payment)
  */
 private suspend fun placeOrderDirectly(
@@ -2390,6 +2237,7 @@ private suspend fun placeOrderDirectly(
     customerEmail: String = "",
     customerPhone: String = "",
     prefs: SharedPreferences? = null,
+    lastUpiOption: String? = null,
     onOrderPlaced: (Order) -> Unit,
     orderPlaced: () -> Unit,
     // Offer-related parameters
@@ -2462,16 +2310,13 @@ private suspend fun placeOrderDirectly(
         }
     }
     
-    // Handle wallet deduction (only for regular wallet payment, not referral wallet)
-    // Referral wallet is deducted separately after order creation
-    if (finalPaymentMethod == PaymentMethod.WALLET && walletViewModel != null && selectedOfferType != OfferType.REFERRAL_WALLET) {
-        if (walletPaymentAmount > 0) {
-            walletViewModel.deductMoney(
-                amount = walletPaymentAmount,
-                orderId = "order_${currentTime}",
-                description = "Order payment"
-            )
-        }
+    // Handle wallet deduction whenever wallet was used (full or partial); referral wallet is deducted separately after order creation
+    if (walletPaymentAmount > 0 && walletViewModel != null && selectedOfferType != OfferType.REFERRAL_WALLET) {
+        walletViewModel.deductMoney(
+            amount = walletPaymentAmount,
+            orderId = "order_${currentTime}",
+            description = "Order payment"
+        )
     }
     
     // Record promo code usage if applied
@@ -2613,6 +2458,13 @@ private suspend fun placeOrderDirectly(
         }
     }
     
+    // Save last-used payment method so next time "Paying via" defaults to GPay/PhonePe etc.
+    prefs?.edit()?.apply {
+        putString("last_payment_method", order.paymentMethod.name)
+        putString("last_upi_option", lastUpiOption ?: "")
+        apply()
+    }
+    
     onOrderPlaced(order)
     orderPlaced()
     
@@ -2649,6 +2501,7 @@ private fun initiateRazorpayPayment(
     feeConfig: com.codewithchandra.grocent.model.FeeConfiguration?,
     walletPaymentAmount: Double,
     selectedPaymentMethod: PaymentMethod?,
+    selectedUpiOption: String? = null,
     locationViewModel: LocationViewModel?,
     prefs: SharedPreferences,
     onOrderPlaced: (Order) -> Unit,
@@ -2713,6 +2566,7 @@ private fun initiateRazorpayPayment(
                         customerEmail = customerEmail,
                         customerPhone = customerPhone,
                         prefs = prefs,
+                        lastUpiOption = selectedUpiOption,
                         onOrderPlaced = onOrderPlaced,
                         orderPlaced = orderPlaced,
                         selectedOfferType = selectedOfferType,
@@ -2788,6 +2642,145 @@ fun PaymentMethodCardWithIcon(
     }
 }
 
+/**
+ * Payment method card with trailing arrow (reference-style). Shows radio when selected, arrow when not.
+ */
+@Composable
+fun PaymentMethodCardWithArrow(
+    icon: @Composable () -> Unit,
+    title: String,
+    subtitle: String? = null,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) PrimaryGreen.copy(alpha = 0.08f) else Color.White
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        border = if (isSelected) BorderStroke(1.dp, PrimaryGreen) else null
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            icon()
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextBlack
+                )
+                subtitle?.let {
+                    Text(
+                        text = it,
+                        fontSize = 13.sp,
+                        color = TextGray
+                    )
+                }
+            }
+            Icon(
+                imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.ArrowForward,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = if (isSelected) Color(0xFF34C759) else TextGray
+            )
+        }
+    }
+}
+
+/** Zepto/Grocent UPI style card: title, subtitle, red LINK > button. */
+@Composable
+fun UnlockGrocentUpiCard(
+    title: String,
+    subtitle: String,
+    onLinkClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextBlack
+                )
+                Text(
+                    text = subtitle,
+                    fontSize = 13.sp,
+                    color = TextGray
+                )
+            }
+            TextButton(
+                onClick = onLinkClick,
+                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFD32F2F))
+            ) {
+                Text("LINK", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Icon(
+                    imageVector = Icons.Default.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = Color(0xFFD32F2F)
+                )
+            }
+        }
+    }
+}
+
+/** Add New UPI ID row with pink + icon and text. */
+@Composable
+fun AddNewUpiIdRow(onClick: () -> Unit) {
+    val pink = Color(0xFFE91E63)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+                tint = pink
+            )
+            Text(
+                text = "Add New UPI ID",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                color = pink
+            )
+        }
+    }
+}
+
 @Composable
 fun PaymentMethodCard(
     title: String,
@@ -2858,7 +2851,7 @@ fun BillSummaryRow(
         ) {
             if (originalPrice > currentPrice) {
                 Text(
-                    text = "₹${String.format("%.0f", originalPrice)}",
+                    text = "\u20B9${String.format("%.0f", originalPrice)}",
                     fontSize = 12.sp,
                     color = TextGray,
                     style = androidx.compose.ui.text.TextStyle(
@@ -2867,7 +2860,7 @@ fun BillSummaryRow(
                 )
             }
             Text(
-                text = if (isFree) "FREE" else "₹${String.format("%.0f", currentPrice)}",
+                text = if (isFree) "FREE" else "\u20B9${String.format("%.0f", currentPrice)}",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (isFree) PrimaryGreen else TextBlack
@@ -2903,7 +2896,7 @@ fun BillSavingsRow(
             )
         }
         Text(
-            text = "₹${String.format("%.0f", amount)}",
+            text = "\u20B9${String.format("%.0f", amount)}",
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = PrimaryGreen
