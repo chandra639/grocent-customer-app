@@ -144,6 +144,7 @@ fun GroceryNavigation(
     val mainScreenRoutes = remember {
         setOf(
             Screen.Shop.route,
+            Screen.Cart.route,
             Screen.Explore.route,
             Screen.Favourite.route,
             Screen.Account.route
@@ -231,7 +232,7 @@ fun GroceryNavigation(
                     com.codewithchandra.grocent.ui.components.MinimalBottomNavigation(
                         currentRoute = currentRoute,
                         onNavigate = { route ->
-                            val targetRoute = if (route == Screen.Cart.route) Screen.Payment.route else route
+                            val targetRoute = route
                             navController.navigate(targetRoute) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -1248,6 +1249,19 @@ fun GroceryNavigation(
                 )
             }
             
+            composable(Screen.Cart.route) {
+                com.codewithchandra.grocent.ui.screens.CartScreen(
+                    cartViewModel = getCartViewModel(),
+                    onCheckoutClick = { navController.navigate(Screen.Payment.route) },
+                    onProductClick = { productId ->
+                        navController.navigate("product_detail/$productId")
+                    },
+                    onPackClick = { packId ->
+                        navController.navigate("combo_pack_detail/$packId")
+                    }
+                )
+            }
+
             composable(Screen.Payment.route) {
                 val orderVm = getOrderViewModel()
                 PaymentScreen(

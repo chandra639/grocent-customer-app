@@ -1135,7 +1135,8 @@ fun PaymentScreen(
                                         cartViewModel.removePackFromCart(pack.id)
                                     }
                                 },
-                                compact = true
+                                compact = true,
+                                showRemoveButton = false
                             )
                         } else {
                             CartItemCard(
@@ -1158,7 +1159,8 @@ fun PaymentScreen(
                                         cartViewModel.removeFromCart(p.id, cartItem.unit)
                                     }
                                 },
-                                compact = true
+                                compact = true,
+                                showRemoveButton = false
                             )
                         }
                     }

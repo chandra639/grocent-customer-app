@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -87,6 +88,7 @@ fun ScheduleOrderScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .navigationBarsPadding()
     ) {
         // Header
         Row(
@@ -203,7 +205,7 @@ fun ScheduleOrderScreen(
             }
         }
 
-        // Confirm button
+        // Confirm button (extra bottom padding so it stays above system nav bar and fully tappable)
         Button(
             onClick = {
                 val date = if (selectedDateTab == 0) "TODAY" else "TOMORROW"
@@ -212,7 +214,8 @@ fun ScheduleOrderScreen(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 16.dp)
+                .padding(bottom = 24.dp),
             colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
             shape = RoundedCornerShape(12.dp),
             enabled = selectedTimeSlot != null
