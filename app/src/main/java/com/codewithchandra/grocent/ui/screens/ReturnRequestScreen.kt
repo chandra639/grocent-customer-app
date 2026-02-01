@@ -99,7 +99,7 @@ fun ReturnRequestScreen(
                 ) {
                     Text(
                         text = "Order not found",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Button(onClick = onBackClick) {
@@ -120,7 +120,7 @@ fun ReturnRequestScreen(
                 ) {
                     Text(
                         text = "Order must be delivered to request return",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
                     Button(onClick = onBackClick) {
@@ -150,17 +150,17 @@ fun ReturnRequestScreen(
                         ) {
                             Text(
                                 text = "Order #${currentOrder.id.take(8).uppercase()}",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = "Order Date: ${currentOrder.orderDate}",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray
                             )
                             Text(
                                 text = "Total: ₹${String.format("%.2f", currentOrder.totalPrice)}",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium
                             )
                         }
@@ -176,7 +176,7 @@ fun ReturnRequestScreen(
                     ) {
                         Text(
                             text = "Select Items to Return",
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold
                         )
                         if (selectedItems.isNotEmpty()) {
@@ -187,7 +187,7 @@ fun ReturnRequestScreen(
                                 Text(
                                     text = "${selectedItems.size} selected",
                                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Medium,
                                     color = PrimaryGreen
                                 )
@@ -243,13 +243,13 @@ fun ReturnRequestScreen(
                                 )
                                 Text(
                                     text = "No items are eligible for return",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Medium,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
                                 Text(
                                     text = "All items in this order are non-returnable or the return period has expired.",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
@@ -276,7 +276,7 @@ fun ReturnRequestScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Eligible Items (${eligibleItems.size})",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = PrimaryGreen
                             )
@@ -357,17 +357,17 @@ fun ReturnRequestScreen(
                             ) {
                                 Text(
                                     text = product.name,
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Medium
                                 )
                                 Text(
                                     text = "Quantity: ${cartItem.quantity} ${product.unit}",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray
                                 )
                                 Text(
                                     text = "Price: ₹${String.format("%.2f", product.price * cartItem.quantity)}",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray
                                 )
                                 
@@ -388,7 +388,7 @@ fun ReturnRequestScreen(
                                                     Text(
                                                         text = "✓ Refundable",
                                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                        fontSize = 11.sp,
+                                                        style = MaterialTheme.typography.labelSmall,
                                                         color = PrimaryGreen,
                                                         fontWeight = FontWeight.Medium
                                                     )
@@ -402,7 +402,7 @@ fun ReturnRequestScreen(
                                                     Text(
                                                         text = "🔄 Exchange Only",
                                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                                        fontSize = 11.sp,
+                                                        style = MaterialTheme.typography.labelSmall,
                                                         color = MaterialTheme.colorScheme.primary,
                                                         fontWeight = FontWeight.Medium
                                                     )
@@ -413,7 +413,7 @@ fun ReturnRequestScreen(
                                         if (product.returnPeriodDays > 0) {
                                             Text(
                                                 text = "• ${product.returnPeriodDays} days",
-                                                fontSize = 11.sp,
+                                                style = MaterialTheme.typography.labelSmall,
                                                 color = TextGray
                                             )
                                         }
@@ -421,11 +421,10 @@ fun ReturnRequestScreen(
                                     if (product.returnConditions.isNotBlank()) {
                                         Text(
                                             text = "ℹ️ ${product.returnConditions}",
-                                            fontSize = 11.sp,
-                                            color = TextGray,
-                                            style = androidx.compose.ui.text.TextStyle(
+                                            style = MaterialTheme.typography.labelSmall.copy(
                                                 fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                                            )
+                                            ),
+                                            color = TextGray
                                         )
                                     }
                                 }
@@ -453,7 +452,7 @@ fun ReturnRequestScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Non-Eligible Items (${nonEligibleItems.size})",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.error
                             )
@@ -495,13 +494,13 @@ fun ReturnRequestScreen(
                                 ) {
                                     Text(
                                         text = product.name,
-                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = TextGray
                                     )
                                     Text(
                                         text = "Quantity: ${cartItem.quantity} ${product.unit}",
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         color = TextGray
                                     )
                                     Surface(
@@ -511,7 +510,7 @@ fun ReturnRequestScreen(
                                         Text(
                                             text = eligibility.reason,
                                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                            fontSize = 12.sp,
+                                            style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.error,
                                             fontWeight = FontWeight.Medium
                                         )
@@ -519,7 +518,7 @@ fun ReturnRequestScreen(
                                     if (eligibility.conditions != null) {
                                         Text(
                                             text = "ℹ️ ${eligibility.conditions}",
-                                            fontSize = 11.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             color = TextGray
                                         )
                                     }
@@ -538,7 +537,7 @@ fun ReturnRequestScreen(
                     item {
                         Text(
                             text = "Return Reason",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -570,7 +569,7 @@ fun ReturnRequestScreen(
                                             text = reason.name.replace("_", " ").replaceFirstChar { 
                                                 if (it.isLowerCase()) it.titlecase() else it.toString() 
                                             },
-                                            fontSize = 16.sp
+                                            style = MaterialTheme.typography.titleMedium
                                         )
                                     }
                                 }
@@ -645,7 +644,7 @@ fun ReturnRequestScreen(
                             }
                             Text(
                                 text = if (isLoading) "Submitting..." else "Submit Return Request",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }

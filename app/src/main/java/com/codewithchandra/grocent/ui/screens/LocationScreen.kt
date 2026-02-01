@@ -276,7 +276,7 @@ fun LocationScreen(
                     ) {
                         Text(
                             text = "Select your address",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -338,7 +338,7 @@ fun LocationScreen(
                         )
                         Text(
                             text = "Add New Address",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
                             color = PrimaryGreen
                         )
@@ -421,7 +421,7 @@ fun LocationPromptCard(
                 } else {
                     "Your device location is off"
                 },
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -431,7 +431,7 @@ fun LocationPromptCard(
                 } else {
                     "Enabling location helps us reach you quickly with accurate delivery"
                 },
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = TextGray,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -467,7 +467,7 @@ fun LocationPromptCard(
                 )
                 Text(
                     text = "Use my Current Location",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -523,13 +523,13 @@ fun AddressCard(
             ) {
                 Text(
                     text = address.title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
                 Text(
                     text = address.address.replace("|", ","),
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray
                 )
             }

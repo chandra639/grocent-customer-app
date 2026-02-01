@@ -45,14 +45,14 @@ fun FestivalOffersSection(
         ) {
             Text(
                 text = "🎉 Festival Special Offers",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             
             Text(
                 text = "View All",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable { /* Navigate to all offers */ }
             )
@@ -147,7 +147,7 @@ fun FestivalOfferCard(
             Column {
                 Text(
                     text = promotion.title,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     maxLines = 2
@@ -157,7 +157,7 @@ fun FestivalOfferCard(
                 
                 Text(
                     text = promotion.discountText,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = festivalColors.accent
                 )

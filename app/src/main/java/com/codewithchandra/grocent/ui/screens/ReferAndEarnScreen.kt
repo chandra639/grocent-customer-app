@@ -75,7 +75,7 @@ fun ReferAndEarnScreen(
                     
                     Text(
                         text = "Refer & Earn",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack,
                         modifier = Modifier.weight(1f),
@@ -136,13 +136,13 @@ fun ReferAndEarnScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "Refer a friend & earn ₹${String.format("%.0f", offerConfig.referralRewardAmount)}",
-                                    fontSize = 18.sp,
+                                    style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = TextBlack
                                 )
                                 Text(
                                     text = "Reward credited after friend's first successful order",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
@@ -157,7 +157,7 @@ fun ReferAndEarnScreen(
                         ) {
                             Text(
                                 text = "Your Referral Code",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = TextGray
                             )
@@ -185,7 +185,7 @@ fun ReferAndEarnScreen(
                                     ) {
                                         Text(
                                             text = referralCode,
-                                            fontSize = 14.sp,
+                                            style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.Medium,
                                             color = TextGray,
                                             letterSpacing = 1.sp
@@ -217,14 +217,14 @@ fun ReferAndEarnScreen(
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Share", fontSize = 13.sp)
+                                    Text("Share", style = MaterialTheme.typography.bodyMedium)
                                 }
                             }
                             
                             // Hint Text
                             Text(
                                 text = "Ask your friend to enter this code during signup",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = TextGray.copy(alpha = 0.7f),
                                 modifier = Modifier.padding(top = 4.dp)
                             )
@@ -249,7 +249,7 @@ fun ReferAndEarnScreen(
                     ) {
                         Text(
                             text = "Referral Progress",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -267,7 +267,7 @@ fun ReferAndEarnScreen(
                         
                         Text(
                             text = "$completedReferrals / $maxReferrals Completed",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = TextGray
                         )
                         
@@ -282,7 +282,7 @@ fun ReferAndEarnScreen(
                             ) {
                                 Text(
                                     text = "Completed Referrals: $completedReferrals",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextBlack
                                 )
                             }
@@ -292,7 +292,7 @@ fun ReferAndEarnScreen(
                             ) {
                                 Text(
                                     text = "Pending Referrals: $pendingReferrals",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextBlack
                                 )
                             }
@@ -303,7 +303,7 @@ fun ReferAndEarnScreen(
                             ) {
                                 Text(
                                     text = "Refer $remainingReferrals more friends to earn ₹${String.format("%.0f", nextRewardAmount)}",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextBlack
                                 )
                                 Icon(
@@ -346,7 +346,7 @@ fun ReferAndEarnScreen(
                             )
                             Text(
                                 text = "Referral Rewards ₹${String.format("%.0f", referralStats.totalEarnings)}",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
@@ -361,12 +361,12 @@ fun ReferAndEarnScreen(
                             Column {
                                 Text(
                                     text = "Usable per order: ₹20",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray
                                 )
                                 Text(
                                     text = "Min order: ₹${String.format("%.0f", offerConfig.minOrderValueForWallet)}",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray
                                 )
                             }
@@ -391,22 +391,22 @@ fun ReferAndEarnScreen(
                         ) {
                             Text(
                                 text = "• ₹${String.format("%.0f", offerConfig.referralRewardAmount)} credited after friend's first delivered order",
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextBlack
                             )
                             Text(
                                 text = "• One reward per referral",
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextBlack
                             )
                             Text(
                                 text = "• Max ₹20 usable per order",
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextBlack
                             )
                             Text(
                                 text = "• One offer per order",
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextBlack
                             )
                         }

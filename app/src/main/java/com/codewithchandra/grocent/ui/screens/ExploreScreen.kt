@@ -207,7 +207,7 @@ private fun SearchBar(
             Text(
                 text = "Search for products, brands...",
                 color = TextGray,
-                fontSize = 14.sp
+                style = MaterialTheme.typography.bodyMedium
             )
         },
         leadingIcon = {
@@ -267,7 +267,7 @@ private fun TrendingBannerCard(
                     )
                     Text(
                         text = "TRENDING",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF8B4513)
                     )
@@ -279,7 +279,7 @@ private fun TrendingBannerCard(
                     // Title
                     Text(
                         text = "Mango Season",
-                        fontSize = 22.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -287,7 +287,7 @@ private fun TrendingBannerCard(
                     // Description
                     Text(
                         text = "Fresh Alphonso mangoes are back in stock!",
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -306,7 +306,7 @@ private fun TrendingBannerCard(
                 ) {
                     Text(
                         text = "Shop Now",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -415,7 +415,7 @@ private fun CategoryCardSimple(
                     // Show emoji icon
                     Text(
                         text = category.icon,
-                        fontSize = 48.sp
+                        style = MaterialTheme.typography.headlineLarge
                     )
                 }
             }
@@ -424,7 +424,7 @@ private fun CategoryCardSimple(
             Column {
                 Text(
                     text = category.name,
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     maxLines = 1
@@ -432,7 +432,7 @@ private fun CategoryCardSimple(
                 if (productCount > 0) {
                     Text(
                         text = "$productCount items",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = TextGray,
                         modifier = Modifier.padding(top = 2.dp)
                     )

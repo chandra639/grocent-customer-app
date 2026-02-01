@@ -42,7 +42,7 @@ fun WeeklyMonthlyKitsSection(
         ) {
             Text(
                 text = "Weekly/Monthly Kits",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -53,7 +53,7 @@ fun WeeklyMonthlyKitsSection(
                 Text(
                     text = "See All",
                     color = PrimaryGreen,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -124,7 +124,7 @@ fun KitCard(
                 ) {
                     Text(
                         text = kit.type.name,
-                        fontSize = 9.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
@@ -146,7 +146,7 @@ fun KitCard(
                             } else {
                                 "${kit.discountPercentage}% OFF"
                             },
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
@@ -165,7 +165,7 @@ fun KitCard(
                 // Kit name
                 Text(
                     text = kit.name,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = TextBlack,
                     maxLines = 2,
@@ -176,7 +176,7 @@ fun KitCard(
                 if (kit.duration.isNotEmpty()) {
                     Text(
                         text = kit.duration,
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = TextGray,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
@@ -185,7 +185,7 @@ fun KitCard(
                 // Description
                 Text(
                     text = kit.description,
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = TextGray,
                     maxLines = 2,
                     modifier = Modifier.padding(bottom = 6.dp)
@@ -199,7 +199,7 @@ fun KitCard(
                 ) {
                     Text(
                         text = "₹${String.format("%.0f", kit.kitPrice)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryGreen
                     )
@@ -207,11 +207,10 @@ fun KitCard(
                     if (kit.originalTotalPrice > kit.kitPrice) {
                         Text(
                             text = "₹${String.format("%.0f", kit.originalTotalPrice)}",
-                            fontSize = 10.sp,
-                            color = TextGray,
-                            style = TextStyle(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 textDecoration = TextDecoration.LineThrough
-                            )
+                            ),
+                            color = TextGray
                         )
                     }
                     
@@ -222,7 +221,7 @@ fun KitCard(
                         ) {
                             Text(
                                 text = "${kit.discountPercentage}% OFF",
-                                fontSize = 9.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = PrimaryGreen,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -249,7 +248,7 @@ fun KitCard(
                 ) {
                     Text(
                         text = "ADD",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 16.dp)

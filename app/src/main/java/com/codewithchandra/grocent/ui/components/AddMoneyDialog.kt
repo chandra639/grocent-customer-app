@@ -110,7 +110,7 @@ fun AddMoneyDialog(
                 ) {
                     Text(
                         text = "Add Money to Wallet",
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -127,7 +127,7 @@ fun AddMoneyDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         text = "Enter Amount",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = TextGray
                     )
@@ -144,7 +144,7 @@ fun AddMoneyDialog(
                         leadingIcon = {
                             Text(
                                 text = "₹",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack,
                                 modifier = Modifier.padding(start = 16.dp)
@@ -165,7 +165,7 @@ fun AddMoneyDialog(
                 // Quick Amount Buttons
                 Text(
                     text = "Quick Add",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextGray
                 )
@@ -187,7 +187,7 @@ fun AddMoneyDialog(
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
                             text = "Select Payment Method",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextGray
                         )
@@ -206,7 +206,7 @@ fun AddMoneyDialog(
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(
                             text = "Customer Details",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextGray
                         )
@@ -264,7 +264,7 @@ fun AddMoneyDialog(
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFD32F2F),
                         modifier = Modifier.padding(vertical = 4.dp)
                     )
@@ -341,7 +341,7 @@ fun AddMoneyDialog(
                                 needsCustomerDetails && !hasAllDetails -> "Fill Customer Details"
                                 else -> "Add ₹${amountText.toDoubleOrNull() ?: 0}"
                             },
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = BackgroundWhite
                         )
@@ -351,7 +351,7 @@ fun AddMoneyDialog(
                 // Info Text
                 Text(
                     text = "Minimum amount: ₹10",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = TextGray,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -374,7 +374,7 @@ fun QuickAmountButton(
     ) {
         Text(
             text = "₹$amount",
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = TextBlack,
             modifier = Modifier
@@ -438,7 +438,7 @@ fun PaymentMethodCard(
                     PaymentMethod.DEBIT_CARD -> "Debit Card"
                     else -> method.name
                 },
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = TextBlack
             )

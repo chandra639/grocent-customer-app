@@ -129,7 +129,7 @@ fun TrendingProductsSection(
             ) {
                 Text(
                     text = "Trending",
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Black,
                     color = Color(0xFF1F2937)
                 )
@@ -138,7 +138,7 @@ fun TrendingProductsSection(
             }
             Text(
                 text = "Fast selling in your area",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF6B7280)
             )
@@ -363,7 +363,7 @@ fun TrendingProductCard(
                         )
                         Text(
                             text = "${(8..15).random()}m",
-                            fontSize = 9.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
                             color = Color(0xFF1F2937)
                         )
@@ -372,7 +372,7 @@ fun TrendingProductCard(
                     // Low stock badge
                     Text(
                         text = "LOW STOCK",
-                        fontSize = 9.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
                         color = Color.White,
                         modifier = Modifier
@@ -387,7 +387,7 @@ fun TrendingProductCard(
                 if (product.discountPercentage > 0) {
                     Text(
                         text = "-${product.discountPercentage}%",
-                        fontSize = 9.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Black,
                         color = Color.White,
                         modifier = Modifier
@@ -441,14 +441,14 @@ fun TrendingProductCard(
             ) {
                 Text(
                     text = product.name,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1F2937),
                     maxLines = 1
                 )
                 Text(
                     text = product.measurementValue.ifEmpty { "1 pc" },
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF6B7280)
                 )
@@ -460,7 +460,7 @@ fun TrendingProductCard(
                 ) {
                     Text(
                         text = "₹${String.format("%.0f", product.price)}",
-                        fontSize = 15.sp,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Black,
                         color = Color(0xFF1F2937)
                     )
@@ -495,7 +495,7 @@ fun TrendingProductCard(
                             // Quantity display
                             Text(
                                 text = "$currentQuantity",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 modifier = Modifier.padding(horizontal = 8.dp)
@@ -558,7 +558,7 @@ fun TrendingProductCard(
                         ) {
                             Text(
                                 text = "ADD",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Black,
                                 color = if (!(product.stock <= 0 && product.availableStock <= 0 && !product.isInStock)) {
                                     BrandPrimary // Green text when in stock

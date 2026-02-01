@@ -50,7 +50,7 @@ fun DiscountedProductsSection(
         ) {
             Text(
                 text = "Deals and Discounts",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -61,7 +61,7 @@ fun DiscountedProductsSection(
                 Text(
                     text = "See All",
                     color = PrimaryGreen,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -154,7 +154,7 @@ fun DiscountedProductCard(
                             } else {
                                 "$discountPercent% OFF"
                             },
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
@@ -174,7 +174,7 @@ fun DiscountedProductCard(
                 if (product.measurementValue.isNotEmpty()) {
                     Text(
                         text = product.measurementValue,
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = TextGray,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
@@ -183,7 +183,7 @@ fun DiscountedProductCard(
                 // Product name - Clickable for navigation
                 Text(
                     text = product.name,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = TextBlack,
                     maxLines = 2,
@@ -200,12 +200,12 @@ fun DiscountedProductCard(
                     ) {
                         Text(
                             text = "★",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = Color(0xFFFFA000) // Orange star
                         )
                         Text(
                             text = "${String.format("%.1f", product.rating)} ($reviewCount)",
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = TextGray,
                             modifier = Modifier.padding(start = 2.dp)
                         )
@@ -223,7 +223,7 @@ fun DiscountedProductCard(
                         } else {
                             "🕐 ${product.deliveryTime}"
                         },
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = PrimaryGreen,
                         fontWeight = if (showStockWarning) FontWeight.Medium else FontWeight.Normal
                     )
@@ -237,7 +237,7 @@ fun DiscountedProductCard(
                 ) {
                     Text(
                         text = "₹${String.format("%.0f", product.price)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryGreen
                     )
@@ -245,11 +245,10 @@ fun DiscountedProductCard(
                     if (originalPrice > product.price) {
                         Text(
                             text = "MRP ₹${String.format("%.0f", originalPrice)}",
-                            fontSize = 10.sp,
-                            color = TextGray,
-                            style = TextStyle(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 textDecoration = TextDecoration.LineThrough
-                            )
+                            ),
+                            color = TextGray
                         )
                     }
                     
@@ -260,7 +259,7 @@ fun DiscountedProductCard(
                         ) {
                             Text(
                                 text = "$discountPercent% OFF",
-                                fontSize = 9.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = PrimaryGreen,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -295,7 +294,7 @@ fun DiscountedProductCard(
                 ) {
                     Text(
                         text = "ADD",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 16.dp)

@@ -1,5 +1,10 @@
 package com.codewithchandra.grocent.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,6 +24,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.LocationOff
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Warning
@@ -28,8 +34,10 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -203,7 +211,9 @@ fun PaymentScreen(
     onOrderPlaced: (Order) -> Unit,
     onBackClick: () -> Unit,
     onAddMoneyClick: (() -> Unit)? = null,
-    onPaymentMethodsClick: (Double) -> Unit = {}
+    onPaymentMethodsClick: (Double) -> Unit = {},
+    onScheduleDeliveryClick: () -> Unit = {},
+    onNavigateToAddressSelection: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val activity = context as? ComponentActivity
@@ -304,6 +314,11 @@ fun PaymentScreen(
     var deliveryAddress by remember { mutableStateOf(
         locationViewModel?.currentAddress?.address ?: "Home - Manneswarar Nagar, Mannivakkam, Tamil Nadu"
     ) }
+    LaunchedEffect(locationViewModel?.currentAddress) {
+        locationViewModel?.currentAddress?.address?.let { addr ->
+            deliveryAddress = addr
+        }
+    }
     var showAddressDialog by remember { mutableStateOf(false) }
     var showAddAddressDialog by remember { mutableStateOf(false) }
     var newAddressTitle by remember { mutableStateOf("") }
@@ -701,7 +716,7 @@ fun PaymentScreen(
                 }
                 Text(
                     text = "Checkout",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     modifier = Modifier.weight(1f),
@@ -721,59 +736,429 @@ fun PaymentScreen(
                 .padding(bottom = 164.dp), // Extra padding for footer (100dp) + bottom navigation bar (64dp)
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Delivery Address Section
+            // Delivery address dropdown bar (reference: icon + "Title - address..." + chevron)
             val currentAddressObj = locationViewModel?.currentAddress
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            val addressDisplayText = "${currentAddressObj?.title ?: "Home"} - ${(currentAddressObj?.address ?: deliveryAddress).replace("|", ",")}"
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showAddressDialog = true },
+                color = Color(0xFFF5F5F5),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.Top
+                    Icon(
+                        imageVector = if (currentAddressObj?.title?.equals("Home", ignoreCase = true) == true) Icons.Default.Home else Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = TextGray,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Text(
+                        text = addressDisplayText,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextBlack,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Text(
+                        text = "Manage",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = PrimaryGreen
+                    )
+                }
+            }
+            
+            // Inline address selection panel (expands downward)
+            AnimatedVisibility(
+                visible = showAddressDialog,
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp)
+                            .padding(vertical = 16.dp)
+                            .padding(bottom = 32.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null,
-                            tint = Color(0xFF34C759),
-                            modifier = Modifier.size(24.dp)
-                        )
-                        
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        // Saved Addresses row: title left, Add New right, close button
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Text(
+                                text = "Saved Addresses",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = TextBlack
+                            )
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = currentAddressObj?.title ?: "Home",
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = TextBlack
+                                    text = "Add New",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.Medium,
+                                    color = PrimaryGreen,
+                                    modifier = Modifier.clickable {
+                                        showAddressDialog = false
+                                        onNavigateToAddressSelection()
+                                    }
                                 )
-                                if (currentAddressObj?.isDefault == true) {
-                                    Text(
-                                        text = "Default",
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color(0xFF34C759)
+                                IconButton(onClick = { showAddressDialog = false }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Close",
+                                        tint = TextGray
                                     )
                                 }
                             }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
+                        val currentAddr = locationViewModel?.currentAddress
+                        val savedAddresses = locationViewModel?.savedAddresses ?: emptyList()
+                        if (savedAddresses.isEmpty()) {
                             Text(
-                                text = (currentAddressObj?.address ?: deliveryAddress).replace("|", ","),
-                                fontSize = 13.sp,
+                                text = "No saved addresses",
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray,
-                                lineHeight = 18.sp
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .heightIn(max = 400.dp)
+                                    .verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                savedAddresses.forEach { address ->
+                                    val isSelected = currentAddr?.id == address.id || deliveryAddress == address.address
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                deliveryAddress = address.address
+                                                locationViewModel?.selectAddress(address)
+                                                showAddressDialog = false
+                                            },
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = Color.White
+                                        ),
+                                        shape = RoundedCornerShape(12.dp),
+                                        border = if (isSelected) BorderStroke(1.dp, PrimaryGreen) else null
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(12.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Icon(
+                                                imageVector = if (address.title.equals("Home", ignoreCase = true)) Icons.Default.Home else Icons.Default.LocationOn,
+                                                contentDescription = null,
+                                                tint = TextGray,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Text(
+                                                        text = address.title,
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = TextBlack
+                                                    )
+                                                    if (isSelected) {
+                                                        Surface(
+                                                            color = PrimaryGreen.copy(alpha = 0.2f),
+                                                            shape = RoundedCornerShape(4.dp)
+                                                        ) {
+                                                            Text(
+                                                                text = "Selected",
+                                                                style = MaterialTheme.typography.labelSmall,
+                                                                fontWeight = FontWeight.Medium,
+                                                                color = PrimaryGreen,
+                                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                Text(
+                                                    text = address.address.replace("|", ","),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = TextGray,
+                                                    maxLines = 2,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Delivery type: Instant | Schedule (above Bill Summary)
+            val deliveryType = locationViewModel?.selectedDeliveryType ?: "SAME_DAY"
+            val deliveryDateLabel = locationViewModel?.selectedDeliveryDate ?: "TODAY"
+            val deliveryTimeSlot = locationViewModel?.selectedDeliveryTimeSlot
+            val showScheduledSummary = deliveryType == "SCHEDULE" && deliveryTimeSlot != null
+            
+            if (showScheduledSummary) {
+                // Single summary card when schedule + slot chosen (reference: Arriving on date, Shipment scheduled, Edit)
+                val cal = Calendar.getInstance()
+                if (deliveryDateLabel == "TOMORROW") cal.add(Calendar.DAY_OF_MONTH, 1)
+                val dateFormatted = SimpleDateFormat("d MMM", Locale.getDefault()).format(cal.time)
+                val timeRangeFormatted = deliveryTimeSlot?.let { slot ->
+                    val isPM = slot.contains("PM", ignoreCase = true)
+                    val timePart = slot.replace(" AM", "").replace(" PM", "").replace("am", "").replace("pm", "").trim()
+                    val hour = timePart.split(":")[0].toIntOrNull() ?: 11
+                    val hour24 = when {
+                        isPM && hour != 12 -> hour + 12
+                        !isPM && hour == 12 -> 0
+                        else -> if (isPM) 12 else hour
+                    }
+                    val endHour24 = (hour24 + 1) % 24
+                    val startHour12 = if (hour24 == 0) 12 else if (hour24 > 12) hour24 - 12 else hour24
+                    val endHour12 = if (endHour24 == 0) 12 else if (endHour24 > 12) endHour24 - 12 else endHour24
+                    val startAmPm = if (hour24 < 12) "AM" else "PM"
+                    val endAmPm = if (endHour24 < 12) "AM" else "PM"
+                    "${startHour12}$startAmPm-${endHour12} $endAmPm"
+                } ?: deliveryTimeSlot ?: ""
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onScheduleDeliveryClick() },
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                    border = BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Box(modifier = Modifier.size(40.dp)) {
+                                Icon(
+                                    imageVector = Icons.Default.Schedule,
+                                    contentDescription = null,
+                                    tint = TextGray,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = Color(0xFF34C759),
+                                    modifier = Modifier
+                                        .size(18.dp)
+                                        .align(Alignment.BottomEnd)
+                                )
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    text = "Arriving on $dateFormatted, $timeRangeFormatted",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextBlack
+                                )
+                                Text(
+                                    text = "Shipment scheduled",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextGray
+                                )
+                            }
+                        }
+                        Text(
+                            text = "Edit",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFFE91E63),
+                            modifier = Modifier.clickable { onScheduleDeliveryClick() }
+                        )
+                    }
+                }
+            } else {
+                val scheduleSubtext = if (deliveryType == "SCHEDULE" && deliveryTimeSlot != null) {
+                    val cal2 = Calendar.getInstance()
+                    if (deliveryDateLabel == "TOMORROW") cal2.add(Calendar.DAY_OF_MONTH, 1)
+                    val dateFormatted2 = SimpleDateFormat("d MMM", Locale.getDefault()).format(cal2.time)
+                    val dayLabel = if (deliveryDateLabel == "TODAY") "Today" else "Tomorrow"
+                    "$dayLabel, $dateFormatted2 · $deliveryTimeSlot"
+                } else "Select a slot"
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { locationViewModel?.setDeliveryPreferences("SAME_DAY", "TODAY", null) },
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (deliveryType == "SAME_DAY") Color(0xFFE8F5E9) else Color.White
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        border = if (deliveryType == "SAME_DAY") null else BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = "Instant Delivery",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextBlack
+                                )
+                                Text(
+                                    text = "11 min",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextGray
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.LocalShipping,
+                                contentDescription = null,
+                                tint = Color(0xFF34C759),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                    Card(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onScheduleDeliveryClick() },
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (deliveryType == "SCHEDULE") Color(0xFFFFF8E1) else Color.White
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+                        border = if (deliveryType == "SCHEDULE") BorderStroke(1.dp, Color(0xFFFFA500)) else BorderStroke(1.dp, Color(0xFFE0E0E0)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                Text(
+                                    text = "Schedule Delivery",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = TextBlack
+                                )
+                                Text(
+                                    text = scheduleSubtext,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = TextGray
+                                )
+                            }
+                            Icon(
+                                imageVector = Icons.Default.Schedule,
+                                contentDescription = null,
+                                tint = Color(0xFFFFA500),
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Cart items (exact cart behaviour: quantity controls, MRP, selling price; no title)
+            if (cartViewModel.cartItems.isEmpty()) {
+                Text(
+                    text = "No items in cart",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextGray,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    cartViewModel.cartItems.forEach { cartItem ->
+                        if (cartItem.isPack) {
+                            PackCartItemCard(
+                                cartItem = cartItem,
+                                cartViewModel = cartViewModel,
+                                onPackClick = {},
+                                onQuantityChange = { q ->
+                                    cartItem.pack?.let { pack ->
+                                        cartViewModel.updatePackQuantity(pack.id, q.toDouble())
+                                    }
+                                },
+                                onRemove = {
+                                    cartItem.pack?.let { pack ->
+                                        cartViewModel.removePackFromCart(pack.id)
+                                    }
+                                },
+                                compact = true
+                            )
+                        } else {
+                            CartItemCard(
+                                cartItem = cartItem,
+                                cartViewModel = cartViewModel,
+                                onProductClick = {},
+                                onQuantityChange = { newQty ->
+                                    cartItem.product?.let { p ->
+                                        val currentQty = cartItem.quantity
+                                        val newQtyD = newQty.toDouble()
+                                        if (newQtyD > currentQty) {
+                                            cartViewModel.addToCart(p, newQtyD - currentQty)
+                                        } else {
+                                            cartViewModel.updateQuantity(p.id, newQtyD, cartItem.unit)
+                                        }
+                                    }
+                                },
+                                onRemove = {
+                                    cartItem.product?.let { p ->
+                                        cartViewModel.removeFromCart(p.id, cartItem.unit)
+                                    }
+                                },
+                                compact = true
                             )
                         }
                     }
@@ -792,7 +1177,7 @@ fun PaymentScreen(
                 ) {
                     Text(
                         text = "Bill Summary",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -806,12 +1191,12 @@ fun PaymentScreen(
                     ) {
                         Text(
                             text = "Item Total",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             color = TextBlack
                         )
                         Text(
                             text = "\u20B9${String.format("%.2f", subtotal)}",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
                         )
@@ -825,12 +1210,12 @@ fun PaymentScreen(
                     ) {
                         Text(
                             text = "Delivery Fee",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             color = TextBlack
                         )
                         Text(
                             text = if (isDeliveryFree) "Free" else "\u20B9${String.format("%.2f", calculatedFees.deliveryFee)}",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium,
                             color = if (isDeliveryFree) Color(0xFF34C759) else TextBlack
                         )
@@ -844,12 +1229,12 @@ fun PaymentScreen(
                     ) {
                         Text(
                             text = "Platform Fee",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             color = TextBlack
                         )
                         Text(
                             text = "\u20B9${String.format("%.2f", platformFee)}",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
                         )
@@ -863,12 +1248,12 @@ fun PaymentScreen(
                     ) {
                         Text(
                             text = "Taxes & Charges",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             color = TextBlack
                         )
                         Text(
                             text = "\u20B9${String.format("%.2f", taxAmount)}",
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
                         )
@@ -882,12 +1267,12 @@ fun PaymentScreen(
                         ) {
                             Text(
                                 text = "Welcome Offer",
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 color = TextBlack
                             )
                             Text(
                                 text = "-\u20B9${String.format("%.2f", welcomeOfferDiscount)}",
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFF34C759)
                             )
@@ -902,12 +1287,12 @@ fun PaymentScreen(
                         ) {
                             Text(
                                 text = "Wallet Reward",
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 color = TextBlack
                             )
                             Text(
                                 text = "-\u20B9${String.format("%.2f", walletAmountUsed)}",
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFF34C759)
                             )
@@ -922,12 +1307,12 @@ fun PaymentScreen(
                         ) {
                             Text(
                                 text = "Coupon Discount",
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 color = TextBlack
                             )
                             Text(
                                 text = "-\u20B9${String.format("%.2f", discountAmount)}",
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Medium,
                                 color = Color(0xFF34C759)
                             )
@@ -944,13 +1329,13 @@ fun PaymentScreen(
                     ) {
                         Text(
                             text = "To Pay",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
                         Text(
                             text = "\u20B9${String.format("%.2f", finalTotal)}",
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -988,14 +1373,14 @@ fun PaymentScreen(
                         ) {
                             Text(
                                 text = "\u20B9${String.format("%.0f", totalSavings)} Saved!",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF34C759)
                             )
                             if (discountAmount > 0) {
                                 Text(
                                     text = "Includes coupon discount of \u20B9${String.format("%.0f", discountAmount)}",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = Color(0xFF34C759).copy(alpha = 0.8f)
                                 )
                             }
@@ -1008,7 +1393,7 @@ fun PaymentScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Choose Your Offer",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 modifier = Modifier.padding(top = 8.dp)
@@ -1072,13 +1457,13 @@ fun PaymentScreen(
                             Column {
                                 Text(
                                     text = "Welcome Offer",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = TextBlack
                                 )
                                 Text(
                                     text = "\u20B9${offerConfig.value?.welcomeOfferAmount?.toInt() ?: 50} OFF on first order",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray
                                 )
                             }
@@ -1090,7 +1475,7 @@ fun PaymentScreen(
                             if (selectedOfferType == OfferType.WELCOME_OFFER) {
                                 Text(
                                     text = "\u20B9${welcomeOfferDiscount.toInt()} OFF",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = PrimaryGreen
                                 )
@@ -1170,13 +1555,13 @@ fun PaymentScreen(
                             Column {
                                 Text(
                                     text = "Use Wallet Reward",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = TextBlack
                                 )
                                 Text(
                                     text = "Usable wallet amount: \u20B9${usableWalletAmount.toInt()}",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray
                                 )
                             }
@@ -1184,7 +1569,7 @@ fun PaymentScreen(
                         if (selectedOfferType == OfferType.REFERRAL_WALLET) {
                             Text(
                                 text = "\u20B9${walletAmountUsed.toInt()}",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = PrimaryGreen
                             )
@@ -1226,10 +1611,9 @@ fun PaymentScreen(
                 ) {
                     Text(
                         text = "Only one offer can be applied per order. Please choose the best deal.",
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = PrimaryGreen,
-                        modifier = Modifier.padding(12.dp),
-                        style = MaterialTheme.typography.bodySmall
+                        modifier = Modifier.padding(12.dp)
                     )
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -1265,7 +1649,7 @@ fun PaymentScreen(
                 ) {
                     Text(
                         text = "Customer Details",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -1366,7 +1750,7 @@ fun PaymentScreen(
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .padding(bottom = 72.dp), // Bottom padding for bottom navigation bar
                 shadowElevation = 8.dp,
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -1447,7 +1831,7 @@ fun PaymentScreen(
                                 )
                                 Text(
                                     text = "Grocent Wallet: \u20B9${String.format("%.0f", walletBalance)}",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Medium,
                                     color = TextBlack
                                 )
@@ -1461,7 +1845,7 @@ fun PaymentScreen(
                             ) {
                                 Text(
                                     text = "Add money",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium,
                                     color = PrimaryGreen
                                 )
@@ -1557,7 +1941,7 @@ fun PaymentScreen(
                             ) {
                                 Text(
                                     text = "PAYING VIA",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.labelMedium,
                                     color = TextGray
                                 )
                                 Icon(
@@ -1569,7 +1953,7 @@ fun PaymentScreen(
                             }
                             Text(
                                 text = getPayingViaShortLabel(selectedPaymentMethod, selectedUpiOption, secondaryPaymentMethod, isWalletSufficient),
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
@@ -1700,7 +2084,7 @@ fun PaymentScreen(
                     ) {
                         Text(
                             text = "Pay \u20B9${String.format("%.0f", if (selectedPaymentMethod == PaymentMethod.WALLET && !isWalletSufficient) remainingAmount else finalTotal)}",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -1718,88 +2102,6 @@ fun PaymentScreen(
         } else {
             // Hide footer when order is placed
             Spacer(modifier = Modifier.height(164.dp)) // Space for bottom navigation bar (64dp) + extra padding (100dp)
-        }
-        
-        // Address Selection Dialog
-        if (showAddressDialog) {
-            AlertDialog(
-                onDismissRequest = { showAddressDialog = false },
-                title = {
-                    Text(
-                        text = "Select Delivery Address",
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                text = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 400.dp)
-                            .verticalScroll(rememberScrollState()),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        // Show saved addresses
-                        locationViewModel?.savedAddresses?.forEach { address ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        deliveryAddress = address.address
-                                        locationViewModel.selectAddress(address)
-                                        showAddressDialog = false
-                                    },
-                                colors = CardDefaults.cardColors(
-                                    containerColor = if (deliveryAddress == address.address) 
-                                        PrimaryGreen.copy(alpha = 0.1f) 
-                                    else CardBackground
-                                )
-                            ) {
-                                Column(
-                                    modifier = Modifier.padding(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text(
-                                        text = address.title,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = TextBlack
-                                    )
-                                    Text(
-                                        text = address.address.replace("|", ","),
-                                        fontSize = 12.sp,
-                                        color = TextGray
-                                    )
-                                }
-                            }
-                        }
-                        
-                        // Add New Address Button
-                        Button(
-                            onClick = {
-                                showAddressDialog = false
-                                showAddAddressDialog = true
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = PrimaryGreen
-                            )
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("Add New Address")
-                        }
-                    }
-                },
-                confirmButton = {
-                    TextButton(onClick = { showAddressDialog = false }) {
-                        Text("Cancel")
-                    }
-                }
-            )
         }
         
         // Service Area Error Dialog
@@ -1826,13 +2128,13 @@ fun PaymentScreen(
                     ) {
                         Text(
                             text = "We currently don't deliver to your location.",
-                            fontSize = 14.sp
+                            style = MaterialTheme.typography.bodyMedium
                         )
                         nearestStoreAnyway?.let { store ->
                             if (store.serviceAreaEnabled) {
                                 Text(
                                     text = "We deliver within ${String.format("%.1f", store.serviceRadiusKm)} km of ${store.name}.",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -1841,7 +2143,7 @@ fun PaymentScreen(
                             nearestStoreAnyway?.let { store ->
                                 Text(
                                     text = "Your location is ${String.format("%.1f", distance)} km away from ${store.name}.",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
@@ -1851,7 +2153,7 @@ fun PaymentScreen(
                             if (store.serviceAreaEnabled) {
                                 Text(
                                     text = "\nService area: Within ${String.format("%.1f", store.serviceRadiusKm)} km${store.pincode?.let { " of PINCODE $it" } ?: " of our store"}",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -1859,7 +2161,7 @@ fun PaymentScreen(
                         }
                         Text(
                             text = "\nPlease try a different delivery address within our service area.",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -1958,6 +2260,7 @@ fun PaymentScreen(
                     scope.launch {
                         // Get delivery preferences from LocationViewModel
                         val deliveryType = locationViewModel?.selectedDeliveryType ?: "SAME_DAY"
+                        val deliveryDateForSchedule = locationViewModel?.selectedDeliveryDate ?: "TOMORROW"
                         val deliveryTimeSlot = locationViewModel?.selectedDeliveryTimeSlot
                         
                         val currentTime = System.currentTimeMillis()
@@ -1967,7 +2270,7 @@ fun PaymentScreen(
                             "SAME_DAY" -> currentTime + (15 * 60 * 1000) // 15 minutes
                             "SCHEDULE" -> {
                                 val calendar = Calendar.getInstance().apply {
-                                    add(Calendar.DAY_OF_MONTH, 1)
+                                    if (deliveryDateForSchedule == "TOMORROW") add(Calendar.DAY_OF_MONTH, 1)
                                     deliveryTimeSlot?.let { slot ->
                                         val isPM = slot.contains("PM", ignoreCase = true)
                                         val timePart = slot.replace(" AM", "").replace(" PM", "").replace("am", "").replace("pm", "")
@@ -2140,14 +2443,14 @@ fun OrderSuccessPopup(
                 
                 Text(
                     text = "Order Placed!",
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
                 
                 Text(
                     text = "Your order has been placed successfully",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
@@ -2249,16 +2552,16 @@ private suspend fun placeOrderDirectly(
 ) {
     // Get delivery preferences from LocationViewModel
     val deliveryType = locationViewModel?.selectedDeliveryType ?: "SAME_DAY"
-    val deliveryDate = locationViewModel?.selectedDeliveryDate ?: "TODAY"
+    val deliveryDate = locationViewModel?.selectedDeliveryDate ?: "TOMORROW"
     val deliveryTimeSlot = locationViewModel?.selectedDeliveryTimeSlot
     
     // Calculate estimated delivery time based on delivery type
     val estimatedDeliveryTime = when (deliveryType) {
         "SAME_DAY" -> currentTime + (15 * 60 * 1000) // 15 minutes for same-day
         "SCHEDULE" -> {
-            // Calculate tomorrow + selected time slot
+            // Use selectedDeliveryDate: TODAY = today + slot, TOMORROW = tomorrow + slot
             val calendar = Calendar.getInstance().apply {
-                add(Calendar.DAY_OF_MONTH, 1) // Tomorrow
+                if (deliveryDate == "TOMORROW") add(Calendar.DAY_OF_MONTH, 1)
                 deliveryTimeSlot?.let { slot ->
                     // Parse time slot (e.g., "9:00 AM" or "4:00 PM")
                     val isPM = slot.contains("PM", ignoreCase = true)
@@ -2620,14 +2923,14 @@ fun PaymentMethodCardWithIcon(
             ) {
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
                 subtitle?.let {
                     Text(
                         text = it,
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -2677,14 +2980,14 @@ fun PaymentMethodCardWithArrow(
             ) {
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
                 subtitle?.let {
                     Text(
                         text = it,
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -2721,13 +3024,13 @@ fun UnlockGrocentUpiCard(
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
                 Text(
                     text = subtitle,
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray
                 )
             }
@@ -2735,7 +3038,7 @@ fun UnlockGrocentUpiCard(
                 onClick = onLinkClick,
                 colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFD32F2F))
             ) {
-                Text("LINK", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                Text("LINK", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
                 Icon(
                     imageVector = Icons.Default.ArrowForward,
                     contentDescription = null,
@@ -2773,7 +3076,7 @@ fun AddNewUpiIdRow(onClick: () -> Unit) {
             )
             Text(
                 text = "Add New UPI ID",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = pink
             )
@@ -2814,13 +3117,13 @@ fun PaymentMethodCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
                 Text(
                     text = description,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = TextGray
                 )
             }
@@ -2842,7 +3145,7 @@ fun BillSummaryRow(
     ) {
         Text(
             text = label,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = TextGray
         )
         Row(
@@ -2852,16 +3155,15 @@ fun BillSummaryRow(
             if (originalPrice > currentPrice) {
                 Text(
                     text = "\u20B9${String.format("%.0f", originalPrice)}",
-                    fontSize = 12.sp,
-                    color = TextGray,
-                    style = androidx.compose.ui.text.TextStyle(
+                    style = MaterialTheme.typography.bodySmall.copy(
                         textDecoration = TextDecoration.LineThrough
-                    )
+                    ),
+                    color = TextGray
                 )
             }
             Text(
                 text = if (isFree) "FREE" else "\u20B9${String.format("%.0f", currentPrice)}",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (isFree) PrimaryGreen else TextBlack
             )
@@ -2891,13 +3193,13 @@ fun BillSavingsRow(
             )
             Text(
                 text = label,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = TextGray
             )
         }
         Text(
             text = "\u20B9${String.format("%.0f", amount)}",
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = PrimaryGreen
         )

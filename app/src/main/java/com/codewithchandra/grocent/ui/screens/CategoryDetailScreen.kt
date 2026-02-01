@@ -211,7 +211,7 @@ fun CategoryDetailScreen(
                 
                 Text(
                     text = categoryName,
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                         color = Color(0xFF34C759),
                     modifier = Modifier.weight(1f),
@@ -280,7 +280,7 @@ fun CategoryDetailScreen(
             ) {
                 Text(
                     text = "No products found in this category",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextGray
                 )
@@ -412,7 +412,7 @@ private fun FilterTab(
     ) {
         Text(
             text = text,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = if (isSelected) Color.White else Color(0xFF34C759),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -483,7 +483,7 @@ private fun CategoryProductCard(
                     ) {
                         Text(
                             text = "$discountPercent% OFF",
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -515,7 +515,7 @@ private fun CategoryProductCard(
             // Item Title
             Text(
                 text = product.name,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 maxLines = 2,
@@ -537,7 +537,7 @@ private fun CategoryProductCard(
             if (measurementText.isNotEmpty()) {
                 Text(
                     text = measurementText,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = TextGray,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -554,7 +554,7 @@ private fun CategoryProductCard(
                     // Selling Price
                     Text(
                         text = "₹${String.format("%.0f", product.price)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -563,7 +563,7 @@ private fun CategoryProductCard(
                     if (originalPrice > product.price) {
                         Text(
                             text = "₹${String.format("%.0f", originalPrice)}",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = TextGray,
                             textDecoration = TextDecoration.LineThrough
                         )
@@ -627,7 +627,7 @@ private fun CategoryProductCard(
                         ) {
                             Text(
                                 text = "−",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -635,7 +635,7 @@ private fun CategoryProductCard(
                         
                         Text(
                             text = "$currentQuantity",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 4.dp)
@@ -653,7 +653,7 @@ private fun CategoryProductCard(
                         ) {
                             Text(
                                 text = "+",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )

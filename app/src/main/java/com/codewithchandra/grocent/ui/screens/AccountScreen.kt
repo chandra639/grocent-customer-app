@@ -153,7 +153,7 @@ fun AccountScreen(
                     }
                     Text(
                         text = "My Profile",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack,
                         modifier = Modifier.weight(1f),
@@ -162,7 +162,7 @@ fun AccountScreen(
                     TextButton(onClick = { showEditDialog = true }) {
                         Text(
                             text = "Edit",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
                             color = BrandPrimary // Green
                         )
@@ -228,7 +228,7 @@ fun AccountScreen(
                 // Name - only show when logged in; after logout show empty
                 Text(
                     text = if (authViewModel?.isLoggedIn == true) localUserProfileViewModel.userName.ifBlank { "" } else "",
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -252,7 +252,7 @@ fun AccountScreen(
                         )
                         Text(
                             text = "Grocent Gold Member",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             color = Color.Black
                         )
@@ -287,7 +287,7 @@ fun AccountScreen(
                 displayPhoneNumber?.let { phone ->
                     Text(
                         text = phone,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         color = TextGray
                     )
                 }
@@ -352,7 +352,7 @@ fun AccountScreen(
             ) {
                 Text(
                     text = "REFER & EARN",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = TextGray,
                     letterSpacing = 1.sp
@@ -379,13 +379,13 @@ fun AccountScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "Refer Friends & Earn ₹20",
-                                    fontSize = 18.sp,
+                                    style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = TextBlack
                                 )
                                 Text(
                                     text = "Reward credited after friend's first successful order",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray,
                                     modifier = Modifier.padding(top = 4.dp)
                                 )
@@ -406,7 +406,7 @@ fun AccountScreen(
                         ) {
                             Text(
                                 text = "Your Referral Code",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = TextGray
                             )
@@ -425,7 +425,7 @@ fun AccountScreen(
                                 ) {
                                     Text(
                                         text = referralViewModel.referralCode ?: "Loading...",
-                                        fontSize = 18.sp,
+                                        style = MaterialTheme.typography.titleLarge,
                                         fontWeight = FontWeight.Bold,
                                         color = BrandPrimary,
                                         letterSpacing = 2.sp
@@ -452,7 +452,7 @@ fun AccountScreen(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Share", fontSize = 14.sp)
+                                    Text("Share", style = MaterialTheme.typography.bodyMedium)
                                 }
                             }
                         }
@@ -471,7 +471,7 @@ fun AccountScreen(
             ) {
                 Text(
                     text = "MY ACCOUNT",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = TextGray,
                     letterSpacing = 1.sp
@@ -540,7 +540,7 @@ fun AccountScreen(
             ) {
                 Text(
                     text = "SETTINGS & SUPPORT",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = TextGray,
                     letterSpacing = 1.sp
@@ -601,7 +601,7 @@ fun AccountScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Log Out",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFFD32F2F)
                 )
@@ -612,7 +612,7 @@ fun AccountScreen(
         item {
             Text(
                 text = "Grocent App v2.4.0",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = TextGray,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -687,7 +687,7 @@ fun EditProfileDialog(
                 ) {
                     Text(
                         text = "Edit Profile",
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -758,7 +758,7 @@ fun EditProfileDialog(
                         TextButton(onClick = onRemovePhoto) {
                             Text(
                                 text = "Remove Photo",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = Color(0xFFD32F2F) // Red
                             )
                         }
@@ -766,7 +766,7 @@ fun EditProfileDialog(
                     
                     Text(
                         text = "Tap to change photo",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = TextGray
                     )
                 }
@@ -802,7 +802,7 @@ fun EditProfileDialog(
                 ) {
                     Text(
                         text = "Save Changes",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -850,7 +850,7 @@ fun StatCard(
                 )
                 Text(
                     text = title,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = textColor
                 )
@@ -858,13 +858,13 @@ fun StatCard(
             Column {
                 Text(
                     text = value,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
                 Text(
                     text = subtitle,
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = textColor.copy(alpha = 0.8f)
                 )
             }
@@ -899,7 +899,7 @@ fun ProfileMenuItem(
             )
             Text(
                 text = title,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = TextBlack
             )

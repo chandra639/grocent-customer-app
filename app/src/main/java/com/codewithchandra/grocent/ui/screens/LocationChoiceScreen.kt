@@ -141,7 +141,7 @@ fun LocationChoiceScreen(
             // Title
             Text(
                 text = "Select Location",
-                fontSize = 28.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 textAlign = TextAlign.Center
@@ -149,7 +149,7 @@ fun LocationChoiceScreen(
             
             Text(
                 text = "Choose how you'd like to set your delivery location",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Normal,
                 color = TextGray,
                 textAlign = TextAlign.Center,
@@ -201,7 +201,7 @@ fun LocationChoiceScreen(
                     )
                     Text(
                         text = "Enable Location",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -235,7 +235,7 @@ fun LocationChoiceScreen(
                     )
                     Text(
                         text = "Manually Enter Location",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryGreen
                     )

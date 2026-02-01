@@ -75,7 +75,7 @@ fun FavouriteScreen(
                 
                 Text(
                     text = "My Wishlist",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     modifier = Modifier.weight(1f),
@@ -104,13 +104,13 @@ fun FavouriteScreen(
                     )
                     Text(
                         text = "No favourites yet",
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
                     Text(
                         text = "Start adding items to your wishlist",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -158,7 +158,7 @@ fun FavouriteScreen(
                     ) {
                         Text(
                             text = "Looking for more?",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextGray
                         )
@@ -171,7 +171,7 @@ fun FavouriteScreen(
                         ) {
                             Text(
                                 text = "Continue Shopping",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = BrandPrimary
                             )
@@ -230,15 +230,15 @@ fun WishlistItemCard(
             // Product Image (Left Side) - Square with rounded corners - Clickable for navigation
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(GrocentDimens.ProductImageSize)
                     .clickable(onClick = onProductClick)
             ) {
                 AsyncImage(
-                    model = product.imageUrl.ifEmpty { "https://via.placeholder.com/100" },
+                    model = product.imageUrl.ifEmpty { "https://via.placeholder.com/80" },
                     contentDescription = product.name,
                     modifier = Modifier
                         .fillMaxSize()
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(RoundedCornerShape(GrocentDimens.ProductImageCornerRadius)),
                     contentScale = ContentScale.Crop
                 )
                 
@@ -253,7 +253,7 @@ fun WishlistItemCard(
                     ) {
                         Text(
                             text = "$discount% OFF",
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -271,7 +271,7 @@ fun WishlistItemCard(
             ) {
                 Text(
                     text = product.name,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     maxLines = 2,
@@ -284,14 +284,14 @@ fun WishlistItemCard(
                     } else {
                         product.measurementType.name.lowercase()
                     },
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Normal,
                     color = TextGray
                 )
                 
                 Text(
                     text = "₹${String.format("%.0f", product.price)}",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -351,7 +351,7 @@ fun WishlistItemCard(
                             
                             Text(
                                 text = "$currentQuantity",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -409,7 +409,7 @@ fun WishlistItemCard(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = "Add",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )

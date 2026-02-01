@@ -102,7 +102,7 @@ private fun LargeHorizontalCategoryCard(
                             // Text badge for Personal Care
                             Text(
                                 text = category.badge,
-                                fontSize = 10.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFF69B4), // Pink
                                 modifier = Modifier.padding(bottom = 4.dp)
@@ -120,7 +120,7 @@ private fun LargeHorizontalCategoryCard(
                             ) {
                                 Text(
                                     text = category.badge,
-                                    fontSize = 10.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -132,7 +132,7 @@ private fun LargeHorizontalCategoryCard(
                     // Category name
                     Text(
                         text = category.name,
-                        fontSize = 22.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = if (backgroundColor == Color.Black) Color.White else TextBlack
                     )
@@ -141,7 +141,7 @@ private fun LargeHorizontalCategoryCard(
                     if (category.subtitle.isNotEmpty()) {
                         Text(
                             text = category.subtitle,
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = if (backgroundColor == Color.Black) Color(0xFFCCCCCC) else TextGray
                         )
                     }
@@ -159,7 +159,7 @@ private fun LargeHorizontalCategoryCard(
                             category.name.contains("Personal Care", ignoreCase = true) -> "Explore"
                             else -> "Shop Now"
                         },
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = when {
                             backgroundColor == Color.Black -> BrandAccent
@@ -266,7 +266,7 @@ private fun MediumRoundedCategoryCard(
                     ) {
                         Text(
                             text = category.badge,
-                            fontSize = 9.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -277,7 +277,7 @@ private fun MediumRoundedCategoryCard(
                 // Category name
                 Text(
                     text = category.name,
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -286,7 +286,7 @@ private fun MediumRoundedCategoryCard(
                 if (category.subtitle.isNotEmpty()) {
                     Text(
                         text = category.subtitle,
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -414,14 +414,14 @@ private fun SquareCategoryCard(
                 Column {
                     Text(
                         text = category.name,
-                        fontSize = 15.sp,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
                     if (category.subtitle.isNotEmpty()) {
                         Text(
                             text = category.subtitle,
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = TextGray,
                             modifier = Modifier.padding(top = 2.dp)
                         )

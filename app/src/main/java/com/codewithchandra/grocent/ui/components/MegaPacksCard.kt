@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForwardIos
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,7 +117,7 @@ fun MegaPacksCard(
                         // Exclusive badge
                         Text(
                             text = "Exclusive",
-                            fontSize = 9.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Black,
                             color = BrandAccent,
                             modifier = Modifier
@@ -130,7 +131,7 @@ fun MegaPacksCard(
                         // Title
                         Text(
                             text = (megaPack?.title ?: "MEGA\nPACKS"),
-                            fontSize = 24.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Black,
                             color = Color.White,
                             lineHeight = 24.sp,
@@ -140,7 +141,7 @@ fun MegaPacksCard(
                         // Subtitle
                         Text(
                             text = megaPack?.subtitle ?: "Save big on bulk orders",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFFD1D5DB)
                         )

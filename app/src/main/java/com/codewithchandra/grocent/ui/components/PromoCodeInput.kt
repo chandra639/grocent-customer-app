@@ -68,7 +68,7 @@ fun PromoCodeInput(
                     } else {
                         "Have a promo code?"
                     },
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = if (appliedPromoCode != null) PrimaryGreen else TextBlack
                 )
@@ -80,7 +80,7 @@ fun PromoCodeInput(
                 if (appliedPromoCode != null) {
                     Text(
                         text = appliedPromoCode.code,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryGreen
                     )
@@ -91,7 +91,7 @@ fun PromoCodeInput(
                     ) {
                         Text(
                             text = if (showAvailableCodes) "Hide Offers" else "View Offers (${availablePromoCodes.size})",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = PrimaryGreen
                         )
                     }
@@ -116,7 +116,7 @@ fun PromoCodeInput(
                 ) {
                     Text(
                         text = "Available Promo Codes",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -150,14 +150,14 @@ fun PromoCodeInput(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = promo.code,
-                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = TextBlack
                                     )
                                     if (promo.description.isNotEmpty()) {
                                         Text(
                                             text = promo.description,
-                                            fontSize = 12.sp,
+                                            style = MaterialTheme.typography.bodySmall,
                                             color = TextGray,
                                             modifier = Modifier.padding(top = 4.dp)
                                         )
@@ -165,7 +165,7 @@ fun PromoCodeInput(
                                     if (promo.minOrderValue != null && promo.minOrderValue > 0) {
                                         Text(
                                             text = "Min order: ₹${promo.minOrderValue.toInt()}",
-                                            fontSize = 11.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             color = TextGray,
                                             modifier = Modifier.padding(top = 2.dp)
                                         )
@@ -177,7 +177,7 @@ fun PromoCodeInput(
                                         com.codewithchandra.grocent.model.PromoCodeType.FIXED_AMOUNT -> "₹${promo.discountValue.toInt()} OFF"
                                         com.codewithchandra.grocent.model.PromoCodeType.FREE_DELIVERY -> "Free Delivery"
                                     },
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = PrimaryGreen,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -210,21 +210,21 @@ fun PromoCodeInput(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = appliedPromoCode.code,
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
                             if (appliedPromoCode.description.isNotEmpty()) {
                                 Text(
                                     text = appliedPromoCode.description,
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = TextGray
                                 )
                             }
                             if (discountAmount > 0) {
                                 Text(
                                     text = "Discount: ₹${String.format("%.0f", discountAmount)}",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium,
                                     color = PrimaryGreen
                                 )
@@ -286,7 +286,7 @@ fun PromoCodeInput(
                     ) {
                         Text(
                             text = "Apply",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -296,7 +296,7 @@ fun PromoCodeInput(
                 if (errorMessage != null) {
                     Text(
                         text = errorMessage,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFD32F2F),
                         modifier = Modifier.padding(start = 4.dp)
                     )

@@ -157,7 +157,7 @@ fun ModernBottomNavigation(
                 ) {
                     Text(
                         text = if (cartItemCount > 9) "9+" else "$cartItemCount",
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black, // Black text to match reference image
                         maxLines = 1
@@ -190,7 +190,7 @@ fun ModernNavItem(
         )
         Text(
             text = label,
-            fontSize = 10.sp,
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             color = if (isSelected) BrandPrimary else Color(0xFF9CA3AF)
         )

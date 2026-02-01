@@ -223,7 +223,7 @@ fun LoadingScreen(
                 Text(
                     text = "Location Permission",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+                    style = MaterialTheme.typography.headlineSmall
                 )
             },
             text = {
@@ -233,22 +233,22 @@ fun LoadingScreen(
                 ) {
                     Text(
                         text = "Grocent needs location access to:",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         color = TextBlack
                     )
                     Text(
                         text = "• Provide accurate delivery addresses",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                     Text(
                         text = "• Show nearby stores and offers",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                     Text(
                         text = "• Ensure faster delivery",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -307,7 +307,7 @@ fun LoadingScreen(
                 Text(
                     text = "Enable Location",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
+                    style = MaterialTheme.typography.headlineSmall
                 )
             },
             text = {
@@ -317,12 +317,12 @@ fun LoadingScreen(
                 ) {
                     Text(
                         text = "Location services are currently disabled on your device.",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         color = TextBlack
                     )
                     Text(
                         text = "Enable location to automatically detect your current location for faster delivery.",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -620,7 +620,7 @@ fun LoadingScreenContent(
             // Loading Message Text with fade-in animation
             Text(
                 text = loadingMessage,
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = TextGray,
                 textAlign = TextAlign.Center,

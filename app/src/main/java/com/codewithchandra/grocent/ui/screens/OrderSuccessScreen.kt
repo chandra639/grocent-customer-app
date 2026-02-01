@@ -123,7 +123,7 @@ fun OrderSuccessScreen(
                 // Main Title
                 Text(
                     text = "Order Successfully Placed",
-                    fontSize = 24.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     textAlign = TextAlign.Center
@@ -136,14 +136,14 @@ fun OrderSuccessScreen(
                 ) {
                     Text(
                         text = "Thank you for shopping with Grocent.",
-                        fontSize = 15.sp,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Normal,
                         color = TextGray,
                         textAlign = TextAlign.Center
                     )
                     Text(
                         text = "Your groceries are on the way!",
-                        fontSize = 15.sp,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Normal,
                         color = TextGray,
                         textAlign = TextAlign.Center
@@ -169,13 +169,13 @@ fun OrderSuccessScreen(
                     ) {
                         Text(
                             text = "Order ID",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextGray
                         )
                         Text(
                             text = orderNumber,
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -195,7 +195,7 @@ fun OrderSuccessScreen(
                 ) {
                     Text(
                         text = "Track Order",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -223,7 +223,7 @@ fun OrderSuccessScreen(
                 ) {
                     Text(
                         text = "Continue Shopping",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = TextBlack
                     )

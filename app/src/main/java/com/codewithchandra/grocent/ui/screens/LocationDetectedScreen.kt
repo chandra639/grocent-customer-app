@@ -87,7 +87,7 @@ fun LocationDetectedScreen(
             // Title
             Text(
                 text = "Location Detected!",
-                fontSize = 28.sp,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = PrimaryGreen,
                 textAlign = TextAlign.Center
@@ -119,7 +119,7 @@ fun LocationDetectedScreen(
                     )
                     Text(
                         text = addressText,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = TextBlack,
                         modifier = Modifier.weight(1f)
@@ -136,7 +136,7 @@ fun LocationDetectedScreen(
             
             Text(
                 text = "Continuing...",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = TextGray,
                 textAlign = TextAlign.Center

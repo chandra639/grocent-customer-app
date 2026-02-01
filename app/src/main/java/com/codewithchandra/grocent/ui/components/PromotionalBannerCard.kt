@@ -52,7 +52,7 @@ fun PromotionalBannerCard(
             ) {
                 Text(
                     text = discountText,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack,
                     modifier = Modifier.weight(1f)
@@ -81,7 +81,7 @@ fun PromotionalBannerCard(
                 // Fallback: Use emoji or placeholder
                 Text(
                     text = "🛒",
-                    fontSize = 64.sp,
+                    style = MaterialTheme.typography.displaySmall,
                     modifier = Modifier.size(80.dp)
                 )
             }

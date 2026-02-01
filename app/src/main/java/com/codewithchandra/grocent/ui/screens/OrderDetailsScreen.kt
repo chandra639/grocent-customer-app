@@ -142,7 +142,7 @@ fun OrderDetailsScreen(
                 
                 Text(
                     text = "Order Details",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     modifier = Modifier.weight(1f),
@@ -178,14 +178,14 @@ fun OrderDetailsScreen(
                 ) {
                     Text(
                         text = orderNumber,
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
                     
                     Text(
                         text = "Placed on: $placedDateTime",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Normal,
                         color = TextGray
                     )
@@ -214,7 +214,7 @@ fun OrderDetailsScreen(
                                 )
                                 Text(
                                     text = statusText,
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium,
                                     color = BrandPrimary
                                 )
@@ -241,7 +241,7 @@ fun OrderDetailsScreen(
                                     )
                                     Text(
                                         text = "ETA: $etaTime",
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = TextGray
                                     )
@@ -264,7 +264,7 @@ fun OrderDetailsScreen(
                     ) {
                         Text(
                             text = "Delivery Information",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -296,7 +296,7 @@ fun OrderDetailsScreen(
                                     )
                                     Text(
                                         text = if (type == "SAME_DAY") "Same Day Delivery" else "Scheduled Delivery",
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = if (type == "SAME_DAY") BrandPrimary else Color(0xFFFFA500)
                                     )
@@ -322,7 +322,7 @@ fun OrderDetailsScreen(
                                         )
                                         Text(
                                             text = "Date: $date",
-                                            fontSize = 14.sp,
+                                            style = MaterialTheme.typography.bodyMedium,
                                             color = TextGray
                                         )
                                     }
@@ -341,7 +341,7 @@ fun OrderDetailsScreen(
                                         )
                                         Text(
                                             text = "Time: $time",
-                                            fontSize = 14.sp,
+                                            style = MaterialTheme.typography.bodyMedium,
                                             color = TextGray
                                         )
                                     }
@@ -361,7 +361,7 @@ fun OrderDetailsScreen(
                                 )
                                 Text(
                                     text = "Estimated: ${order.estimatedDelivery}",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray
                                 )
                             }
@@ -381,7 +381,7 @@ fun OrderDetailsScreen(
                 ) {
                     Text(
                         text = "Items in your order",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -412,7 +412,7 @@ fun OrderDetailsScreen(
                 ) {
                     Text(
                         text = "Payment Details",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -461,7 +461,7 @@ fun OrderDetailsScreen(
                         )
                         Text(
                             text = "Paid via $paymentMethodText",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextGray
                         )
@@ -490,7 +490,7 @@ fun OrderDetailsScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Download Invoice",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = BrandPrimary
                         )
@@ -509,7 +509,7 @@ fun OrderDetailsScreen(
                 ) {
                     Text(
                         text = "Delivery Details",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -532,13 +532,13 @@ fun OrderDetailsScreen(
                         ) {
                             Text(
                                 text = "Home (Delivery Address)",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = TextBlack
                             )
                             Text(
                                 text = order.deliveryAddress,
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Normal,
                                 color = TextGray
                             )
@@ -569,19 +569,19 @@ fun OrderDetailsScreen(
                                 ) {
                                     Text(
                                         text = "Delivery Partner",
-                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = TextBlack
                                     )
                                     Text(
                                         text = deliveryPerson.name,
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Normal,
                                         color = TextBlack
                                     )
                                     Text(
                                         text = "Vaccinated",
-                                        fontSize = 12.sp,
+                                        style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.Normal,
                                         color = TextGray
                                     )
@@ -639,7 +639,7 @@ fun OrderDetailsScreen(
                 ) {
                     Text(
                         text = "Need Help?",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = TextBlack
                     )
@@ -665,7 +665,7 @@ fun OrderDetailsScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = "Track Order",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -695,8 +695,8 @@ private fun OrderItemRow(
                 model = pack.imageUrl.ifBlank { "https://via.placeholder.com/80" },
                 contentDescription = pack.title,
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .size(GrocentDimens.ProductImageSize)
+                    .clip(RoundedCornerShape(GrocentDimens.ProductImageCornerRadius)),
                 contentScale = ContentScale.Crop
             )
             
@@ -707,7 +707,7 @@ private fun OrderItemRow(
             ) {
                 Text(
                     text = pack.title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -715,7 +715,7 @@ private fun OrderItemRow(
                 // Item count
                 Text(
                     text = "$itemCount items",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Normal,
                     color = TextGray
                 )
@@ -727,13 +727,13 @@ private fun OrderItemRow(
                 ) {
                     Text(
                         text = "x${String.format("%.0f", cartItem.quantity)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Normal,
                         color = TextGray
                     )
                     Text(
                         text = "₹${String.format("%.0f", cartItem.totalPrice)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -748,8 +748,8 @@ private fun OrderItemRow(
                 model = product.imageUrl.ifEmpty { "https://via.placeholder.com/80" },
                 contentDescription = product.name,
                 modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .size(GrocentDimens.ProductImageSize)
+                    .clip(RoundedCornerShape(GrocentDimens.ProductImageCornerRadius)),
                 contentScale = ContentScale.Crop
             )
             
@@ -760,7 +760,7 @@ private fun OrderItemRow(
             ) {
                 Text(
                     text = product.name,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -772,7 +772,7 @@ private fun OrderItemRow(
                     } else {
                         product.measurementType.name.lowercase()
                     },
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Normal,
                     color = TextGray
                 )
@@ -784,13 +784,13 @@ private fun OrderItemRow(
                 ) {
                     Text(
                         text = "x${String.format("%.0f", cartItem.quantity)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Normal,
                         color = TextGray
                     )
                     Text(
                         text = "₹${String.format("%.0f", cartItem.totalPrice)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -815,13 +815,13 @@ private fun PaymentDetailRow(
     ) {
         Text(
             text = label,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = labelWeight,
             color = TextGray
         )
         Text(
             text = value,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = valueWeight,
             color = valueColor
         )

@@ -178,7 +178,7 @@ fun ManualLocationSelectionScreen(
             item {
                 Text(
                     text = "Select delivery location",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -216,7 +216,7 @@ fun ManualLocationSelectionScreen(
                 item {
                     Text(
                         text = "Your saved addresses",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -267,13 +267,13 @@ fun LocationWarningBanner(
                 Column {
                     Text(
                         text = "Device location not enabled",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
                     Text(
                         text = "Enable for a better delivery experience",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = TextGray
                     )
                 }
@@ -287,7 +287,7 @@ fun LocationWarningBanner(
                 Text(
                     text = "Enable",
                     color = BackgroundWhite,
-                    fontSize = 12.sp
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
@@ -322,7 +322,7 @@ fun SearchLocationBar(
             )
             Text(
                 text = searchQuery.ifBlank { "Search for area, street name..." },
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = if (searchQuery.isBlank()) TextGray else TextBlack,
                 modifier = Modifier.weight(1f)
             )
@@ -364,7 +364,7 @@ fun LocationOptionCard(
                 )
                 Text(
                     text = title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -410,14 +410,14 @@ fun SavedAddressCard(
             ) {
                 Text(
                     text = address.title,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = address.address,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray
                 )
             }

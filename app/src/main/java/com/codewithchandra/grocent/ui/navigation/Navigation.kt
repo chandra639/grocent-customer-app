@@ -61,6 +61,7 @@ sealed class Screen(val route: String, val title: String, val icon: androidx.com
     object ProductDetail : Screen("product_detail/{productId}", "Product Detail", Icons.Default.Info)
     object Checkout : Screen("checkout", "Checkout", Icons.Default.ShoppingCart)
     object Payment : Screen("payment", "Payment", Icons.Default.Payment)
+    object ScheduleOrder : Screen("schedule_order", "Schedule your order", Icons.Default.Schedule)
     @Suppress("UNUSED")
     object OrderSuccess : Screen("order_success/{orderId}", "Order Success", Icons.Default.CheckCircle)
     @Suppress("UNUSED")
@@ -144,7 +145,6 @@ fun GroceryNavigation(
         setOf(
             Screen.Shop.route,
             Screen.Explore.route,
-            Screen.Cart.route,
             Screen.Favourite.route,
             Screen.Account.route
         )
@@ -156,6 +156,9 @@ fun GroceryNavigation(
             Screen.Splash.route,
             Screen.Login.route,
             Screen.Onboarding.route,
+            Screen.Checkout.route,
+            Screen.Payment.route,
+            Screen.ScheduleOrder.route,
             "location_selection",
             "order_details",
             "add_edit_address"
@@ -228,7 +231,8 @@ fun GroceryNavigation(
                     com.codewithchandra.grocent.ui.components.MinimalBottomNavigation(
                         currentRoute = currentRoute,
                         onNavigate = { route ->
-                            navController.navigate(route) {
+                            val targetRoute = if (route == Screen.Cart.route) Screen.Payment.route else route
+                            navController.navigate(targetRoute) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
@@ -268,30 +272,20 @@ fun GroceryNavigation(
         val topPaddingValueFloat = topPaddingValue.value
         val startPaddingValueFloat = startPaddingValue.value
         val endPaddingValueFloat = endPaddingValue.value
-        val stableSystemBottomPaddingFloat = stableSystemBottomPadding.value
+        // Full-screen routes (Checkout, Payment, Schedule, etc.): no extra bottom padding so content fills the screen
+        val bottomPadding = if (currentRoute in hideBottomBarRoutes) 0.dp else stableSystemBottomPadding
+        val bottomPaddingFloat = bottomPadding.value
         
-        // CRITICAL FIX: Stabilize contentPadding using Float values to prevent unnecessary recalculations
-        // Note: Float values are already extracted above (lines 330-333) to stabilize the key() wrapper
-        // This ensures remember() only recalculates when actual padding values change, not when Dp objects change
-        // IMPORTANT: We use stableSystemBottomPadding (fixed 52.dp) instead of rawSystemBottomPadding
-        // to prevent contentPadding from changing when bottom bar visibility changes
-        val contentPadding = remember(topPaddingValueFloat, startPaddingValueFloat, endPaddingValueFloat, stableSystemBottomPaddingFloat) {
+        val contentPadding = remember(topPaddingValueFloat, startPaddingValueFloat, endPaddingValueFloat, bottomPaddingFloat) {
             PaddingValues(
                 top = topPaddingValue,
                 start = startPaddingValue,
                 end = endPaddingValue,
-                // CRITICAL FIX: Use fixed stable padding that doesn't change during navigation
-                // This prevents contentPadding from changing when shouldShowBottomBar changes
-                bottom = stableSystemBottomPadding
+                bottom = bottomPadding
             )
         }
         
-        // CRITICAL FIX: Stabilize the entire content block using key() to prevent recomposition
-        // when innerPadding object reference changes but values stay the same
-        // Key on actual padding values (Float) and currentRoute, NOT on innerPadding object reference
-        // This ensures NavHost only recomposes when route or actual padding values change,
-        // NOT when Scaffold creates a new innerPadding object with the same values
-        key(topPaddingValueFloat, startPaddingValueFloat, endPaddingValueFloat, stableSystemBottomPaddingFloat, currentRoute) {
+        key(topPaddingValueFloat, startPaddingValueFloat, endPaddingValueFloat, bottomPaddingFloat, currentRoute) {
             // Check if user is already logged in (fast check from SharedPreferences + Firebase)
             // This prevents showing login screen if user is already authenticated
             val isLoggedIn = remember {
@@ -445,9 +439,9 @@ fun GroceryNavigation(
             
             composable("location_selection") {
                 val locationVm = getLocationViewModel()
-                // Check if we came from CheckoutScreen
+                // Check if we came from Checkout or Payment (return to that screen on address select)
                 val previousRoute = navController.previousBackStackEntry?.destination?.route
-                val cameFromCheckout = previousRoute == Screen.Checkout.route
+                val cameFromCheckoutOrPayment = previousRoute == Screen.Checkout.route || previousRoute == Screen.Payment.route
                 
                 com.codewithchandra.grocent.ui.screens.LocationScreen(
                     locationViewModel = locationVm,
@@ -455,8 +449,8 @@ fun GroceryNavigation(
                         // Address is already selected in ViewModel
                         android.util.Log.d("Navigation", "Address selected. Previous route: $previousRoute, Current address: ${locationVm.currentAddress?.address}")
                         
-                        if (cameFromCheckout) {
-                            // Return to CheckoutScreen if we came from there
+                        if (cameFromCheckoutOrPayment) {
+                            // Return to Checkout or Payment if we came from there
                             navController.popBackStack()
                         } else {
                             // Otherwise navigate to Shop (initial app flow)
@@ -1048,7 +1042,7 @@ fun GroceryNavigation(
                     },
                     onCartClick = {
                         try {
-                            navController.navigate(Screen.Cart.route)
+                            navController.navigate(Screen.Payment.route)
                         } catch (e: Exception) {
                             // Silently handle navigation error
                         }
@@ -1123,7 +1117,7 @@ fun GroceryNavigation(
                     },
                     onViewCartClick = {
                         try {
-                            navController.navigate(Screen.Cart.route)
+                            navController.navigate(Screen.Payment.route)
                         } catch (e: Exception) {
                             // Silently handle navigation error
                         }
@@ -1213,28 +1207,6 @@ fun GroceryNavigation(
                 )
             }
             
-            composable(Screen.Cart.route) {
-                android.util.Log.e("NavigationDebug", "Cart composable route ENTRY")
-                val cartVm = getCartViewModel()
-                android.util.Log.e("NavigationDebug", "CartViewModel obtained, calling CartScreen")
-                CartScreen(
-                    cartViewModel = cartVm,
-                    onProductClick = { product ->
-                        navController.navigate("product_detail/${product.id}")
-                    },
-                    onCheckout = {
-                        // Navigate to Checkout screen first (where delivery scheduling is available)
-                        navController.navigate(Screen.Checkout.route)
-                    },
-                    onBackClick = {
-                        navController.popBackStack()
-                    },
-                    onPackClick = { packId ->
-                        navController.navigate("combo_pack_detail/$packId")
-                    }
-                )
-            }
-            
             composable(Screen.Favourite.route) {
                 // Get products from Firestore - syncs with admin app changes
                 val products by ProductRepository.getProductsFlow()
@@ -1288,6 +1260,8 @@ fun GroceryNavigation(
                     paymentViewModel = getPaymentViewModel(),
                     onAddMoneyClick = { navController.navigate(Screen.AddMoney.route) },
                     onPaymentMethodsClick = { amount -> navController.navigate("payment_methods/${amount.toInt()}") },
+                    onScheduleDeliveryClick = { navController.navigate(Screen.ScheduleOrder.route) },
+                    onNavigateToAddressSelection = { navController.navigate("location_selection") },
                     onOrderPlaced = { order ->
                         orderVm.addOrder(order) // Add order to order list
                         getCartViewModel().clearCart()
@@ -1297,6 +1271,14 @@ fun GroceryNavigation(
                         }
                     },
                     onBackClick = { navController.popBackStack() }
+                )
+            }
+            
+            composable(Screen.ScheduleOrder.route) {
+                ScheduleOrderScreen(
+                    locationViewModel = getLocationViewModel(),
+                    onBackClick = { navController.popBackStack() },
+                    onConfirm = { navController.popBackStack() }
                 )
             }
             
@@ -1557,7 +1539,7 @@ fun GroceryNavigation(
                     },
                     cartViewModel = getCartViewModel(),
                     onCartClick = {
-                        navController.navigate(Screen.Cart.route)
+                        navController.navigate(Screen.Payment.route)
                     }
                 )
             }
@@ -1574,11 +1556,11 @@ fun GroceryNavigation(
                     cartViewModel = getCartViewModel(),
                     onViewCartClick = {
                         try {
-                            navController.navigate(Screen.Cart.route) {
+                            navController.navigate(Screen.Payment.route) {
                                 launchSingleTop = true
                             }
                         } catch (e: Exception) {
-                            android.util.Log.e("Navigation", "Error navigating to cart: ${e.message}", e)
+                            android.util.Log.e("Navigation", "Error navigating to checkout: ${e.message}", e)
                         }
                     }
                 )
@@ -1755,16 +1737,12 @@ fun GroceryNavigation(
                                 cartViewModel = getCartViewModel(), // Pass cartViewModel for real-time updates
                                 orderViewModel = getOrderViewModel(), // Pass orderViewModel for stock reservation
                                 onViewCartClick = {
-                                    android.util.Log.e("NavigationDebug", "onViewCartClick CALLED - route=${Screen.Cart.route}")
                                     try {
-                                        android.util.Log.e("NavigationDebug", "About to navigate to Cart")
-                                        navController.navigate(Screen.Cart.route) {
+                                        navController.navigate(Screen.Payment.route) {
                                             launchSingleTop = true
                                         }
-                                        android.util.Log.e("NavigationDebug", "Navigation to Cart route COMPLETED")
                                     } catch (e: Exception) {
-                                        android.util.Log.e("NavigationDebug", "Navigation to Cart route FAILED: ${e.message}", e)
-                                        e.printStackTrace()
+                                        android.util.Log.e("Navigation", "Error navigating to checkout: ${e.message}", e)
                                     }
                                 },
                                 onViewAllSimilarProducts = { category ->

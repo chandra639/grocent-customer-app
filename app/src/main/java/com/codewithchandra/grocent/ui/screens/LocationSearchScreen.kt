@@ -561,7 +561,7 @@ fun LocationSearchScreen(
             }
             Text(
                 text = "Search city and locality",
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 modifier = Modifier.align(Alignment.Center),
@@ -664,7 +664,7 @@ fun LocationSearchScreen(
                     Text(
                         text = "No results found. Please check:\n1) Places API (New) is enabled in Google Cloud Console\n2) API key has correct permissions",
                         modifier = Modifier.padding(16.dp),
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -787,27 +787,27 @@ fun LocationSearchScreen(
                     Column {
                         Text(
                             text = "Use current location",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = PrimaryGreen
                         )
                         if (isDetectingLocation) {
                             Text(
                                 text = "Detecting location...",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray
                             )
                         } else if (currentLocationAddress != null) {
                             Text(
                                 text = currentLocationAddress!!,
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray,
                                 maxLines = 2
                             )
                         } else {
                             Text(
                                 text = "Tap to detect your location",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray
                             )
                         }

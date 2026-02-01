@@ -58,14 +58,14 @@ fun QuickAccessProductsSection(
         ) {
             Text(
                 text = "Quick Access",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
             
             Text(
                 text = "View All",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = PrimaryGreen,
                 modifier = Modifier.clickable { /* Navigate to all products */ }
             )
@@ -158,7 +158,7 @@ fun QuickAccessProductCard(
                 // Product name - Clickable for navigation
                 Text(
                     text = product.name,
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack,
                     maxLines = 2,
@@ -175,7 +175,7 @@ fun QuickAccessProductCard(
                 ) {
                     Text(
                         text = "₹${String.format("%.0f", product.price)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -216,7 +216,7 @@ fun QuickAccessProductCard(
                             
                             Text(
                                 text = currentQuantity.toString(),
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )

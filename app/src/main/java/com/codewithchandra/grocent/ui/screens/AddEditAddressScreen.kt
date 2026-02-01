@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
@@ -170,6 +171,7 @@ fun AddEditAddressScreen(
     // Use key to reuse PlacesAutocompleteHelper instance across recompositions
     // This prevents creating multiple PlacesClients which causes resource leaks
     val placesHelper = remember(context) { PlacesAutocompleteHelper(context) }
+    val isEditMode = address != null && !address.id.startsWith("temp_")
     
     // Helper function to write debug logs
     fun writeDebugLog(hypothesisId: String, location: String, message: String, data: JSONObject) {
@@ -1145,9 +1147,11 @@ fun AddEditAddressScreen(
                 val geocodedAddress = locHelper.getAddressFromLocation(selectedLocation!!)
                 geocodedAddress?.let { 
                     addressText = it
-                    // Clear location-specific fields when location changes
-                    floor = ""
-                    landmark = ""
+                    // Clear location-specific fields only when not editing a saved address
+                    if (address == null || address.id.startsWith("temp_")) {
+                        floor = ""
+                        landmark = ""
+                    }
                     // Only carry forward name, phoneNumber, and flatHouseNo for Home, Work, or Other titles
                     val isValidTitle = address?.title in listOf("Home", "Work", "Other")
                     val shouldClearFields = address == null || 
@@ -1220,12 +1224,14 @@ fun AddEditAddressScreen(
                     val geocodedAddress = locHelper.getAddressFromLocation(location)
                     geocodedAddress?.let { 
                         addressText = it
-                        // Clear location-specific fields when location changes
-                        floor = ""
-                        landmark = ""
+                        // Clear location-specific fields only when not editing a saved address
+                        if (address == null || address.id.startsWith("temp_")) {
+                            floor = ""
+                            landmark = ""
+                        }
                         // Only carry forward name, phoneNumber, and flatHouseNo for Home, Work, or Other titles
                         val isValidTitle = address?.title in listOf("Home", "Work", "Other")
-                        val shouldClearFields = address == null || 
+                        val shouldClearFields = address == null ||
                                                (address != null && address.id.startsWith("temp_")) || 
                                                (address != null && !isValidTitle)
                         // #region agent log
@@ -1306,12 +1312,14 @@ fun AddEditAddressScreen(
                 val place = placesHelper.getPlaceDetails(suggestion.placeId)
                 place?.let {
                     addressText = it.address ?: suggestion.fullText
-                    // Clear location-specific fields when location changes
-                    floor = ""
-                    landmark = ""
+                    // Clear location-specific fields only when not editing a saved address
+                    if (address == null || address.id.startsWith("temp_")) {
+                        floor = ""
+                        landmark = ""
+                    }
                     // Only carry forward name, phoneNumber, and flatHouseNo for Home, Work, or Other titles
                     val isValidTitle = address?.title in listOf("Home", "Work", "Other")
-                    val shouldClearFields = address == null || 
+                    val shouldClearFields = address == null ||
                                            (address != null && address.id.startsWith("temp_")) || 
                                            (address != null && !isValidTitle)
                     // #region agent log
@@ -1482,8 +1490,8 @@ fun AddEditAddressScreen(
                 )
             }
             Text(
-                text = "Add address",
-                fontSize = 20.sp,
+                text = if (isEditMode) "Update address" else "Add address",
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 modifier = Modifier.weight(1f),
@@ -1561,7 +1569,7 @@ fun AddEditAddressScreen(
                             )
                                 Text(
                                 text = "Location not enabled",
-                                fontSize = 11.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Medium,
                                 color = TextBlack,
                                 maxLines = 1,
@@ -1581,7 +1589,7 @@ fun AddEditAddressScreen(
                         ) {
                             Text(
                                 text = "Enable",
-                                fontSize = 11.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = BackgroundWhite,
                                 fontWeight = FontWeight.Medium
                             )
@@ -1729,9 +1737,8 @@ fun AddEditAddressScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 12.dp), // Match reference: pl-12 = 48dp total, so padding = 12dp
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    fontSize = 15.sp, // Match reference: text-[15px]
-                                    fontWeight = FontWeight.Bold, // Match reference: font-bold
+                                textStyle = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold,
                                     color = Color.Black
                                 ),
                                 keyboardOptions = KeyboardOptions.Default,
@@ -1745,7 +1752,7 @@ fun AddEditAddressScreen(
                                             Text(
                                                 text = "Search for a new area, locality...",
                                                 color = Color(0xFF94A3B8), // Match reference: slate-400
-                                                fontSize = 15.sp, // Match reference: text-[15px]
+                                                style = MaterialTheme.typography.titleSmall, // Match reference: text-[15px]
                                                 fontWeight = FontWeight.Normal
                                             )
                                         } else {
@@ -2168,7 +2175,7 @@ fun AddEditAddressScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Use Current Location",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -2465,7 +2472,7 @@ fun AddEditAddressScreen(
                     ) {
                         Text(
                             text = "Move the pin to adjust your location",
-                                            fontSize = 11.sp, // Slightly smaller
+                                            style = MaterialTheme.typography.labelSmall, // Slightly smaller
                             color = Color.White,
                                             modifier = Modifier.padding(
                                                 horizontal = 10.dp,
@@ -2521,7 +2528,7 @@ fun AddEditAddressScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Use current location",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -2627,7 +2634,7 @@ fun AddEditAddressScreen(
         ) {
             Text(
                 text = "Delivering your order to",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                 color = TextGray,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -2668,14 +2675,14 @@ fun AddEditAddressScreen(
                                 
                                 Text(
                                     text = areaName,
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold,
                                     color = TextBlack
                                 )
                                 if (fullAddress.isNotEmpty()) {
                                     Text(
                                         text = fullAddress,
-                                            fontSize = 12.sp,
+                                            style = MaterialTheme.typography.bodySmall,
                                             fontWeight = FontWeight.Normal,
                                         color = TextGray
                                     )
@@ -2683,7 +2690,7 @@ fun AddEditAddressScreen(
                             } else {
                                 Text(
                                     text = "Moving pin to get address...",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray,
                                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                                 )
@@ -2699,7 +2706,7 @@ fun AddEditAddressScreen(
                         Text(
                             text = "Change",
                             color = PrimaryGreen,
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -2795,8 +2802,8 @@ fun AddEditAddressScreen(
                     verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Add more address details",
-                fontSize = 16.sp,
+                text = if (isEditMode) "Update address" else "Add more address details",
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -2842,7 +2849,7 @@ fun AddEditAddressScreen(
                         ) {
                             Text(
                                 text = "Enter complete address",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
@@ -2869,7 +2876,7 @@ fun AddEditAddressScreen(
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
                                     text = "Who you are ordering for?",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                         color = TextBlack
                     )
@@ -2891,7 +2898,7 @@ fun AddEditAddressScreen(
                                         )
                         Text(
                                             text = "Self",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                                             color = TextBlack
                                         )
                                     }
@@ -2910,34 +2917,39 @@ fun AddEditAddressScreen(
                                         )
                                         Text(
                                             text = "Others",
-                                            fontSize = 14.sp,
+                                            style = MaterialTheme.typography.bodyMedium,
                                             color = TextBlack
                                         )
                                     }
                                 }
                             }
                             
-                            // Save address as
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                Text(
-                                    text = "Save address as",
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = TextBlack
-                                )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    listOf("Home", "Work", "Other").forEach { option ->
-                                        FilterChip(
-                                            selected = saveAddressAs == option,
-                                            onClick = { saveAddressAs = option },
-                                            enabled = true,
+                            // Save address as (only visible when "Self" is selected)
+                            AnimatedVisibility(
+                                visible = (orderingFor == "Self"),
+                                enter = fadeIn(),
+                                exit = fadeOut()
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    Text(
+                                        text = "Save address as",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = TextBlack
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        listOf("Home", "Work", "Other").forEach { option ->
+                                            FilterChip(
+                                                selected = saveAddressAs == option,
+                                                onClick = { saveAddressAs = option },
+                                                enabled = true,
                                             label = {
                                                 Text(
                                                     text = option,
-                                                    fontSize = 12.sp,
+                                                    style = MaterialTheme.typography.bodySmall,
                                                     fontWeight = if (saveAddressAs == option) FontWeight.SemiBold else FontWeight.Normal
                                                 )
                                             },
@@ -2955,6 +2967,7 @@ fun AddEditAddressScreen(
                                             shape = RoundedCornerShape(8.dp)
                                         )
                                     }
+                                }
                                 }
                             }
                             
@@ -3024,7 +3037,7 @@ fun AddEditAddressScreen(
                                     Text(
                                         text = "Change",
                                         color = PrimaryGreen,
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -3096,15 +3109,16 @@ fun AddEditAddressScreen(
                                             append(phoneNumber)
                                         }
                                         
-                                        val newAddress = if (address == null) {
+                                        val addressTitle = if (orderingFor == "Others") "Other" else saveAddressAs
+                                        val newAddress = if (address == null || address.id.startsWith("temp_")) {
                                             DeliveryAddress(
                                                 id = UUID.randomUUID().toString(),
-                                                title = saveAddressAs,
+                                                title = addressTitle,
                                                 address = completeAddress,
                                                 isDefault = false
                                             )
                                         } else {
-                                            address.copy(title = saveAddressAs, address = completeAddress)
+                                            address.copy(title = addressTitle, address = completeAddress)
                                         }
                                         
                                         onSave(newAddress)
@@ -3123,7 +3137,7 @@ fun AddEditAddressScreen(
                             ) {
                                 Text(
                                     text = "Save address",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }

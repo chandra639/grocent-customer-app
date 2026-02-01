@@ -74,7 +74,7 @@ fun DealCategoryBanner(
                 ) {
                     Text(
                         text = "UP TO ${dealCategory.discountPercentage}% OFF",
-                        fontSize = 13.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
@@ -96,7 +96,7 @@ fun DealCategoryBanner(
                 }
                 Text(
                     text = dealCategory.name,
-                    fontSize = 22.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = titleColor,
                     maxLines = 2,
@@ -185,7 +185,7 @@ fun DealCategoryBanner(
                                 ) {
                                     Text(
                                         text = icon,
-                                        fontSize = 20.sp
+                                        style = MaterialTheme.typography.headlineSmall
                                     )
                                 }
                             }

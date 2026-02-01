@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -50,14 +51,14 @@ fun CategoryTile(
             // Large emoji icon
             Text(
                 text = category.icon,
-                fontSize = 48.sp,
+                style = androidx.compose.material3.MaterialTheme.typography.headlineLarge,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             
             // Category name
             Text(
                 text = category.name,
-                fontSize = 16.sp,
+                style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -65,7 +66,7 @@ fun CategoryTile(
             // Product count
             Text(
                 text = "$productCount items",
-                fontSize = 12.sp,
+                style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                 color = TextGray
             )
         }

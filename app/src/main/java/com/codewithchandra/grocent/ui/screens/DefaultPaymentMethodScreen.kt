@@ -107,13 +107,13 @@ fun DefaultPaymentMethodScreen(
                     ) {
                         Text(
                             text = "To Pay: ",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
                         )
                         Text(
                             text = "\u20B9${String.format("%.0f", amountToPay)}",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = PrimaryGreen
                         )
@@ -124,7 +124,7 @@ fun DefaultPaymentMethodScreen(
             item {
                 Text(
                     text = "Recommended Payments",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
@@ -229,7 +229,7 @@ fun DefaultPaymentMethodScreen(
             item {
                 Text(
                     text = "Pay by UPI",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextGray,
                     modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
@@ -263,7 +263,7 @@ fun DefaultPaymentMethodScreen(
             item {
                 Text(
                     text = "Cards",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextGray,
                     modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
@@ -329,14 +329,14 @@ private fun PaymentOptionRowWithIcon(
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
                         text = title,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = TextBlack
                     )
                     if (subtitle != null) {
                         Text(
                             text = subtitle,
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = TextGray
                         )
                     }

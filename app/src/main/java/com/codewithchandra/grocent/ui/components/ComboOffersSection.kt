@@ -42,7 +42,7 @@ fun ComboOffersSection(
         ) {
             Text(
                 text = "Combo Offers",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -53,7 +53,7 @@ fun ComboOffersSection(
                 Text(
                     text = "See All",
                     color = PrimaryGreen,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -125,7 +125,7 @@ fun ComboOfferCard(
                             } else {
                                 "${combo.discountPercentage}% OFF"
                             },
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
@@ -144,7 +144,7 @@ fun ComboOfferCard(
                 // Combo name
                 Text(
                     text = combo.name,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = TextBlack,
                     maxLines = 2,
@@ -154,7 +154,7 @@ fun ComboOfferCard(
                 // Description
                 Text(
                     text = combo.description,
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = TextGray,
                     maxLines = 2,
                     modifier = Modifier.padding(bottom = 6.dp)
@@ -168,7 +168,7 @@ fun ComboOfferCard(
                 ) {
                     Text(
                         text = "₹${String.format("%.0f", combo.comboPrice)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryGreen
                     )
@@ -176,11 +176,10 @@ fun ComboOfferCard(
                     if (combo.originalTotalPrice > combo.comboPrice) {
                         Text(
                             text = "₹${String.format("%.0f", combo.originalTotalPrice)}",
-                            fontSize = 10.sp,
-                            color = TextGray,
-                            style = TextStyle(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 textDecoration = TextDecoration.LineThrough
-                            )
+                            ),
+                            color = TextGray
                         )
                     }
                     
@@ -191,7 +190,7 @@ fun ComboOfferCard(
                         ) {
                             Text(
                                 text = "${combo.discountPercentage}% OFF",
-                                fontSize = 9.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = PrimaryGreen,
                                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -218,7 +217,7 @@ fun ComboOfferCard(
                 ) {
                     Text(
                         text = "ADD",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 16.dp)

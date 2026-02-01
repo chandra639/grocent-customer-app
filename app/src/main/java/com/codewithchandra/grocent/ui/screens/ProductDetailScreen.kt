@@ -675,7 +675,7 @@ fun ProductDetailScreen(
                                 ) {
                                     Text(
                                         text = "Best Seller",
-                                        fontSize = 11.sp,
+                                        style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
                                         color = Color.Black,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -690,7 +690,7 @@ fun ProductDetailScreen(
                                     ) {
                                         Text(
                                             text = "-$discountPercent%",
-                                            fontSize = 11.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White,
                                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
@@ -739,7 +739,7 @@ fun ProductDetailScreen(
                     // Product Title
                     Text(
                         text = product.name,
-                        fontSize = 22.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -753,7 +753,7 @@ fun ProductDetailScreen(
                     ) {
                         Text(
                             text = "${String.format("%.1f", product.rating)}",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
                         )
@@ -765,7 +765,7 @@ fun ProductDetailScreen(
                         )
                         Text(
                             text = "(120 reviews)",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = BrandPrimary // App green color
                         )
                     }
@@ -787,7 +787,7 @@ fun ProductDetailScreen(
                                 // Current price
                                 Text(
                                     text = "₹${String.format("%.0f", product.price)}",
-                                    fontSize = 24.sp,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = TextBlack
                                 )
@@ -795,7 +795,7 @@ fun ProductDetailScreen(
                                 // Measurement unit
                                 Text(
                                     text = "/ ${product.measurementValue.ifEmpty { product.size.ifEmpty { "kg" } }}",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     color = TextGray
                                 )
                             }
@@ -809,11 +809,10 @@ fun ProductDetailScreen(
                                 ) {
                                     Text(
                                         text = "₹${String.format("%.0f", actualMRP)}",
-                                        fontSize = 14.sp,
-                                        color = TextGray,
-                                        style = TextStyle(
+                                        style = MaterialTheme.typography.bodyMedium.copy(
                                             textDecoration = TextDecoration.LineThrough
-                                        )
+                                        ),
+                                        color = TextGray
                                     )
                                     Surface(
                                         color = BrandPrimary, // App green color
@@ -821,7 +820,7 @@ fun ProductDetailScreen(
                                     ) {
                                         Text(
                                             text = "SAVE ₹${String.format("%.0f", actualMRP - product.price)}",
-                                            fontSize = 11.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White,
                                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -864,13 +863,13 @@ fun ProductDetailScreen(
                                     Column {
                                         Text(
                                             text = "Fast Delivery",
-                                            fontSize = 11.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
                                             color = BrandPrimary
                                         )
                                         Text(
                                             text = "Within 2 hrs",
-                                            fontSize = 10.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             color = BrandPrimary
                                         )
                                     }
@@ -896,13 +895,13 @@ fun ProductDetailScreen(
                                     Column {
                                         Text(
                                             text = "52 kcal",
-                                            fontSize = 11.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
                                             color = Color(0xFFFF9800)
                                         )
                                         Text(
                                             text = "per 100g",
-                                            fontSize = 10.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             color = Color(0xFFFF9800)
                                         )
                                     }
@@ -928,13 +927,13 @@ fun ProductDetailScreen(
                                     Column {
                                         Text(
                                             text = "No Return or Exchange",
-                                            fontSize = 11.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Bold,
                                             color = TextGray
                                         )
                                         Text(
                                             text = "Perishable Item",
-                                            fontSize = 10.sp,
+                                            style = MaterialTheme.typography.labelSmall,
                                             color = TextGray
                                         )
                                     }
@@ -945,7 +944,7 @@ fun ProductDetailScreen(
                         // Choose Quantity Heading
                         Text(
                             text = "Choose Quantity",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack,
                             modifier = Modifier.padding(bottom = 12.dp)
@@ -966,7 +965,7 @@ fun ProductDetailScreen(
                                 Column {
                                     Text(
                                         text = "SELECT UNIT",
-                                        fontSize = 12.sp,
+                                        style = MaterialTheme.typography.bodySmall,
                                         fontWeight = FontWeight.Bold,
                                         color = TextGray,
                                         modifier = Modifier.padding(bottom = 8.dp)
@@ -1065,7 +1064,7 @@ fun ProductDetailScreen(
                                                             ) {
                                                                 Text(
                                                                     text = "$quantityForUnit",
-                                                                    fontSize = 12.sp,
+                                                                    style = MaterialTheme.typography.bodySmall,
                                                                     fontWeight = FontWeight.Bold,
                                                                     color = Color.White
                                                                 )
@@ -1088,13 +1087,13 @@ fun ProductDetailScreen(
                                                     Column {
                                                         Text(
                                                             text = unit,
-                                                            fontSize = 14.sp,
+                                                            style = MaterialTheme.typography.bodyMedium,
                                                             fontWeight = FontWeight.Bold,
                                                             color = if (isSelected) BrandPrimary else TextBlack
                                                         )
                                                         Text(
                                                             text = "₹${String.format("%.2f", unitPrices[unit] ?: 0.0)}",
-                                                            fontSize = 12.sp,
+                                                            style = MaterialTheme.typography.bodySmall,
                                                             color = if (isSelected) BrandPrimary else TextGray
                                                         )
                                                     }
@@ -1140,7 +1139,7 @@ fun ProductDetailScreen(
                                     )
                                     Text(
                                         text = "Storage Tips",
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Medium,
                                         color = TextBlack
                                     )
@@ -1164,7 +1163,7 @@ fun ProductDetailScreen(
                                 ) {
                                     Text(
                                         text = "• Store in a cool, dry place\n• Keep away from direct sunlight\n• Refrigerate if needed\n• Use within recommended time",
-                                        fontSize = 14.sp,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         color = TextBlack,
                                         lineHeight = 20.sp
                                     )
@@ -1183,7 +1182,7 @@ fun ProductDetailScreen(
                     ) {
                         Text(
                             text = "Similar Products",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack,
                             modifier = Modifier.padding(bottom = 12.dp)
@@ -1246,7 +1245,7 @@ fun ProductDetailScreen(
                     ) {
                         Text(
                             text = "Top Products in ${product.category.ifEmpty { "Fruits" }}",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack,
                             modifier = Modifier.padding(bottom = 12.dp)
@@ -1349,7 +1348,7 @@ fun ProductDetailScreen(
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = cartText,
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = BrandPrimary,
                                     maxLines = 1,
@@ -1399,7 +1398,7 @@ fun ProductDetailScreen(
                         ) {
                             Text(
                                 text = "Add to cart",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = BackgroundWhite
                             )
@@ -1452,7 +1451,7 @@ fun ProductDetailScreen(
                                 ) {
                                     Text(
                                         text = "$quantity",
-                                        fontSize = 16.sp,
+                                        style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold,
                                         color = BackgroundWhite,
                                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1599,7 +1598,7 @@ fun ProductDetailScreen(
                             )
                             Text(
                                 text = "View Cart ($totalQty)",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
                         }
@@ -1661,7 +1660,7 @@ fun ProductDetailScreen(
                             ) {
                                 Text(
                                     text = "−",
-                                    fontSize = 20.sp,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (unitQuantity > 0) TextBlack else TextGray
                                 )
@@ -1670,7 +1669,7 @@ fun ProductDetailScreen(
                             // Quantity Display
                             Text(
                                 text = "$unitQuantity",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack,
                                 modifier = Modifier.width(40.dp),
@@ -1698,7 +1697,7 @@ fun ProductDetailScreen(
                             ) {
                                 Text(
                                     text = "+",
-                                    fontSize = 20.sp,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = BrandPrimary
                                 )
@@ -1778,7 +1777,7 @@ fun ProductDetailScreen(
                     ) {
                         Text(
                             text = "Add to Cart",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -1937,7 +1936,7 @@ fun SimilarProductTile(
                                 }
                                 Text(
                                     text = "$inCartQuantity",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold,
                                     color = BackgroundWhite
                                 )
@@ -1987,7 +1986,7 @@ fun SimilarProductTile(
                             ) {
                                 Text(
                                     text = "ADD",
-                                    fontSize = 12.sp, // Increased from 10.sp
+                                    style = MaterialTheme.typography.bodySmall, // Increased from 10.sp
                                     fontWeight = FontWeight.Bold,
                                     color = BrandPrimary
                                 )
@@ -2013,7 +2012,7 @@ fun SimilarProductTile(
                     Text(
                         text = product.measurementValue.ifEmpty { product.size },
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = DiscountBlue,
                         fontWeight = FontWeight.Medium
                     )
@@ -2025,7 +2024,7 @@ fun SimilarProductTile(
             // Product name
             Text(
                 text = product.name,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Medium,
                 color = TextBlack,
                 maxLines = 2,
@@ -2039,7 +2038,7 @@ fun SimilarProductTile(
             if (product.isInStock && product.stock > 0) {
                 Text(
                     text = "In Stock",
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = ViewDetailsGreen,
                     fontWeight = FontWeight.Medium
                 )
@@ -2055,14 +2054,14 @@ fun SimilarProductTile(
                 if (discountPercent > 0) {
                     Text(
                         text = "$discountPercent% OFF",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = DiscountBlue,
                         fontWeight = FontWeight.Bold
                     )
                 }
                 Text(
                     text = "₹${String.format("%.0f", product.price)}",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -2146,7 +2145,7 @@ fun SimilarProductCard(
         Text(
                             text = product.size,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Medium,
                             color = PrimaryGreen
                         )
@@ -2180,7 +2179,7 @@ fun SimilarProductCard(
                     ) {
                         Text(
                             text = "OUT OF STOCK",
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
@@ -2197,7 +2196,7 @@ fun SimilarProductCard(
                 // Product Name (max 2 lines, ellipsized) - Clickable for navigation
                 Text(
                     text = product.name,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
             color = TextBlack,
                     maxLines = 2,
@@ -2212,7 +2211,7 @@ fun SimilarProductCard(
                 if (availableStock < 10 && availableStock > 0) {
                     Text(
                         text = "Only $availableStock left",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFFFF9800),
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 4.dp)
@@ -2233,7 +2232,7 @@ fun SimilarProductCard(
                             )
                             Text(
                         text = product.deliveryTime,
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = PrimaryGreen,
             fontWeight = FontWeight.Medium
                     )
@@ -2247,18 +2246,17 @@ fun SimilarProductCard(
                 ) {
                     Text(
                         text = "₹${String.format("%.0f", product.price)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryOrange
                     )
                     product.originalPrice?.let {
                         Text(
                             text = "₹${String.format("%.0f", it)}",
-                            fontSize = 11.sp,
-                            color = TextGray,
-                            style = TextStyle(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 textDecoration = TextDecoration.LineThrough
-                            )
+                            ),
+                            color = TextGray
                         )
                     }
                 }
@@ -2292,14 +2290,14 @@ fun SimilarProductCard(
                             ) {
                                 Text(
                                     text = "−",
-                                    fontSize = 18.sp,
+                                    style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                         color = BackgroundWhite
                     )
                 }
                             Text(
                                 text = "$inCartQuantity",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = BackgroundWhite
                             )
@@ -2319,7 +2317,7 @@ fun SimilarProductCard(
                             ) {
                                 Text(
                                     text = "+",
-                                    fontSize = 18.sp,
+                                    style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = BackgroundWhite
                                 )
@@ -2345,7 +2343,7 @@ fun SimilarProductCard(
                         ) {
                             Text(
                                 text = "ADD",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = BackgroundWhite
                             )
@@ -2373,7 +2371,7 @@ fun FlavorTwinsSection(
         // Section Title
         Text(
             text = "Flavor Twins",
-            fontSize = 20.sp,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = DarkText,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
@@ -2505,7 +2503,7 @@ fun FlavorTwinProductCard(
                     if (product.measurementValue.isNotEmpty() || product.size.isNotEmpty()) {
         Text(
                             text = product.measurementValue.ifEmpty { product.size },
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = TextGray,
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
@@ -2514,7 +2512,7 @@ fun FlavorTwinProductCard(
                     // 2. Description (Product Name) - Clickable for navigation
                     Text(
                         text = product.name,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = DarkText,
                         maxLines = 2,
@@ -2529,7 +2527,7 @@ fun FlavorTwinProductCard(
                     if (availableStock < 3 && availableStock > 0) {
                         Text(
                             text = "Only $availableStock left",
-                            fontSize = 10.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFFFF9800), // Orange color
                             fontWeight = FontWeight.Medium,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -2551,7 +2549,7 @@ fun FlavorTwinProductCard(
                     )
                     Text(
                                 text = product.deliveryTime,
-                                fontSize = 10.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = PrimaryGreenNew,
             fontWeight = FontWeight.Medium
         )
@@ -2566,7 +2564,7 @@ fun FlavorTwinProductCard(
                         // Current Price (large, bold, GREEN to match Zepto)
                         Text(
                             text = "₹${String.format("%.0f", product.price)}",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = PrimaryGreenNew // GREEN color (not DarkText)
                         )
@@ -2577,11 +2575,10 @@ fun FlavorTwinProductCard(
                             if (it > product.price) {
                                 Text(
                                     text = "MRP ₹${String.format("%.0f", it)}",
-                                    fontSize = 10.sp,
-                                    color = TextGray,
-                                    style = TextStyle(
+                                    style = MaterialTheme.typography.labelSmall.copy(
                                         textDecoration = TextDecoration.LineThrough
-                                    )
+                                    ),
+                                    color = TextGray
                                 )
                             }
                         }
@@ -2620,14 +2617,14 @@ fun FlavorTwinProductCard(
                             ) {
                                 Text(
                                     text = "−",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                         color = BackgroundWhite
                     )
                 }
                             Text(
                                 text = "$inCartQuantity",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = BackgroundWhite,
                                 modifier = Modifier.widthIn(min = 20.dp) // Allow width to expand for double digits
@@ -2650,7 +2647,7 @@ fun FlavorTwinProductCard(
                             ) {
                                 Text(
                                     text = "+",
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = BackgroundWhite
                                 )
@@ -2690,7 +2687,7 @@ fun FlavorTwinProductCard(
                             ) {
                                 Text(
                                     text = "ADD",
-                                    fontSize = 11.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = if (availableStock > 0) BrandPrimary else TextGray,
                                     letterSpacing = 0.3.sp,
@@ -2718,7 +2715,7 @@ fun FreshHitListSection(
         // Section Title
         Text(
             text = "Fresh Hit List",
-            fontSize = 20.sp,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = DarkText,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
@@ -2828,14 +2825,14 @@ fun FreshHitListTile(
                         ) {
         Text(
                                 text = "−",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = BackgroundWhite
                             )
                         }
                         Text(
                             text = "$inCartQuantity",
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = BackgroundWhite
                         )
@@ -2855,7 +2852,7 @@ fun FreshHitListTile(
                         ) {
                             Text(
                                 text = "+",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Bold,
                                 color = BackgroundWhite
                             )
@@ -2881,7 +2878,7 @@ fun FreshHitListTile(
                         ) {
                             Text(
                                 text = "ADD",
-                                fontSize = 10.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = if (availableStock > 0) BrandPrimary else TextGray,
                                 letterSpacing = 0.8.sp
@@ -2905,13 +2902,13 @@ fun DetailRow(label: String, value: String) {
     ) {
         Text(
             text = label,
-            fontSize = 13.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = TextGray,
             fontWeight = FontWeight.Medium
         )
         Text(
             text = value,
-            fontSize = 13.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = TextBlack,
             fontWeight = FontWeight.SemiBold,
             textAlign = androidx.compose.ui.text.style.TextAlign.End,
@@ -3051,7 +3048,7 @@ fun SimilarProductCardBlinkit(
                             }
                             Text(
                                 text = "$inCartQuantity",
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 modifier = Modifier.padding(horizontal = 4.dp)
@@ -3101,7 +3098,7 @@ fun SimilarProductCardBlinkit(
                             ) {
                                 Text(
                                     text = "ADD",
-                                    fontSize = 11.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = AddToCartDarkGreen,
                                     letterSpacing = 0.3.sp
@@ -3122,7 +3119,7 @@ fun SimilarProductCardBlinkit(
                 if (product.measurementValue.isNotEmpty() || product.size.isNotEmpty()) {
                     Text(
                         text = product.measurementValue.ifEmpty { product.size },
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = TextGray,
                         fontWeight = FontWeight.Medium
                     )
@@ -3132,7 +3129,7 @@ fun SimilarProductCardBlinkit(
                 // Product Name
                 Text(
                     text = product.name,
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = TextBlack,
                     maxLines = 2,
@@ -3146,7 +3143,7 @@ fun SimilarProductCardBlinkit(
                 if (availableStock > 0 && availableStock < 3) {
                     Text(
                         text = "Only $availableStock left",
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFFFF5722),
                         fontWeight = FontWeight.Medium
                     )
@@ -3166,7 +3163,7 @@ fun SimilarProductCardBlinkit(
                     )
                     Text(
                         text = product.deliveryTime,
-                        fontSize = 10.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = PrimaryGreenNew,
                         fontWeight = FontWeight.Medium
                     )
@@ -3183,7 +3180,7 @@ fun SimilarProductCardBlinkit(
                     // Price
                     Text(
                         text = "₹${String.format("%.0f", product.price)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -3192,11 +3189,10 @@ fun SimilarProductCardBlinkit(
                     if (actualMRP != null && actualMRP > product.price) {
                         Text(
                             text = "MRP ₹${String.format("%.0f", actualMRP)}",
-                            fontSize = 11.sp,
-                            color = TextGray,
-                            style = TextStyle(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 textDecoration = TextDecoration.LineThrough
-                            )
+                            ),
+                            color = TextGray
                         )
                     }
                 }

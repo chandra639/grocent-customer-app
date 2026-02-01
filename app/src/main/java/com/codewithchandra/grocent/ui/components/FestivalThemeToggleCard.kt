@@ -101,12 +101,12 @@ fun FestivalThemeToggleCard(
                 Column {
                     Text(
                         text = getFestivalDisplayName(festival),
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = statusText,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

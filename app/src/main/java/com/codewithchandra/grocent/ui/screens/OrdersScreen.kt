@@ -26,6 +26,7 @@ import com.codewithchandra.grocent.model.OrderStatus
 import com.codewithchandra.grocent.ui.theme.*
 import com.codewithchandra.grocent.util.OrderStatusMapper
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 @Composable
@@ -53,6 +54,10 @@ fun OrdersScreen(
     val orderHistory = orders.filter { order ->
         order.orderStatus == OrderStatus.DELIVERED || order.orderStatus == OrderStatus.CANCELLED
     }.sortedByDescending { it.createdAt }
+    
+    // Use current date each time so "Scheduled for:" always shows today (not a cached date like Jul 17)
+    val todayFormatted = SimpleDateFormat("EEE, d MMM yyyy", Locale.getDefault())
+        .format(Calendar.getInstance().time)
     
     Column(
         modifier = Modifier
@@ -85,7 +90,7 @@ fun OrdersScreen(
                 
                 Text(
                     text = "My Orders",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     modifier = Modifier.weight(1f),
@@ -112,7 +117,7 @@ fun OrdersScreen(
             ) {
                 Text(
                     text = "Current",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = if (selectedTab == 0) BrandPrimary else TextGray
                 )
@@ -136,7 +141,7 @@ fun OrdersScreen(
             ) {
                 Text(
                     text = "Scheduled",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = if (selectedTab == 1) Color(0xFFFFA500) else TextGray
                 )
@@ -160,7 +165,7 @@ fun OrdersScreen(
             ) {
                 Text(
                     text = "History",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = if (selectedTab == 2) BrandPrimary else TextGray
                 )
@@ -194,17 +199,17 @@ fun OrdersScreen(
                         ) {
                             Text(
                                 text = "📦",
-                                fontSize = 64.sp
+                                style = MaterialTheme.typography.displaySmall
                             )
                             Text(
                                 text = "No current orders",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
                             Text(
                                 text = "Your active orders will appear here",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray
                             )
                         }
@@ -278,17 +283,22 @@ fun OrdersScreen(
                         ) {
                             Text(
                                 text = "📅",
-                                fontSize = 64.sp
+                                style = MaterialTheme.typography.displaySmall
                             )
                             Text(
                                 text = "No scheduled orders",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
                             Text(
+                                text = "Scheduled for: $todayFormatted",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextGray
+                            )
+                            Text(
                                 text = "Your scheduled delivery orders will appear here",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray
                             )
                         }
@@ -338,17 +348,17 @@ fun OrdersScreen(
                         ) {
                             Text(
                                 text = "📦",
-                                fontSize = 64.sp
+                                style = MaterialTheme.typography.displaySmall
                             )
                             Text(
                                 text = "No order history",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
                             Text(
                                 text = "Your past orders will appear here",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray
                             )
                         }
@@ -394,13 +404,13 @@ fun SectionHeader(
     ) {
         Text(
             text = title,
-            fontSize = 16.sp,
+            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = color
         )
         Text(
             text = subtitle,
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Normal,
             color = TextGray
         )
@@ -469,7 +479,7 @@ fun SimpleOrderCard(
                     ) {
                         Text(
                             text = "Order ID: $orderNumber",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -508,7 +518,7 @@ fun SimpleOrderCard(
                     // Placed on
                     Text(
                         text = "Placed on: $placedDateTime",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Normal,
                         color = TextGray
                     )
@@ -521,7 +531,7 @@ fun SimpleOrderCard(
                             if (dateText.isNotEmpty() || timeText.isNotEmpty()) {
                                 Text(
                                     text = "📅 Scheduled: $dateText $timeText",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium,
                                     color = Color(0xFFFFA500)
                                 )
@@ -532,7 +542,7 @@ fun SimpleOrderCard(
                     // Status
                     Text(
                         text = statusText,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = BrandPrimary // Green status text
                     )
@@ -546,7 +556,7 @@ fun SimpleOrderCard(
                     // Total amount
                     Text(
                         text = "₹${String.format("%.0f", order.totalPrice)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )

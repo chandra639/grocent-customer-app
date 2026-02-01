@@ -130,7 +130,7 @@ fun AppHeader(
             // App name
             Text(
                 text = "Grocent in",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = BackgroundWhite
             )
@@ -154,7 +154,7 @@ fun AppHeader(
         // Delivery time (large, bold)
         Text(
             text = "$deliveryTimeMinutes minutes",
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = BackgroundWhite
         )
@@ -172,7 +172,7 @@ fun AppHeader(
             ) {
                 Text(
                     text = displayText,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = BackgroundWhite,
                     maxLines = 1,
                     modifier = Modifier.weight(1f)

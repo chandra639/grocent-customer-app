@@ -52,7 +52,7 @@ fun CartFAB(
             ) {
                 Text(
                     text = if (itemCount > 9) "9+" else "$itemCount",
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black
                 )

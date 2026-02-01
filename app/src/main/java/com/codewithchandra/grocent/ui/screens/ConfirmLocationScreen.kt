@@ -198,7 +198,7 @@ fun ConfirmLocationScreen(
             }
             Text(
                 text = "Confirm location",
-                fontSize = 20.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 modifier = Modifier.weight(1f)
@@ -230,7 +230,7 @@ fun ConfirmLocationScreen(
                 )
                 Text(
                     text = searchQuery.ifBlank { "Search for a new area, locality..." },
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = if (searchQuery.isBlank()) TextGray else TextBlack,
                     modifier = Modifier.weight(1f)
                 )
@@ -372,7 +372,7 @@ fun ConfirmLocationScreen(
             ) {
                 Text(
                     text = "Move the pin to adjust your location",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = Color.White,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                 )
@@ -472,7 +472,7 @@ fun ConfirmLocationScreen(
             ) {
                 Text(
                     text = "Delivering your order to",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = TextGray,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
@@ -493,14 +493,14 @@ fun ConfirmLocationScreen(
                     ) {
                         Text(
                             text = selectedAddress?.split(",")?.firstOrNull() ?: "Loading address...",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = selectedAddress ?: "Please wait...",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = TextGray
                         )
                     }
@@ -508,7 +508,7 @@ fun ConfirmLocationScreen(
                         Text(
                             text = "Change",
                             color = PrimaryGreen,
-                            fontSize = 14.sp
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
@@ -541,7 +541,7 @@ fun ConfirmLocationScreen(
         ) {
             Text(
                 text = "Confirm Location",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = BackgroundWhite
             )

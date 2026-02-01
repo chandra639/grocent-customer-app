@@ -128,7 +128,7 @@ fun ComboPacksScreen(
                     
                     Text(
                         text = "Mega Packs & Offers",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = BrandPrimary,
                         modifier = Modifier.weight(1f),
@@ -172,13 +172,13 @@ fun ComboPacksScreen(
                     ) {
                         Text(
                             text = "No Combo Packs Available",
-                            fontSize = 18.sp,
+                            style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Medium,
                             color = Color.Gray
                         )
                         Text(
                             text = "Check back later for exciting offers!",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
                     }
@@ -336,7 +336,7 @@ fun MegaPackCard(
                         ) {
                             Text(
                                 text = badgeText,
-                                fontSize = 9.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -356,7 +356,7 @@ fun MegaPackCard(
                     ) {
                         Text(
                             text = "IN CART",
-                            fontSize = 9.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.White,
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -375,7 +375,7 @@ fun MegaPackCard(
                 // Title
                 Text(
                     text = pack.title.ifBlank { "Combo Pack" },
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     maxLines = 2,
@@ -386,7 +386,7 @@ fun MegaPackCard(
                 if (pack.description.isNotBlank()) {
                     Text(
                         text = pack.description,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray,
                         maxLines = 1
                     )
@@ -398,7 +398,7 @@ fun MegaPackCard(
                 Column {
                     Text(
                         text = "₹${String.format("%.0f", pack.price)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -406,11 +406,10 @@ fun MegaPackCard(
                     if (pack.originalPrice > pack.price) {
                         Text(
                             text = "₹${String.format("%.0f", pack.originalPrice)}",
-                            fontSize = 11.sp,
-                            color = Color.Gray,
-                            style = androidx.compose.ui.text.TextStyle(
+                            style = MaterialTheme.typography.labelSmall.copy(
                                 textDecoration = TextDecoration.LineThrough
-                            )
+                            ),
+                            color = Color.Gray
                         )
                     }
                 }
@@ -443,7 +442,7 @@ fun MegaPackCard(
                             ) {
                                 Text(
                                     text = "−",
-                                    fontSize = 20.sp,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -460,7 +459,7 @@ fun MegaPackCard(
                         ) {
                             Text(
                                 text = "$packInCartQuantity",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -480,7 +479,7 @@ fun MegaPackCard(
                             ) {
                                 Text(
                                     text = "+",
-                                    fontSize = 20.sp,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -503,7 +502,7 @@ fun MegaPackCard(
                         shape = RoundedCornerShape(16.dp),
                         enabled = cartViewModel != null
                     ) {
-                        Text("ADD", fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                        Text("ADD", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                     }
                 }
             }

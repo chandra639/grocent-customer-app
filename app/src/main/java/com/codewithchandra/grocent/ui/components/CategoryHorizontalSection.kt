@@ -41,7 +41,7 @@ fun CategoryHorizontalSection(
         ) {
             Text(
                 text = "Category",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -52,7 +52,7 @@ fun CategoryHorizontalSection(
                 Text(
                     text = "See All",
                     color = PrimaryGreen,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -106,7 +106,7 @@ fun CategoryCard(
                 // Category icon (emoji) - proportional to box size
                 Text(
                     text = category.icon.ifEmpty { "📦" },
-                    fontSize = 105.sp // Increased by 50% from 70.sp to 105.sp
+                    style = MaterialTheme.typography.headlineLarge // Section title
                 )
             }
         }
@@ -115,7 +115,7 @@ fun CategoryCard(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = category.name,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = if (isSelected) PrimaryGreen else TextGray, // Green if selected, gray otherwise
             textAlign = TextAlign.Center,

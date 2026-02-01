@@ -61,7 +61,7 @@ fun ExploreCategoryHeader(
             
             Text(
                 text = "All Categories",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 modifier = Modifier.weight(1f),

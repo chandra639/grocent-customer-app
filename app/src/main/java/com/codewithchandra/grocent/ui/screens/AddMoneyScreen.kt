@@ -99,7 +99,7 @@ fun AddMoneyScreen(
                 title = {
                     Text(
                         text = "Add Money to Wallet",
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -132,7 +132,7 @@ fun AddMoneyScreen(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Enter Amount",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -149,7 +149,7 @@ fun AddMoneyScreen(
                     leadingIcon = {
                         Text(
                             text = "₹",
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack,
                             modifier = Modifier.padding(start = 16.dp)
@@ -171,7 +171,7 @@ fun AddMoneyScreen(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     text = "Quick Add",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -193,7 +193,7 @@ fun AddMoneyScreen(
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(
                     text = "Select Payment Method",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -233,7 +233,7 @@ fun AddMoneyScreen(
                     ) {
                         Text(
                             text = "Customer Details",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -393,7 +393,7 @@ fun AddMoneyScreen(
                             needsCustomerDetails && !hasAllDetails -> "Fill Customer Details"
                             else -> "Continue"
                         },
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = BackgroundWhite
                     )
@@ -403,7 +403,7 @@ fun AddMoneyScreen(
             // Info Text
             Text(
                 text = "Minimum amount: ₹10",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = TextGray,
                 modifier = Modifier.padding(bottom = 8.dp)
             )

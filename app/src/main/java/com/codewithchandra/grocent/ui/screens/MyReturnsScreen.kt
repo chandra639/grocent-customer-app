@@ -53,16 +53,16 @@ fun MyReturnsScreen(
                 ) {
                     Text(
                         text = "📦",
-                        fontSize = 64.sp
+                        style = MaterialTheme.typography.displaySmall
                     )
                     Text(
                         text = "No return requests",
-                        fontSize = 20.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Your return requests will appear here",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         color = TextGray
                     )
                 }
@@ -111,12 +111,12 @@ fun ReturnRequestCard(
                 Column {
                     Text(
                         text = "Return #${returnRequest.id.take(8).uppercase()}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "Order #${returnRequest.orderId.take(8).uppercase()}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = TextGray
                     )
                 }
@@ -130,13 +130,13 @@ fun ReturnRequestCard(
             // Items
             Text(
                 text = "Items to Return:",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )
             returnRequest.items.forEach { item ->
                 Text(
                     text = "• ${item.productName} (${item.quantity})",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = TextGray
                 )
             }
@@ -146,7 +146,7 @@ fun ReturnRequestCard(
             // Return Reason
             Text(
                 text = "Reason: ${returnRequest.reason.name.replace("_", " ")}",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = TextGray
             )
             
@@ -158,12 +158,12 @@ fun ReturnRequestCard(
                 ) {
                     Text(
                         text = "Refund Status:",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = returnRequest.refundStatus.name,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = when (returnRequest.refundStatus) {
                             RefundStatus.PROCESSED -> PrimaryGreen
                             RefundStatus.PENDING -> PrimaryOrange
@@ -174,7 +174,7 @@ fun ReturnRequestCard(
                 if (returnRequest.refundAmount > 0) {
                     Text(
                         text = "Refund Amount: ₹${String.format("%.2f", returnRequest.refundAmount)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryGreen
                     )
@@ -190,7 +190,7 @@ fun ReturnRequestCard(
                 ) {
                     Text(
                         text = "Rejection Reason: ${returnRequest.adminComment}",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onErrorContainer,
                         modifier = Modifier.padding(12.dp)
                     )
@@ -219,7 +219,7 @@ fun StatusChip(status: ReturnRequestStatus) {
     ) {
         Text(
             text = text,
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
             color = color,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)

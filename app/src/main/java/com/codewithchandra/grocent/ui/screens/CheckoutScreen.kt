@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.codewithchandra.grocent.model.DeliveryAddress
 import com.codewithchandra.grocent.ui.theme.*
 import com.codewithchandra.grocent.util.LocationHelper
@@ -241,7 +240,7 @@ fun CheckoutScreen(
                     
                     Text(
                         text = "Checkout",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack,
                         modifier = Modifier.weight(1f),
@@ -273,6 +272,29 @@ fun CheckoutScreen(
                         }
                     }
                 }
+                
+                // Deliver to | Manage (fixed at top)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Deliver to",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = TextBlack
+                    )
+                    Text(
+                        text = "Manage",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFF34C759),
+                        modifier = Modifier.clickable(onClick = onManageAddresses)
+                    )
+                }
             }
         }
         
@@ -284,27 +306,6 @@ fun CheckoutScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Deliver to Section
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Deliver to",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = TextBlack
-                )
-                Text(
-                    text = "Manage",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF34C759),
-                    modifier = Modifier.clickable(onClick = onManageAddresses)
-                )
-            }
-            
             // Address Card - Show only selected address
             if (selectedAddress == null) {
                 // No address available
@@ -331,7 +332,7 @@ fun CheckoutScreen(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = "No address available. Use Manage to add an address.",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = TextGray
                         )
                     }
@@ -350,7 +351,7 @@ fun CheckoutScreen(
             android.util.Log.d("CheckoutScreenDebug", "Rendering Preferred Delivery Time section, deliveryType=$deliveryType")
             Text(
                 text = "Preferred Delivery Time",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 modifier = Modifier.padding(top = 8.dp, bottom = 12.dp)
@@ -377,13 +378,13 @@ fun CheckoutScreen(
                     ) {
                         Text(
                             text = "Same Day",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = if (deliveryType == "SAME_DAY") Color.White else TextBlack
                         )
                         Text(
                             text = "15 Min",
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = if (deliveryType == "SAME_DAY") Color.White else TextGray
                         )
                     }
@@ -405,13 +406,13 @@ fun CheckoutScreen(
                     ) {
                         Text(
                             text = "Schedule",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold,
                             color = if (deliveryType == "SCHEDULE") Color.White else TextBlack
                         )
                         Text(
                             text = "Next Day",
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = if (deliveryType == "SCHEDULE") Color.White else TextGray
                         )
                     }
@@ -449,13 +450,13 @@ fun CheckoutScreen(
                         ) {
                             Text(
                                 text = "Save Extra 10% OFF",
-                                fontSize = 15.sp,
+                                style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFFFF6B00)
                             )
                             Text(
                                 text = "Choose scheduled delivery and get additional 10% discount on your order",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = TextBlack
                             )
                         }
@@ -490,13 +491,13 @@ fun CheckoutScreen(
                         Column {
                             Text(
                                 text = "Instant Delivery",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
                             Text(
                                 text = "Your order will be delivered in 15 minutes",
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray
                             )
                         }
@@ -531,7 +532,7 @@ fun CheckoutScreen(
                         )
                         Text(
                             text = "Scheduled for: $tomorrowFormatted",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
                         )
@@ -543,7 +544,7 @@ fun CheckoutScreen(
                 // Time Slot Selection Grid
                 Text(
                     text = "Select Time Slot",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -601,12 +602,12 @@ fun CheckoutScreen(
                     Column {
                         Text(
                             text = "To Pay",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = TextGray
                         )
                         Text(
                             text = "\u20B9${String.format("%.0f", calculatedFees.finalTotal)}",
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
@@ -615,7 +616,7 @@ fun CheckoutScreen(
                     if (savings > 0) {
                         Text(
                             text = "You save \u20B9${String.format("%.0f", savings)}",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = Color(0xFF34C759)
                         )
@@ -626,14 +627,14 @@ fun CheckoutScreen(
                 if (selectedAddress == null) {
                     Text(
                         text = "Please select or add a delivery address to continue",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFFF6B35),
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                 } else if (deliveryType == "SCHEDULE" && selectedTimeSlot == null) {
                     Text(
                         text = "Please select a delivery time slot",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFFF6B35),
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
@@ -669,7 +670,7 @@ fun CheckoutScreen(
                 ) {
                     Text(
                         text = "Pay \u20B9${String.format("%.0f", calculatedFees.finalTotal)}",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = if (selectedAddress != null && (deliveryType == "SAME_DAY" || selectedTimeSlot != null)) Color.White else TextGray
                     )
@@ -732,7 +733,7 @@ fun AddressCard(
                 ) {
                     Text(
                         text = address.title,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -742,22 +743,21 @@ fun AddressCard(
                             color = Color(0xFF34C759),
                             shape = RoundedCornerShape(3.dp)
                         ) {
-                            Text(
-                                text = "DEFAULT",
-                                fontSize = 7.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
-                            )
+                    Text(
+                        text = "DEFAULT",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp)
+                    )
                         }
                     }
                 }
                 
                 Text(
                     text = address.address.replace("|", ","),
-                    fontSize = 11.sp,
-                    color = TextGray,
-                    lineHeight = 14.sp
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextGray
                 )
             }
         }
@@ -780,7 +780,7 @@ fun BillSummarySection(
         ) {
             Text(
                 text = "Bill Summary",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -794,12 +794,12 @@ fun BillSummarySection(
             ) {
                 Text(
                     text = "Item Total",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     color = TextBlack
                 )
                 Text(
                     text = "\u20B9${String.format("%.2f", calculatedFees.subtotal)}",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -813,12 +813,12 @@ fun BillSummarySection(
             ) {
                 Text(
                     text = "Delivery Fee",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     color = TextBlack
                 )
                 Text(
                     text = if (isDeliveryFree) "Free" else "\u20B9${String.format("%.2f", calculatedFees.deliveryFee)}",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                     color = if (isDeliveryFree) Color(0xFF34C759) else TextBlack
                 )
@@ -832,12 +832,12 @@ fun BillSummarySection(
             ) {
                 Text(
                     text = "Platform Fee",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     color = TextBlack
                 )
                 Text(
                     text = "\u20B9${String.format("%.2f", platformFee)}",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -851,12 +851,12 @@ fun BillSummarySection(
             ) {
                 Text(
                     text = "Taxes & Charges",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     color = TextBlack
                 )
                 Text(
                     text = "\u20B9${String.format("%.2f", taxAmount)}",
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                     color = TextBlack
                 )
@@ -870,12 +870,12 @@ fun BillSummarySection(
                 ) {
                     Text(
                         text = "Coupon Discount",
-                        fontSize = 15.sp,
+                        style = MaterialTheme.typography.titleSmall,
                         color = TextBlack
                     )
                     Text(
                         text = "-\u20B9${String.format("%.2f", discountAmount)}",
-                        fontSize = 15.sp,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Medium,
                         color = Color(0xFF34C759)
                     )
@@ -892,13 +892,13 @@ fun BillSummarySection(
             ) {
                 Text(
                     text = "To Pay",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
                 Text(
                     text = "\u20B9${String.format("%.0f", calculatedFees.finalTotal)}",
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF34C759)
                 )
@@ -930,13 +930,13 @@ fun DateButton(
         ) {
             Text(
                 text = label,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.Bold,
                 color = if (isSelected) Color.White else TextBlack
             )
             Text(
                 text = date,
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelSmall,
                 color = if (isSelected) Color.White else TextGray
             )
         }
@@ -969,7 +969,7 @@ fun TimeSlotChip(
         ) {
             Text(
                 text = timeSlot,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = if (isSelected) Color(0xFF34C759) else TextBlack
             )

@@ -341,7 +341,7 @@ private fun AddToCartControlContent(
                 // Quantity number (with bounce animation)
                 Text(
                     text = "$quantity",
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,
                     textAlign = TextAlign.Center,
@@ -395,7 +395,7 @@ private fun AddToCartControlContent(
             ) {
                 Text(
                     text = "ADD",
-                    fontSize = 12.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = if (enabled) successGreen else Color.Gray, // Green text when enabled, gray when disabled
                     letterSpacing = 0.5.sp

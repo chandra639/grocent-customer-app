@@ -233,14 +233,14 @@ fun DetectingLocationContent(
         ) {
             Text(
                 text = "Detecting your location",
-                fontSize = 24.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "Please wait...",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = TextGray,
                 textAlign = TextAlign.Center
@@ -298,7 +298,7 @@ fun SuccessLocationContent(
         ) {
             Text(
                 text = "Location Detected!",
-                fontSize = 24.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = PrimaryGreen,
                 textAlign = TextAlign.Center
@@ -327,7 +327,7 @@ fun SuccessLocationContent(
                     )
                     Text(
                         text = address,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = TextBlack,
                         modifier = Modifier.weight(1f)
@@ -360,14 +360,14 @@ fun DisabledLocationContent(
         ) {
             Text(
                 text = "Location Services Disabled",
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "We couldn't detect your location. You can enter your address manually to continue shopping.",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Normal,
                 color = TextGray,
                 textAlign = TextAlign.Center,
@@ -387,7 +387,7 @@ fun DisabledLocationContent(
         ) {
             Text(
                 text = "Enter Address Manually",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
@@ -417,14 +417,14 @@ fun PermissionDeniedContent(
         ) {
             Text(
                 text = "Location Permission Required",
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "Please allow location access to automatically detect your delivery address.",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Normal,
                 color = TextGray,
                 textAlign = TextAlign.Center,
@@ -444,7 +444,7 @@ fun PermissionDeniedContent(
         ) {
             Text(
                 text = "Grant Permission",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
@@ -475,14 +475,14 @@ fun ErrorLocationContent(
         ) {
             Text(
                 text = "Unable to Detect Location",
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 textAlign = TextAlign.Center
             )
             Text(
                 text = "We couldn't get your current location. Please try again or enter your address manually.",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Normal,
                 color = TextGray,
                 textAlign = TextAlign.Center,
@@ -506,7 +506,7 @@ fun ErrorLocationContent(
             ) {
                 Text(
                     text = "Try Again",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -524,7 +524,7 @@ fun ErrorLocationContent(
             ) {
                 Text(
                     text = "Enter Address Manually",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = PrimaryGreen
                 )

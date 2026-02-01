@@ -156,14 +156,14 @@ fun PromotionalBanner(
             Column {
                 Text(
                     text = promotion.title,
-                    fontSize = 22.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = promotion.description,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.9f)
                 )
             }
@@ -199,7 +199,7 @@ fun AnimatedDiscountBadge(
     ) {
         Text(
             text = discountText,
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Bold,
             color = Color.White
         )

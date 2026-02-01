@@ -182,7 +182,7 @@ fun OrderTrackingScreen(
                             }
                             Text(
                                 text = "Live Order Track",
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -214,7 +214,7 @@ fun OrderTrackingScreen(
                             }
                             Text(
                                 text = "Order Tracking",
-                                fontSize = 20.sp,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack,
                                 modifier = Modifier.padding(start = 8.dp)
@@ -245,13 +245,13 @@ fun OrderTrackingScreen(
                                 )
                                 Text(
                                     text = "Order Delivered!",
-                                    fontSize = 24.sp,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = PrimaryGreen
                                 )
                                 Text(
                                     text = "Your order has been successfully delivered",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray,
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
@@ -297,7 +297,7 @@ fun OrderTrackingScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "Download Invoice",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
                         }
@@ -327,7 +327,7 @@ fun OrderTrackingScreen(
                             }
                             Text(
                                 text = "Order Tracking",
-                                fontSize = 20.sp,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack,
                                 modifier = Modifier.padding(start = 8.dp)
@@ -976,7 +976,7 @@ fun OrderTrackingMap(
                 Text(
                     text = "ETA $etaText",
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -1087,7 +1087,7 @@ fun EstimatedTimeCard(
                     ) {
                         Text(
                             text = "Estimated Delivery",
-                            fontSize = 13.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = TextGray,
                             fontWeight = FontWeight.Medium
                         )
@@ -1098,7 +1098,7 @@ fun EstimatedTimeCard(
                                 estimatedMinutes > 0 -> "$estimatedMinutes min"
                                 else -> "Arriving soon"
                             },
-                            fontSize = 32.sp,
+                            style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
                             color = if (hasArrived) Color(0xFF4CAF50) else PrimaryGreen
                         )
@@ -1120,7 +1120,7 @@ fun EstimatedTimeCard(
                         )
                         Text(
                             text = "${(animatedProgress * 100).toInt()}% Complete",
-                            fontSize = 11.sp,
+                            style = MaterialTheme.typography.labelSmall,
                             color = TextGray,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -1183,7 +1183,7 @@ fun StatusUpdateCard(order: Order) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = latestStatus.message,
-                            fontSize = 15.sp,
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = TextBlack,
                             lineHeight = 20.sp
@@ -1191,7 +1191,7 @@ fun StatusUpdateCard(order: Order) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = timeAgo,
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = TextGray,
                             fontWeight = FontWeight.Medium
                         )
@@ -1267,14 +1267,14 @@ fun DeliveryPersonCard(
                         Column {
                             Text(
                                 text = "Delivery Person",
-                                fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodySmall,
                                 color = TextGray,
                                 fontWeight = FontWeight.Medium
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = deliveryPerson.name,
-                                fontSize = 18.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = TextBlack
                             )
@@ -1286,7 +1286,7 @@ fun DeliveryPersonCard(
                                         distanceRemaining
                                     )
                                 } km away",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 color = TextGray,
                                 fontWeight = FontWeight.Medium
                             )
@@ -1311,7 +1311,7 @@ fun DeliveryPersonCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text("Call", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                        Text("Call", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                     }
                 }
             }
@@ -1361,7 +1361,7 @@ fun TrackingTimeline(order: Order) {
             ) {
                 Text(
                     text = "Order Status",
-                    fontSize = 20.sp,
+                    style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -1433,7 +1433,7 @@ fun TrackingTimeline(order: Order) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = label,
-                                fontSize = 17.sp,
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = if (isCurrent || isCompleted) FontWeight.Bold else FontWeight.Medium,
                                 color = if (isCompleted) TextBlack else if (isCurrent) PrimaryGreen else TextGray
                             )
@@ -1441,7 +1441,7 @@ fun TrackingTimeline(order: Order) {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = getTimeAgo(statusInfo.timestamp),
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = TextGray,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -1450,7 +1450,7 @@ fun TrackingTimeline(order: Order) {
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = "In progress...",
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     color = PrimaryGreen,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -1533,7 +1533,7 @@ fun DeliveryStatusCard(
         ) {
             Text(
                 text = "Delivery Status",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -1605,7 +1605,7 @@ fun DeliveryStatusCard(
                     val isCompleted = status.ordinal <= currentStatusOrdinal
                     Text(
                         text = label,
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         color = if (isCompleted) TextBlack else TextGray,
                         fontWeight = if (status == customerStatus) FontWeight.Bold else FontWeight.Normal,
                         modifier = Modifier.weight(1f),
@@ -1636,7 +1636,7 @@ fun DeliveryStatusCard(
                         ) {
                             Text(
                                 text = order.deliveryPerson.name.take(1).uppercase(),
-                                fontSize = 20.sp,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = PrimaryGreen
                             )
@@ -1645,7 +1645,7 @@ fun DeliveryStatusCard(
                         Column {
                             Text(
                                 text = order.deliveryPerson.name,
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = TextBlack
                             )
@@ -1655,12 +1655,12 @@ fun DeliveryStatusCard(
                             ) {
                                 Text(
                                     text = "★★★★",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = Color(0xFFFFA500)
                                 )
                                 Text(
                                     text = "4.1",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = TextGray
                                 )
                             }
@@ -1729,7 +1729,7 @@ fun DeliveryStatusCard(
                 ) {
                     Text(
                         text = "Cancel Order",
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
@@ -1780,7 +1780,7 @@ fun OrderDetailCard(
             ) {
                 Text(
                     text = "Order Detail",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -1792,7 +1792,7 @@ fun OrderDetailCard(
                         Text(
                             text = "ETA $etaText",
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = TextBlack
                         )
@@ -1802,12 +1802,12 @@ fun OrderDetailCard(
 
             Text(
                 text = "Order No #${order.id.take(12)}",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = TextGray
             )
             Text(
                 text = "Date ${order.orderDate}",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = TextGray
             )
             Row(
@@ -1816,12 +1816,12 @@ fun OrderDetailCard(
             ) {
                 Text(
                     text = "Total Price",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray
                 )
                 Text(
                     text = "₹ ${String.format("%.2f", order.totalPrice)}",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -1875,7 +1875,7 @@ fun DeliveryLocationCard(
                 )
                 Text(
                     text = "Delivery Location",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -1889,7 +1889,7 @@ fun DeliveryLocationCard(
                         "Lat: ${it.first}, Lng: ${it.second}" 
                     } ?: "Address not available"
                 },
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = TextGray,
                 lineHeight = 20.sp
             )
@@ -1900,7 +1900,7 @@ fun DeliveryLocationCard(
                 if (lat == 0.0 && lng == 0.0) {
                     Text(
                         text = "⚠️ Location coordinates may not match address",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFFF9800), // Orange warning
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -1941,7 +1941,7 @@ fun DeliveryOptionCard(
                 )
                 Text(
                     text = "Delivery Option",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack
                 )
@@ -1949,13 +1949,13 @@ fun DeliveryOptionCard(
 
             Text(
                 text = "Deliver to door",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = TextBlack,
                 fontWeight = FontWeight.Medium
             )
             Text(
                 text = "Please ensure someone is available to receive the order at the delivery address.",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = TextGray,
                 lineHeight = 18.sp
             )

@@ -251,7 +251,7 @@ fun LandingScreen(
                     Text(
                         text = "Skip >",
                         color = PrimaryGreen,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -267,14 +267,13 @@ fun LandingScreen(
             ) {
                 Text(
                     text = "Grocent",
-                    fontSize = 48.sp,
+                    style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
-                    color = TextBlack,
-                    style = MaterialTheme.typography.displayMedium
+                    color = TextBlack
                 )
                 Text(
                     text = "Grocery shopping has never been this much fun.",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Normal,
                     color = TextGray,
                     textAlign = TextAlign.Center,
@@ -305,7 +304,7 @@ fun LandingScreen(
                 ) {
                     Text(
                         text = "LOGIN",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -314,7 +313,7 @@ fun LandingScreen(
                 // Sign Up Helper Text
                 Text(
                     text = "Don't have an account?",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray,
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -336,7 +335,7 @@ fun LandingScreen(
                 ) {
                     Text(
                         text = "SIGN UP",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -372,19 +371,19 @@ fun LandingScreen(
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text("🛒", fontSize = 48.sp)
-                            Text("🥬", fontSize = 40.sp)
-                            Text("🍎", fontSize = 40.sp)
-                            Text("🥕", fontSize = 40.sp)
+                            Text("🛒", style = MaterialTheme.typography.displaySmall)
+                            Text("🥬", style = MaterialTheme.typography.headlineMedium)
+                            Text("🍎", style = MaterialTheme.typography.headlineMedium)
+                            Text("🥕", style = MaterialTheme.typography.headlineMedium)
                         }
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             modifier = Modifier.padding(top = 8.dp)
                         ) {
-                            Text("🍅", fontSize = 40.sp)
-                            Text("🥛", fontSize = 40.sp)
-                            Text("🍞", fontSize = 40.sp)
-                            Text("🧀", fontSize = 40.sp)
+                            Text("🍅", style = MaterialTheme.typography.headlineMedium)
+                            Text("🥛", style = MaterialTheme.typography.headlineMedium)
+                            Text("🍞", style = MaterialTheme.typography.headlineMedium)
+                            Text("🧀", style = MaterialTheme.typography.headlineMedium)
                         }
                     }
                 }
@@ -437,7 +436,7 @@ fun LoginFormScreen(
                         Text(
                             text = "Skip >",
                             color = PrimaryGreen,
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Medium
                         )
                     }
@@ -460,7 +459,7 @@ fun LoginFormScreen(
                 ) {
                     Text(
                         text = "Grocent",
-                        fontSize = 32.sp,
+                        style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
                         color = TextBlack
                     )
@@ -481,7 +480,7 @@ fun LoginFormScreen(
                             append("10 minutes")
                         }
                     },
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray,
                     textAlign = TextAlign.Center
                 )
@@ -495,7 +494,7 @@ fun LoginFormScreen(
                 ) {
                     Text(
                         text = "MOBILE NUMBER",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
                         color = TextGray,
                         letterSpacing = 0.5.sp
@@ -517,7 +516,7 @@ fun LoginFormScreen(
                             // Country code
                             Text(
                                 text = "+91",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = TextBlack
                             )
@@ -540,8 +539,7 @@ fun LoginFormScreen(
                                 },
                                 modifier = Modifier.weight(1f),
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                                textStyle = androidx.compose.ui.text.TextStyle(
-                                    fontSize = 16.sp,
+                                textStyle = MaterialTheme.typography.titleMedium.copy(
                                     color = TextBlack,
                                     fontWeight = FontWeight.Normal
                                 ),
@@ -549,7 +547,7 @@ fun LoginFormScreen(
                                     if (phoneNumber.isEmpty()) {
                                         Text(
                                             text = "00000 00000",
-                                            fontSize = 16.sp,
+                                            style = MaterialTheme.typography.titleMedium,
                                             color = TextGray
                                         )
                                     }
@@ -576,7 +574,7 @@ fun LoginFormScreen(
                     ) {
                         Text(
                             text = "Have a referral code?",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium,
                             color = BrandPrimary
                         )
@@ -603,7 +601,7 @@ fun LoginFormScreen(
                             ) {
                                 Text(
                                     text = "REFERRAL CODE (Optional)",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold,
                                     color = TextGray,
                                     letterSpacing = 0.5.sp
@@ -620,8 +618,7 @@ fun LoginFormScreen(
                                     },
                                     modifier = Modifier.fillMaxWidth(),
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                    textStyle = androidx.compose.ui.text.TextStyle(
-                                        fontSize = 16.sp,
+                                    textStyle = MaterialTheme.typography.titleMedium.copy(
                                         color = TextBlack,
                                         fontWeight = FontWeight.Normal,
                                         letterSpacing = 1.sp
@@ -630,7 +627,7 @@ fun LoginFormScreen(
                                         if (referralCode.isEmpty()) {
                                             Text(
                                                 text = "GROCENT-XXXXXX",
-                                                fontSize = 16.sp,
+                                                style = MaterialTheme.typography.titleMedium,
                                                 color = TextGray,
                                                 letterSpacing = 1.sp
                                             )
@@ -644,7 +641,7 @@ fun LoginFormScreen(
                                 referralCodeStatus?.let { status ->
                                     Text(
                                         text = status,
-                                        fontSize = 12.sp,
+                                        style = MaterialTheme.typography.bodySmall,
                                         color = if (status.contains("detected") || status.contains("applied")) 
                                             Color(0xFF34C759) 
                                         else 
@@ -662,7 +659,7 @@ fun LoginFormScreen(
                     Text(
                         text = errorMessage,
                         color = Color(0xFFFF6B6B),
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -698,7 +695,7 @@ fun LoginFormScreen(
                         ) {
                             Text(
                                 text = "Request OTP",
-                                fontSize = 16.sp,
+                                style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black
                             )
@@ -727,7 +724,7 @@ fun LoginFormScreen(
                             append("Privacy Policy")
                         }
                     },
-                    fontSize = 11.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = TextGray,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
@@ -776,7 +773,7 @@ fun SignUpFormScreen(
                     Text(
                         text = "← Back",
                         color = PrimaryGreen,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -787,7 +784,7 @@ fun SignUpFormScreen(
             // Title
             Text(
                 text = "Sign Up",
-                fontSize = 32.sp,
+                style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -899,7 +896,7 @@ fun SignUpFormScreen(
             ) {
                 Text(
                     text = "SIGN UP NOW!",
-                    fontSize = 18.sp,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
@@ -914,12 +911,12 @@ fun SignUpFormScreen(
             ) {
                 Text(
                     text = "Already have an account? ",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = TextGray
                 )
                 Text(
                     text = "LOGIN",
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = PrimaryGreen,
                     modifier = Modifier.clickable { onLoginClick() }
@@ -962,7 +959,7 @@ fun OTPVerificationScreen(
                     Text(
                         text = "← Change Number",
                         color = PrimaryGreen,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -973,7 +970,7 @@ fun OTPVerificationScreen(
             // OTP Sent Message
             Text(
                 text = "Enter OTP sent to +91 $phoneNumber",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 color = TextBlack,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(vertical = 16.dp)
@@ -984,7 +981,7 @@ fun OTPVerificationScreen(
                 Text(
                     text = errorMessage,
                     color = Color(0xFFFF6B6B),
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1005,7 +1002,7 @@ fun OTPVerificationScreen(
                     Text(
                         text = "Enter 6-digit OTP",
                         color = TextGray,
-                        fontSize = 16.sp
+                        style = MaterialTheme.typography.titleMedium
                     )
                 },
                 colors = TextFieldDefaults.colors(
@@ -1044,7 +1041,7 @@ fun OTPVerificationScreen(
                 } else {
                     Text(
                         text = "Verify OTP",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -1059,7 +1056,7 @@ fun OTPVerificationScreen(
                 Text(
                     text = "Resend OTP",
                     color = PrimaryGreen,
-                    fontSize = 14.sp
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
             

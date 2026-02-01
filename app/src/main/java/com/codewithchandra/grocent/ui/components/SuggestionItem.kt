@@ -45,14 +45,14 @@ fun SuggestionItem(
                 ) {
                     Text(
                         text = suggestion.primaryText,
-                        fontSize = 16.sp,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
                         color = TextBlack
                     )
                     if (suggestion.secondaryText.isNotEmpty()) {
                         Text(
                             text = suggestion.secondaryText,
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = TextGray
                         )
                     }

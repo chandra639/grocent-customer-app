@@ -93,7 +93,7 @@ fun ProductListingScreen(
                     
                     Text(
                         text = subCategoryName,
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
                         modifier = Modifier.weight(1f),
@@ -121,7 +121,7 @@ fun ProductListingScreen(
                         label = {
                             Text(
                                 text = if (selectedSort == "Default") "Sort" else selectedSort,
-                                fontSize = 12.sp
+                                style = MaterialTheme.typography.bodySmall
                             )
                         },
                         colors = FilterChipDefaults.filterChipColors(
@@ -146,7 +146,7 @@ fun ProductListingScreen(
             ) {
                 Text(
                     text = "No products found",
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium,
                     color = TextGray
                 )

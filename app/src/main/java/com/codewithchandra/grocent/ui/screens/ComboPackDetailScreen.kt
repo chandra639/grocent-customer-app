@@ -156,7 +156,7 @@ fun PackHeaderSection(pack: MegaPack) {
                 ) {
                     Text(
                         text = badgeText,
-                        fontSize = 9.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                         modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
@@ -174,7 +174,7 @@ fun PackHeaderSection(pack: MegaPack) {
             // Title
             Text(
                 text = pack.title.ifBlank { "Combo Pack" },
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -188,7 +188,7 @@ fun PackHeaderSection(pack: MegaPack) {
                     val savings = pack.originalPrice - pack.price
                     Text(
                         text = "Save ₹${String.format("%.0f", savings)}",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = BrandPrimary
                     )
@@ -197,7 +197,7 @@ fun PackHeaderSection(pack: MegaPack) {
                 if (pack.subtitle.isNotBlank()) {
                     Text(
                         text = "• ${pack.subtitle}",
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
                 }
@@ -257,7 +257,7 @@ fun PackItemRow(
                     ) {
                         Text(
                             text = product?.name?.take(1)?.uppercase() ?: "?",
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray
                         )
@@ -278,7 +278,7 @@ fun PackItemRow(
                 
                 Text(
                     text = displayName,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = TextBlack,
                     maxLines = 2,
@@ -297,7 +297,7 @@ fun PackItemRow(
                 if (measurement.isNotBlank()) {
                     Text(
                         text = measurement,
-                        fontSize = 12.sp,
+                        style = MaterialTheme.typography.bodySmall,
                         color = Color.Gray
                     )
                 }
@@ -306,7 +306,7 @@ fun PackItemRow(
             // Quantity on right side
             Text(
                 text = "x${packItem.quantity}",
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack,
                 modifier = Modifier.padding(end = 8.dp)
@@ -330,7 +330,7 @@ fun DisclaimerBox(
     ) {
             Text(
                 text = "Images are for representation purpose only. Actual product packaging may vary based on availability.",
-                fontSize = 11.sp,
+                style = MaterialTheme.typography.labelSmall,
                 color = Color(0xFF8B6F00), // Dark yellow/brown text
                 lineHeight = 14.sp
             )
@@ -356,7 +356,7 @@ fun PackSummarySection(pack: MegaPack) {
         ) {
             Text(
                 text = "Pack Summary",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -364,7 +364,7 @@ fun PackSummarySection(pack: MegaPack) {
             val totalItems = pack.items.sumOf { it.quantity }
             Text(
                 text = "Total Items: $totalItems",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
             )
 
@@ -474,7 +474,7 @@ fun ComboPackDetailScreen(
                     
                     Text(
                         text = "Pack Details",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = BrandPrimary,
                         modifier = Modifier.weight(1f),
@@ -519,7 +519,7 @@ fun ComboPackDetailScreen(
                             val totalItems = currentPack.items.sumOf { it.quantity }
                             Text(
                                 text = "$totalItems Items",
-                                fontSize = 14.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
                                 color = TextBlack
                             )
@@ -528,11 +528,10 @@ fun ComboPackDetailScreen(
                             if (currentPack.originalPrice > 0) {
                                 Text(
                                     text = "MRP: ₹${String.format("%.0f", currentPack.originalPrice)}",
-                                    fontSize = 12.sp,
-                                    color = Color.Gray,
-                                    style = androidx.compose.ui.text.TextStyle(
+                                    style = MaterialTheme.typography.bodySmall.copy(
                                         textDecoration = TextDecoration.LineThrough
-                                    )
+                                    ),
+                                    color = Color.Gray
                                 )
                             }
                             
@@ -545,7 +544,7 @@ fun ComboPackDetailScreen(
                             if (discountAmount > 0) {
                                 Text(
                                     text = "Save: ₹${String.format("%.0f", discountAmount)}",
-                                    fontSize = 12.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     fontWeight = FontWeight.Bold,
                                     color = BrandPrimary
                                 )
@@ -586,7 +585,7 @@ fun ComboPackDetailScreen(
                                         ) {
                                             Text(
                                                 text = "−",
-                                                fontSize = 18.sp,
+                                                style = MaterialTheme.typography.titleLarge,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.White,
                                                 textAlign = TextAlign.Center
@@ -603,7 +602,7 @@ fun ComboPackDetailScreen(
                                     ) {
                                         Text(
                                             text = "$packInCartQuantity",
-                                            fontSize = 16.sp,
+                                            style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Bold,
                                             color = Color.White,
                                             textAlign = TextAlign.Center
@@ -625,7 +624,7 @@ fun ComboPackDetailScreen(
                                         ) {
                                             Text(
                                                 text = "+",
-                                                fontSize = 18.sp,
+                                                style = MaterialTheme.typography.titleLarge,
                                                 fontWeight = FontWeight.Bold,
                                                 color = Color.White,
                                                 textAlign = TextAlign.Center
@@ -650,7 +649,7 @@ fun ComboPackDetailScreen(
                                 shape = RoundedCornerShape(12.dp), // Same shape as quantity controls
                                 enabled = cartViewModel != null && currentPack.items.isNotEmpty()
                             ) {
-                                Text("Add Pack to Cart", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                                Text("Add Pack to Cart", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }
@@ -680,13 +679,13 @@ fun ComboPackDetailScreen(
                     ) {
                         Text(
                             text = "Combo Pack Not Found",
-                            fontSize = 20.sp,
+                            style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = Color.Gray
                         )
                         Text(
                             text = "This pack may have been removed.",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray
                         )
                         Button(onClick = onBackClick) {
@@ -729,14 +728,14 @@ fun ComboPackDetailScreen(
                     ) {
                         Text(
                             text = "What's inside this pack?",
-                            fontSize = 16.sp,
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = TextBlack
                         )
                         val itemCount = pack!!.items.sumOf { it.quantity }
                         Text(
                             text = "$itemCount Items",
-                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
                     }

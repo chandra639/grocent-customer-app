@@ -82,13 +82,13 @@ fun FloatingCartSummary(
                 Column {
                     Text(
                         text = "$itemCount ${if (itemCount == 1) "item" else "items"} selected",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = Color.White
                     )
                     Text(
                         text = "₹${String.format("%.0f", totalPrice)}",
-                        fontSize = 18.sp,
+                        style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
@@ -108,7 +108,7 @@ fun FloatingCartSummary(
                 ) {
                     Text(
                         text = "View Cart",
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black
                     )

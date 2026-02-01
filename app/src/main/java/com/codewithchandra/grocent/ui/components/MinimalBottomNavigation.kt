@@ -57,7 +57,7 @@ fun MinimalBottomNavigation(
             label = { 
                 Text(
                     "Home", 
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (isRouteSelected(navItems[0].route)) selectedIconColor else unselectedIconColor
                 )
             },
@@ -78,7 +78,7 @@ fun MinimalBottomNavigation(
             label = { 
                 Text(
                     "Explore", 
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (isRouteSelected(navItems[1].route)) selectedIconColor else unselectedIconColor
                 )
             },
@@ -98,7 +98,7 @@ fun MinimalBottomNavigation(
                             ) {
                                 Text(
                                     text = if (cartItemCount > 9) "9+" else "$cartItemCount",
-                                    fontSize = 10.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -116,7 +116,7 @@ fun MinimalBottomNavigation(
             label = { 
                 Text(
                     "Cart", 
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (isRouteSelected(navItems[2].route)) selectedIconColor else unselectedIconColor
                 )
             },
@@ -137,7 +137,7 @@ fun MinimalBottomNavigation(
             label = { 
                 Text(
                     "Orders", 
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (isRouteSelected(navItems[3].route)) selectedIconColor else unselectedIconColor
                 )
             },
@@ -158,7 +158,7 @@ fun MinimalBottomNavigation(
             label = { 
                 Text(
                     "Account", 
-                    fontSize = 10.sp,
+                    style = MaterialTheme.typography.labelSmall,
                     color = if (isRouteSelected(navItems[4].route)) selectedIconColor else unselectedIconColor
                 )
             },

@@ -84,11 +84,10 @@ fun BlackFridayBanner(
             // Main "BLACK FRIDAY SALE" text with glowing effect
             Text(
                 text = "BLACK FRIDAY SALE",
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = Color(0xFFFFD700), // Gold color
-                style = androidx.compose.ui.text.TextStyle(
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFFFFD700),
                     shadow = androidx.compose.ui.graphics.Shadow(
                         color = Color(0xFFFFD700).copy(alpha = glowAlpha),
                         offset = androidx.compose.ui.geometry.Offset(0f, 0f),
@@ -100,7 +99,7 @@ fun BlackFridayBanner(
             // Subtitle
             Text(
                 text = "Up to 80% OFF on Everything",
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
                 color = Color(0xFFFFD700).copy(alpha = 0.9f)
@@ -109,7 +108,7 @@ fun BlackFridayBanner(
             // Additional info
             Text(
                 text = "Limited Time Offer • Nov 24-28",
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center,
                 color = Color.White.copy(alpha = 0.7f)

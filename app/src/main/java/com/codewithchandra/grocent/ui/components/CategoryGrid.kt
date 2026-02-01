@@ -48,7 +48,7 @@ fun CategoryGrid(
         ) {
             Text(
                 text = "Explore",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 color = TextBlack
             )
@@ -59,7 +59,7 @@ fun CategoryGrid(
                 Text(
                     text = "View All",
                     color = PrimaryGreen,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium
                 )
             }
@@ -248,7 +248,7 @@ fun CategoryGridCard(
                                         is CategoryImageResolver.ImageSource.Icon -> {
                                             Text(
                                                 text = bundledSourceForPlaceholder.emoji,
-                                                fontSize = 26.sp
+                                                style = MaterialTheme.typography.headlineSmall
                                             )
                                         }
                                         else -> {
@@ -264,7 +264,7 @@ fun CategoryGridCard(
                                             // #endregion
                                             Text(
                                                 text = fallbackIcon,
-                                                fontSize = 26.sp
+                                                style = MaterialTheme.typography.headlineSmall
                                             )
                                         }
                                     }
@@ -283,7 +283,7 @@ fun CategoryGridCard(
                                         is CategoryImageResolver.ImageSource.Icon -> {
                                             Text(
                                                 text = bundledSourceForPlaceholder.emoji,
-                                                fontSize = 26.sp
+                                                style = MaterialTheme.typography.headlineSmall
                                             )
                                         }
                                         else -> {
@@ -292,7 +292,7 @@ fun CategoryGridCard(
                                                 text = category.icon.ifEmpty { 
                                                     CategoryImageResolver.getCategoryIconFromName(category.name)
                                                 },
-                                                fontSize = 26.sp
+                                                style = MaterialTheme.typography.headlineSmall
                                             )
                                         }
                                     }
@@ -307,7 +307,7 @@ fun CategoryGridCard(
                         // Fallback to emoji/icon
                     Text(
                             text = imageSource.emoji,
-                        fontSize = 26.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(11.dp)
                     )
                     }
@@ -319,7 +319,7 @@ fun CategoryGridCard(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = category.name,
-            fontSize = 11.sp,
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
             color = TextBlack,
             textAlign = TextAlign.Center,

@@ -426,7 +426,7 @@ fun ProductCard(
                             ) {
                                 Text(
                                     text = "OUT OF STOCK",
-                                    fontSize = 8.sp,
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
                                     modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
@@ -457,7 +457,7 @@ fun ProductCard(
                     // Product Name - Clickable area for navigation
                     Text(
                         text = product.name,
-                        fontSize = 11.sp,
+                        style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = themeText,
                         maxLines = 1,
@@ -475,7 +475,7 @@ fun ProductCard(
                         if (product.size.isNotEmpty()) {
                             Text(
                                 text = product.size,
-                                fontSize = 9.sp,
+                                style = MaterialTheme.typography.labelSmall,
                                 color = if (isFestivalActive) themeTextSecondary.copy(alpha = 0.7f) else TextGray,
                                 modifier = Modifier.padding(top = 2.dp)
                             )
@@ -516,7 +516,7 @@ fun ProductCard(
                                 // Quantity display
                                 Text(
                                     text = "$currentQuantity",
-                                    fontSize = 14.sp,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White,
                                     modifier = Modifier.padding(horizontal = 4.dp)
@@ -597,7 +597,7 @@ fun ProductCard(
                         ) {
                             Text(
                                 text = "₹${String.format("%.0f", product.price)}",
-                                fontSize = 13.sp,
+                                style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
@@ -608,11 +608,10 @@ fun ProductCard(
                         if (actualMRP != null && actualMRP > product.price) {
                             Text(
                                 text = "₹${String.format("%.0f", actualMRP)}",
-                                fontSize = 10.sp,
-                                color = TextGray,
-                                style = androidx.compose.ui.text.TextStyle(
+                                style = MaterialTheme.typography.labelSmall.copy(
                                     textDecoration = TextDecoration.LineThrough
-                                )
+                                ),
+                                color = TextGray
                             )
                         }
                     }
@@ -670,14 +669,14 @@ fun CategoryItem(
         // Icon
         Text(
             text = category.icon,
-            fontSize = 24.sp,
+            style = MaterialTheme.typography.headlineSmall,
             modifier = Modifier.padding(bottom = 4.dp)
         )
 
         // Category label
         Text(
             text = category.name,
-            fontSize = 12.sp,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
             color = when {
                 isFestivalActive && isSelected -> themePrimary
